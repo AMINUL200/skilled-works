@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    /* Firefox */
+    scrollbar-color: #475569 #1e293b;
+    /* Firefox */
+}
+
+/* Chrome, Edge, Safari */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #1e293b;
+    /* Slate-800 */
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6, #6366f1);
+    /* Blue → Indigo gradient */
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #2563eb, #4f46e5);
+    /* Darker hover */
+}
+
+
+
+/* ==============================
+   Announcement Bar
+================================ */
+
+.announcement-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    height: 30px;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+/* NOTE label */
+.announcement-note {
+    background: #ff0000;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0 18px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* scrolling area */
+.announcement-marquee {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* moving text */
+.announcement-track {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: marquee-left 22s linear infinite;
+    color: #333;
+}
+
+/* link */
+.announcement-link {
+    color: #d00eff;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.announcement-link:hover {
+    color: #1f2e9a;
+}
+
+/* animation right → left */
+@keyframes marquee-left {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+
+.announcement-marquee:hover .announcement-track {
+    animation-play-state: paused;
+}
+
+
+
+
+/* ==============================
+   Magnetic Button (No GSAP)
+================================ */
+
+.magnetic-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    user-select: none;
+    /* background: transparent; */
+    /* border: 2px solid currentColor; */
+}
+
+.magnetic-button span {
+    position: relative;
+    display: inline-block;
+    transition: transform 0.3s ease-out;
+}
+
+.magnetic-button.round {
+    border-radius: 50%;
+}
+
+.magnetic-button.square {
+    border-radius: 12px;
+    /* padding: 0 36px; */
+    /* height: 52px; */
+}

@@ -1,0 +1,29 @@
+import React from "react";
+import MagneticButton from "../common/MagneticButtonProps";
+
+const HeroSection = () => {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 gap-8">
+      {/* ROUND */}
+      <MagneticButton
+        variant="round"
+        size={140}
+        className="bg-gradient-to-r from-pink-300 to-sky-200 text-blue-900"
+      >
+        Try Free
+      </MagneticButton>
+
+      {/* SQUARE */}
+      <MagneticButton
+        variant="square"
+         size={140}
+        className="bg-red-600 text-white border-red-600 hover:bg-red-700 px-6"
+        onClick={() => console.log("clicked")}
+      >
+        Explore HRMS
+      </MagneticButton>
+    </div>
+  );
+};
+
+export default HeroSection;
