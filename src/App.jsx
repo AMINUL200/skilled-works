@@ -8,6 +8,11 @@ import AdminLayout from "./layout/AdminLayout";
 import AdminDashboard from "./pages/admin/dashboard/AdminDashboard";
 import SiteSettings from "./pages/admin/settings/SiteSettings";
 import AdminProfile from "./pages/admin/profile/AdminProfile";
+import ContactPage from "./pages/contact/ContactPage";
+import BlogPage from "./pages/blog/BlogPage";
+import BlogDetails from "./pages/blog/BlogDetails";
+import PricingPage from "./pages/pricing/PricingPage";
+import ServiceDetails from "./pages/service/ServiceDetails";
 
 const App = () => {
   return (
@@ -18,6 +23,11 @@ const App = () => {
 
         <Route element={<AppLayout />}>
           <Route index path="/" element={<LandingPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:Id" element={<BlogDetails />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/cms/:Id" element={<ServiceDetails />} />
         </Route>
 
         {/* Admin Layout */}
