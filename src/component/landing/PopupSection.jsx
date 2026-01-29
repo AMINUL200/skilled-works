@@ -159,16 +159,16 @@ const PopupSection = () => {
                           onClick={handleTryNow}
                           className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-red-200 transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3"
                         >
-                          <span>Try Now For Free</span>
-                          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
+                          <span>Visit SponicHR</span>
+                          {/* <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" /> */}
                         </button>
 
                         <button
                           onClick={handleLearnMore}
                           className="group border-2 border-[#1F2E9A] text-[#1F2E9A] px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-[#1F2E9A] hover:text-white transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3"
                         >
-                          <span>Learn More</span>
-                          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
+                          <span>Let's Schedule a Demo</span>
+                          {/* <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" /> */}
                         </button>
                       </div>
                     </div>

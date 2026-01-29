@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Facebook,
   Twitter,
@@ -7,38 +8,180 @@ import {
   Mail,
   Phone,
   MapPin,
+  ExternalLink,
+  Download,
+  Video,
 } from "lucide-react";
 
 const Footer = () => {
+  const navigate = useNavigate();
+
+  // Navigation handler for internal routes
+  const handleNavigation = (path) => {
+    navigate(path);
+    window.scrollTo(0, 0); // Scroll to top on navigation
+  };
+
+  // Social media links
+  const socialLinks = [
+    {
+      icon: Facebook,
+      url: "https://facebook.com/skilledworkerscloud",
+      label: "Facebook"
+    },
+    {
+      icon: Twitter,
+      url: "https://twitter.com/skilledhrcloud",
+      label: "Twitter"
+    },
+    {
+      icon: Linkedin,
+      url: "https://linkedin.com/company/skilled-workers-cloud",
+      label: "LinkedIn"
+    },
+    {
+      icon: Instagram,
+      url: "https://instagram.com/skilledworkerscloud",
+      label: "Instagram"
+    }
+  ];
+
+  // Quick links with paths
+  const quickLinks = [
+    { name: "Home", path: "/" },
+    { name: "About us", path: "/about" },
+    { name: "HRMS Software", path: "/cms/hrms-software" },
+    { name: "HR File Preparation", path: "/cms/hr-file-preparation" },
+    { name: "File Manager", path: "/cms/file-manager" },
+    { name: "Software Development", path: "/cms/software-development" },
+    { name: "Business Consultancy", path: "/cms/business-consultancy" },
+    { name: "Web/Profile Development", path: "/cms/web-development" },
+    { name: "Skilled Workers Industry", path: "cms/industries" },
+    { name: "Recruitment", path: "/recruitment" },
+    { name: "Pricing", path: "/pricing" },
+    { name: "Blog", path: "/blog" },
+    { name: "Contacts", path: "/contact" },
+    { name: "Customer Support", path: "/customer-support" }
+  ];
+
+  // External links
+  const externalLinks = [
+    { name: "Google", url: "https://google.com", icon: ExternalLink },
+    { name: "Facebook", url: "https://facebook.com", icon: Facebook },
+    { name: "LinkedIn", url: "https://linkedin.com", icon: Linkedin },
+    { name: "Twitter", url: "https://twitter.com", icon: Twitter },
+    { name: "Instagram", url: "https://instagram.com", icon: Instagram },
+    { name: "Google Meet", url: "https://meet.google.com", icon: Video },
+    { name: "Zoom", url: "https://zoom.us", icon: Video },
+    { name: "Download Acrobat Reader", url: "https://get.adobe.com/reader/", icon: Download },
+    { name: "Right to Work Check", url: "https://www.gov.uk/check-job-applicant-right-to-work", icon: ExternalLink },
+    { name: "Microsoft Teams", url: "https://teams.microsoft.com", icon: Video },
+    { name: "HO Media Blogs", url: "https://homeofficemedia.blog.gov.uk", icon: ExternalLink }
+  ];
+
+  // Login links
+  const loginLinks = [
+    { name: "HRMS Register", url: "https://skilledworkerscloud.co.uk/hrms-v2/register", external: true },
+    { name: "HRMS Organisation Login", url: "https://skilledworkerscloud.co.uk/hrms-v2/", external: true },
+    { name: "Employee Login", url: "https://skilledworkerscloud.co.uk/hrms-v2/", external: true }
+  ];
+
+  // Policy links
+  const policyLinks = [
+    { name: "Privacy Policy", path: "/privacy-policy" },
+    { name: "My Privacy Rights", path: "/privacy-rights" },
+    { name: "Terms of Use", path: "/terms-of-use" },
+    { name: "Sitemap", path: "/sitemap" }
+  ];
+
+  // Newsletter subscription handler
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const email = form.email.value;
+    
+    // TODO: Integrate with newsletter service (Mailchimp, etc.)
+    console.log("Subscribing email:", email);
+    
+    // Show success message
+    alert("Thank you for subscribing to our newsletter!");
+    form.reset();
+  };
+
+  // ICO Certificate handler
+  const handleICOCertificate = () => {
+    // Replace with actual ICO certificate URL
+    window.open("https://ico.org.uk/ESDWebPages/Entry/ZB620846", "_blank");
+  };
+
   return (
     <footer className="bg-[#0f0f0f] text-white">
       {/* MAIN FOOTER */}
       <div className="max-w-8xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-
+        
         {/* COMPANY INFO */}
         <div>
-          <img
-            src="/image/swch_logo.png"
-            alt="Logo"
-            className="w-40 mb-4"
-          />
+          <div 
+            onClick={() => handleNavigation("/")}
+            className="cursor-pointer hover:opacity-90 transition-opacity"
+          >
+            <img
+              src="/image/swch_logo.png"
+              alt="Skilled Workers Cloud Logo"
+              className="w-40 mb-4"
+            />
+          </div>
 
-          <p className="text-sm text-gray-300 leading-relaxed">
-            SKILLED WORKERS CLOUD is a UK regulated skilled HR-tech company.
-            We specialise in Skilled HR systems for business in the UK.
-            We are a combination of skilled HR and technology based company
-            to deliver superior business results for our client.
+          <p className="text-sm text-gray-300 leading-relaxed mb-4">
+            SKILLED WORKERS CLOUD is a UK regulated HR-tech company.
+            We specialise in HR systems for businesses in the UK.
+            We combine skilled HR expertise with technology to deliver 
+            superior business results for our clients.
           </p>
+
+          {/* CONTACT INFO */}
+          <div className="space-y-2 mb-4">
+            <a 
+              href="mailto:info@skilledworkerscloud.co.uk"
+              className="text-red-500 text-sm hover:text-red-400 transition-colors flex items-center gap-2"
+            >
+              <Mail size={14} />
+              info@skilledworkerscloud.co.uk
+            </a>
+            
+            <a 
+              href="tel:+442081291655"
+              className="text-gray-300 text-sm hover:text-white transition-colors flex items-center gap-2"
+            >
+              <Phone size={14} />
+              Landline: +44 0208 129 1655
+            </a>
+            
+            <a 
+              href="https://wa.me/447467284718"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-300 text-sm hover:text-white transition-colors flex items-center gap-2"
+            >
+              <Phone size={14} />
+              Mobile & WhatsApp: +44 0746 728 4718
+            </a>
+          </div>
 
           {/* SOCIAL ICONS */}
           <div className="flex gap-3 mt-5">
-            {[Facebook, Twitter, Linkedin, Instagram].map((Icon, i) => (
-              <div
+            {socialLinks.map((social, i) => (
+              <a
                 key={i}
-                className="w-9 h-9 border border-gray-500 rounded-full flex items-center justify-center hover:bg-[#E60023] hover:text-white transition cursor-pointer"
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 border border-gray-500 rounded-full flex items-center justify-center hover:bg-[#E60023] hover:text-white hover:border-[#E60023] transition-all duration-300 cursor-pointer group"
+                aria-label={`Follow us on ${social.label}`}
+                title={`Follow us on ${social.label}`}
               >
-                <Icon size={16} />
-              </div>
+                <social.icon size={16} />
+              </a>
             ))}
           </div>
         </div>
@@ -47,47 +190,34 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
           <ul className="space-y-2 text-gray-300 text-sm">
-            {[
-              "Home",
-              "About us",
-              "HRMS Software",
-              "HR File Preparation",
-              "File Manager",
-              "Software Development",
-              "Business Consultancy",
-              "Web/Profile Development",
-              "Skilled Workers Industry",
-              "Recruitment",
-              "Pricing",
-              "Blog",
-              "Contacts",
-            ].map((item, i) => (
-              <li key={i} className="hover:text-[#9B3DFF] cursor-pointer">
-                › {item}
+            {quickLinks.map((link, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => handleNavigation(link.path)}
+                  className="hover:text-[#9B3DFF] cursor-pointer flex items-center gap-1 w-full text-left transition-colors duration-200"
+                >
+                  › {link.name}
+                </button>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* LINKS */}
+        {/* EXTERNAL LINKS */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Links</h3>
           <ul className="space-y-2 text-gray-300 text-sm">
-            {[
-              "Google",
-              "Facebook",
-              "LinkedIn",
-              "Twitter",
-              "Instagram",
-              "Google Meet",
-              "Zoom",
-              "Download Acrobat Reader",
-              "Right to Work Check",
-              "Microsoft Teams",
-              "HO Media Blogs",
-            ].map((item, i) => (
-              <li key={i} className="hover:text-[#9B3DFF] cursor-pointer">
-                › {item}
+            {externalLinks.map((link, i) => (
+              <li key={i}>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#9B3DFF] cursor-pointer flex items-center gap-1 transition-colors duration-200 group"
+                >
+                  › {link.name}
+                  <link.icon size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
               </li>
             ))}
           </ul>
@@ -95,77 +225,120 @@ const Footer = () => {
 
         {/* CONNECT US */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Connect Us</h3>
+          <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
 
-          <p className="text-red-500 text-sm mb-3">
-            info@skilledworkerscloud.co.uk
-          </p>
+          <div className="space-y-3">
+            <a 
+              href="mailto:info@skilledworkerscloud.co.uk"
+              className="text-red-500 text-sm hover:text-red-400 transition-colors block"
+            >
+              info@skilledworkerscloud.co.uk
+            </a>
 
-          <p className="text-sm text-gray-300 flex gap-2 mb-2">
-            <MapPin size={16} />
-            Suite 602, 6th Floor, 252–262 Romford Road,
-            London, E7 9HZ United Kingdom.
-          </p>
+            <p className="text-sm text-gray-300 flex items-start gap-2">
+              <MapPin size={16} className="mt-1 flex-shrink-0" />
+              Suite 602, 6th Floor, 252–262 Romford Road,
+              London, E7 9HZ United Kingdom.
+            </p>
 
-          <p className="text-sm text-gray-300 flex gap-2 mb-2">
-            <Phone size={16} />
-            Landline: +44 0208 129 1655
-          </p>
+            <p className="text-sm text-gray-300 flex items-center gap-2">
+              <Phone size={16} />
+              Landline: +44 0208 129 1655
+            </p>
 
-          <p className="text-sm text-gray-300 flex gap-2">
-            <Phone size={16} />
-            Mobile & WhatsApp: +44 0746 728 4718
-          </p>
+            <p className="text-sm text-gray-300 flex items-center gap-2">
+              <Phone size={16} />
+              Mobile & WhatsApp: +44 0746 728 4718
+            </p>
 
-          <p className="text-red-500 text-sm mt-4 cursor-pointer">
-            ICO Certificate
-          </p>
+            <button
+              onClick={handleICOCertificate}
+              className="text-red-500 text-sm hover:text-red-400 transition-colors cursor-pointer mt-4 inline-block"
+            >
+              ICO Certificate
+            </button>
+          </div>
         </div>
 
-        {/* JOIN US */}
+        {/* JOIN US & LOGIN */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">JOIN US</h3>
+          <h3 className="text-lg font-semibold mb-4">Join Our Newsletter</h3>
 
-          <input
-            type="email"
-            placeholder="Your Email"
-            className="w-full px-4 py-2 rounded-full bg-white text-black mb-3 outline-none"
-          />
+          <form onSubmit={handleNewsletterSubmit} className="mb-6">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              required
+              className="w-full px-4 py-3 rounded-full bg-white text-black mb-3 outline-none focus:ring-2 focus:ring-[#9B3DFF] transition-all"
+            />
+            <button 
+              type="submit"
+              className="w-full py-3 rounded-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 transition-all font-semibold shadow-lg hover:shadow-xl"
+            >
+              Subscribe
+            </button>
+          </form>
 
-          <button className="w-full py-2 rounded-full bg-gradient-to-r from-red-600 to-red-800 hover:opacity-90 transition font-semibold">
-            Submit
-          </button>
-
-          <h4 className="text-lg font-semibold mt-6 mb-3">
+          <h4 className="text-lg font-semibold mt-8 mb-3">
             All Login Links
           </h4>
 
           <ul className="space-y-2 text-sm text-gray-300">
-            <li className="hover:text-white cursor-pointer">› HRMS Register</li>
-            <li className="hover:text-white cursor-pointer">
-              › HRMS Organisation Login
-            </li>
-            <li className="hover:text-white cursor-pointer">
-              › Employee Login
-            </li>
+            {loginLinks.map((link, i) => (
+              <li key={i}>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white cursor-pointer flex items-center gap-1 transition-colors duration-200"
+                >
+                  › {link.name}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
 
       {/* BOTTOM BAR */}
-      <div className="border-t border-gray-700 py-4 text-center text-sm text-gray-400">
-        <p>
-          Copyright © {new Date().getFullYear()} Skilled Workers Cloud Ltd.
-          All Rights Reserved
-        </p>
+      <div className="border-t border-gray-800 py-6">
+        <div className="max-w-8xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm text-center md:text-left">
+              Copyright © {new Date().getFullYear()} Skilled Workers Cloud Ltd.
+              All Rights Reserved
+            </p>
 
-        <div className="flex justify-center gap-6 mt-2 text-red-500 text-sm">
-          <span className="cursor-pointer hover:underline">Privacy Policy</span>
-          <span className="cursor-pointer hover:underline">My Privacy Rights</span>
-          <span className="cursor-pointer hover:underline">Terms of Us</span>
-          <span className="cursor-pointer hover:underline">Sitemap</span>
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-gray-400 text-sm">
+              {policyLinks.map((link, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleNavigation(link.path)}
+                  className="hover:text-[#E60023] cursor-pointer transition-colors duration-200"
+                >
+                  {link.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Company Info */}
+          <div className="text-center mt-4 text-gray-500 text-xs">
+            <p>Registered in England and Wales | Company Number: [YOUR_COMPANY_NUMBER]</p>
+            <p className="mt-1">VAT Number: [YOUR_VAT_NUMBER]</p>
+          </div>
         </div>
       </div>
+
+      {/* Optional: Back to Top Button */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-r from-[#1F2E9A] to-[#9B3DFF] rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-40"
+        aria-label="Back to top"
+      >
+        ↑
+      </button>
     </footer>
   );
 };

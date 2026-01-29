@@ -179,6 +179,7 @@ const ServiceDetails = () => {
   const handleCTAClick = () => {
     navigate("/contact");
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-20">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView, useAnimation } from "framer-motion";
 import {
   Target,
@@ -20,6 +20,7 @@ import AboutHero from "./AboutHero";
 import AboutRight from "./AboutRight";
 import AboutLeft from "./AboutLeft";
 import AboutBusnes from "./AboutBusnes";
+import PageLoader from "../../component/common/PageLoader";
 
 const AboutPage = () => {
   const navigate = useNavigate();
@@ -173,6 +174,21 @@ const AboutPage = () => {
   const handleCTAClick = () => {
     navigate("/contact");
   };
+
+    const [loading, setLoading] = useState(true);
+  
+    // ⏳ 2 second loader
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+  
+      return () => clearTimeout(timer);
+    }, []);
+  
+    if (loading) {
+      return <PageLoader />;
+    }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-45">

@@ -17,6 +17,7 @@ import {
 import FAQComponent from "../../component/common/FAQComponent";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 import { useNavigate } from "react-router-dom";
+import PageLoader from "../../component/common/PageLoader";
 
 const BlogPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -310,6 +311,21 @@ const BlogPage = () => {
     }
   };
 
+  const [loading, setLoading] = useState(true);
+
+  // ⏳ 2 second loader
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-30">
       {/* Hero Header */}
@@ -406,8 +422,9 @@ const BlogPage = () => {
                   {/* CENTER HOVER ICON */}
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div
-                    onClick={()=>navigate(`/blog/${blog.id}`)}
-                     className="w-16 h-16 bg-white/95 backdrop-blur rounded-xl flex items-center justify-center opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 shadow-xl">
+                      onClick={() => navigate(`/blog/${blog.id}`)}
+                      className="w-16 h-16 bg-white/95 backdrop-blur rounded-xl flex items-center justify-center opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 shadow-xl"
+                    >
                       <ArrowRight className="w-6 h-6 text-[#1F2E9A] group-hover:-rotate-40 transition-transform duration-300" />
                     </div>
                   </div>
@@ -499,8 +516,6 @@ const BlogPage = () => {
           )}
         </div>
       </section>
-
-    
 
       {/* FAQ Section */}
       <section className="py-20 bg-gradient-to-b from-white to-[#FAFAFF]">

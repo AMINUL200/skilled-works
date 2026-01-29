@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Calendar,
   User,
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import MagneticButton from "../../component/common/MagneticButtonProps";
+import PageLoader from "../../component/common/PageLoader";
 
 const BlogDetails = () => {
   const navigate = useNavigate();
@@ -227,6 +228,22 @@ const BlogDetails = () => {
       color: "hover:bg-[#34A853] hover:text-white",
     },
   ];
+
+  const [loading, setLoading] = useState(true);
+
+  // ⏳ 2 second loader
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-50">

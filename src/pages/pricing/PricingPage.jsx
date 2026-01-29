@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Check,
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 import FAQComponent from "../../component/common/FAQComponent";
+import PageLoader from "../../component/common/PageLoader";
 
 const PricingPage = () => {
   const [activeService, setActiveService] = useState("hrms");
@@ -414,6 +415,22 @@ const PricingPage = () => {
       category: "Support",
     },
   ];
+
+  const [loading, setLoading] = useState(true);
+
+  // ⏳ 2 second loader
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
 
   return (
     <div className="min-h-screen bg-white overflow-hidden pt-50 ">

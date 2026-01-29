@@ -420,8 +420,7 @@ const Navbar = ({ toggleMenu }) => {
             {navLinks.map((item) => renderNavItem(item))}
 
             {/* Country Selector - Updated */}
-           <div className="relative" ref={desktopCountryRef}>
-
+            <div className="relative" ref={desktopCountryRef}>
               <button
                 onClick={() => setCountryOpen(!countryOpen)}
                 className={`
@@ -488,19 +487,28 @@ const Navbar = ({ toggleMenu }) => {
               )}
             </div>
 
-            <MagneticButton
-              variant="square"
-             className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-8 py-4 rounded-lg font-bold text-lg hover:shadow-xl hover:shadow-red-200 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-3"
+            <button
+              className="
+    bg-gradient-to-r from-[#E60023] to-[#B8001B]
+    text-white
+    px-4 py-2
+    rounded-lg
+    font-bold
+    text-lg
+    transition-all duration-300
+    hover:shadow-xl hover:shadow-red-200
+    hover:-translate-y-1
+    focus:outline-none
+  "
             >
               Explore SponicHR Now
-            </MagneticButton>
+            </button>
           </nav>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
             {/* Mobile Country Selector */}
             <div className="relative" ref={mobileCountryRef}>
-
               <button
                 onClick={() => setCountryOpen(!countryOpen)}
                 className="flex items-center gap-1 p-2 rounded-lg bg-white/50 backdrop-blur-sm"

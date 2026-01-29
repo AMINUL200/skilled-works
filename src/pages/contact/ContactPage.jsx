@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Phone,
   Mail,
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 import FAQComponent from "../../component/common/FAQComponent";
+import PageLoader from "../../component/common/PageLoader";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -36,16 +37,16 @@ const ContactPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     setIsSubmitting(false);
     setIsSubmitted(true);
     setFormData({
@@ -56,7 +57,7 @@ const ContactPage = () => {
       subject: "",
       message: "",
     });
-    
+
     setTimeout(() => setIsSubmitted(false), 5000);
   };
 
@@ -68,7 +69,7 @@ const ContactPage = () => {
       subtitle: "Mon-Fri, 9am-6pm GMT",
       color: "from-[#2EC5FF] to-[#1F2E9A]",
       action: "tel:+442071234567",
-      description: "Speak directly with our HR experts"
+      description: "Speak directly with our HR experts",
     },
     {
       icon: <Mail className="w-6 h-6" />,
@@ -77,7 +78,7 @@ const ContactPage = () => {
       subtitle: "Response within 2 hours",
       color: "from-[#9B3DFF] to-[#E60023]",
       action: "mailto:support@skilledworkerscloud.co.uk",
-      description: "Send detailed queries and documents"
+      description: "Send detailed queries and documents",
     },
     {
       icon: <MapPin className="w-6 h-6" />,
@@ -86,7 +87,7 @@ const ContactPage = () => {
       subtitle: "Central London Office",
       color: "from-[#00B894] to-[#2430A3]",
       action: "https://maps.google.com",
-      description: "Schedule an in-person meeting"
+      description: "Schedule an in-person meeting",
     },
     {
       icon: <Clock className="w-6 h-6" />,
@@ -95,8 +96,8 @@ const ContactPage = () => {
       subtitle: "24/7 Critical HR support",
       color: "from-[#FF6B6B] to-[#FFA726]",
       action: "tel:+442071234568",
-      description: "For urgent HR compliance issues"
-    }
+      description: "For urgent HR compliance issues",
+    },
   ];
 
   const departments = [
@@ -104,61 +105,81 @@ const ContactPage = () => {
       name: "Sales & Demos",
       email: "sales@skilledworkerscloud.co.uk",
       phone: "+44 20 7123 4569",
-      description: "Product demonstrations and pricing"
+      description: "Product demonstrations and pricing",
     },
     {
       name: "Technical Support",
       email: "tech@skilledworkerscloud.co.uk",
       phone: "+44 20 7123 4570",
-      description: "Platform assistance and troubleshooting"
+      description: "Platform assistance and troubleshooting",
     },
     {
       name: "HR Consulting",
       email: "consulting@skilledworkerscloud.co.uk",
       phone: "+44 20 7123 4571",
-      description: "HR strategy and implementation"
-    }
+      description: "HR strategy and implementation",
+    },
   ];
 
   const faqData = [
     {
       id: 1,
       question: "How quickly can I implement your HRMS platform?",
-      answer: "Most clients are fully operational within 2-4 weeks. Our implementation team provides dedicated support throughout the process, including data migration, configuration, and staff training.",
-      category: "Implementation"
+      answer:
+        "Most clients are fully operational within 2-4 weeks. Our implementation team provides dedicated support throughout the process, including data migration, configuration, and staff training.",
+      category: "Implementation",
     },
     {
       id: 2,
       question: "Is your platform UK GDPR compliant?",
-      answer: "Yes, our platform is fully compliant with UK GDPR regulations. We provide data processing agreements, regular security audits, and all necessary compliance documentation for UK businesses.",
-      category: "Compliance"
+      answer:
+        "Yes, our platform is fully compliant with UK GDPR regulations. We provide data processing agreements, regular security audits, and all necessary compliance documentation for UK businesses.",
+      category: "Compliance",
     },
     {
       id: 3,
       question: "Can I customize the platform for my industry needs?",
-      answer: "Absolutely! We offer industry-specific modules and customization options. Whether you're in aviation, healthcare, or construction, we can tailor the platform to your specific requirements.",
-      category: "Customization"
+      answer:
+        "Absolutely! We offer industry-specific modules and customization options. Whether you're in aviation, healthcare, or construction, we can tailor the platform to your specific requirements.",
+      category: "Customization",
     },
     {
       id: 4,
       question: "What kind of support do you offer after implementation?",
-      answer: "We provide 24/7 technical support, dedicated account management, regular software updates, and ongoing HR consulting. All clients get access to our UK-based support team.",
-      category: "Support"
+      answer:
+        "We provide 24/7 technical support, dedicated account management, regular software updates, and ongoing HR consulting. All clients get access to our UK-based support team.",
+      category: "Support",
     },
     {
       id: 5,
       question: "How secure is my data on your platform?",
-      answer: "We use bank-level security with AES-256 encryption, regular penetration testing, and ISO 27001 certification. Your data is stored in UK-based data centers with daily backups.",
-      category: "Security"
+      answer:
+        "We use bank-level security with AES-256 encryption, regular penetration testing, and ISO 27001 certification. Your data is stored in UK-based data centers with daily backups.",
+      category: "Security",
     },
     {
       id: 6,
       question: "Do you offer training for our staff?",
-      answer: "Yes, we provide comprehensive training sessions, online tutorials, and detailed documentation. We also offer train-the-trainer programs for larger organizations.",
-      category: "Training"
-    }
+      answer:
+        "Yes, we provide comprehensive training sessions, online tutorials, and detailed documentation. We also offer train-the-trainer programs for larger organizations.",
+      category: "Training",
+    },
   ];
 
+  const [loading, setLoading] = useState(true);
+
+  // ⏳ 2 second loader
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-30 md:pt-30">
@@ -168,20 +189,16 @@ const ContactPage = () => {
           <div className="absolute top-0 left-0 w-96 h-96 bg-[#1F2E9A] rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#9B3DFF] rounded-full blur-3xl"></div>
         </div>
-        
+
         <div className="container mx-auto px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-           
-            
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               <span className="text-[#2430A3]">Contact Us Today</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#9B3DFF] via-[#2EC5FF] to-[#E60023]">
                 With Your Query
               </span>
             </h1>
-            
-           
-            
+
             <div className="flex flex-wrap justify-center gap-4">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#E6E0FF]">
                 <Award className="w-4 h-4 text-[#9B3DFF]" />
@@ -212,22 +229,28 @@ const ContactPage = () => {
                   <Headphones className="w-8 h-8 text-[#9B3DFF]" />
                   Quick Contact
                 </h2>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {contactDetails.map((contact, index) => (
                     <a
                       key={index}
                       href={contact.action}
-                      target={contact.action?.startsWith('http') ? "_blank" : "_self"}
-                      rel={contact.action?.startsWith('http') ? "noopener noreferrer" : ""}
+                      target={
+                        contact.action?.startsWith("http") ? "_blank" : "_self"
+                      }
+                      rel={
+                        contact.action?.startsWith("http")
+                          ? "noopener noreferrer"
+                          : ""
+                      }
                       className="block group"
                     >
                       <div className="h-full bg-white rounded-2xl border border-[#F2EEFF] p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
                         <div className="flex items-start gap-4">
-                          <div className={`p-3 rounded-xl ${contact.color} shadow-lg`}>
-                            <div className="text-black">
-                              {contact.icon}
-                            </div>
+                          <div
+                            className={`p-3 rounded-xl ${contact.color} shadow-lg`}
+                          >
+                            <div className="text-black">{contact.icon}</div>
                           </div>
                           <div className="flex-1">
                             <h3 className="text-lg font-bold text-[#1F2E9A] mb-1">
@@ -244,7 +267,6 @@ const ContactPage = () => {
                             </p>
                           </div>
                         </div>
-                       
                       </div>
                     </a>
                   ))}
@@ -257,18 +279,29 @@ const ContactPage = () => {
                   <Building className="w-6 h-6" />
                   Department Contacts
                 </h3>
-                
+
                 <div className="space-y-6">
                   {departments.map((dept, index) => (
-                    <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+                    <div
+                      key={index}
+                      className="bg-white/10 backdrop-blur-sm rounded-xl p-5"
+                    >
                       <h4 className="font-bold text-lg mb-2">{dept.name}</h4>
-                      <p className="text-white/80 text-sm mb-3">{dept.description}</p>
+                      <p className="text-white/80 text-sm mb-3">
+                        {dept.description}
+                      </p>
                       <div className="flex flex-wrap gap-4">
-                        <a href={`mailto:${dept.email}`} className="flex items-center gap-2 text-white/90 hover:text-white transition-colors">
+                        <a
+                          href={`mailto:${dept.email}`}
+                          className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+                        >
                           <Mail className="w-4 h-4" />
                           <span className="text-sm">{dept.email}</span>
                         </a>
-                        <a href={`tel:${dept.phone}`} className="flex items-center gap-2 text-white/90 hover:text-white transition-colors">
+                        <a
+                          href={`tel:${dept.phone}`}
+                          className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+                        >
                           <Phone className="w-4 h-4" />
                           <span className="text-sm">{dept.phone}</span>
                         </a>
@@ -281,19 +314,33 @@ const ContactPage = () => {
               {/* Support Stats */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white rounded-xl p-6 border border-[#F2EEFF] text-center">
-                  <div className="text-3xl font-bold text-[#E60023] mb-2">98%</div>
-                  <div className="text-sm text-[#666666]">Client Satisfaction</div>
+                  <div className="text-3xl font-bold text-[#E60023] mb-2">
+                    98%
+                  </div>
+                  <div className="text-sm text-[#666666]">
+                    Client Satisfaction
+                  </div>
                 </div>
                 <div className="bg-white rounded-xl p-6 border border-[#F2EEFF] text-center">
-                  <div className="text-3xl font-bold text-[#9B3DFF] mb-2">2h</div>
-                  <div className="text-sm text-[#666666]">Avg Response Time</div>
+                  <div className="text-3xl font-bold text-[#9B3DFF] mb-2">
+                    2h
+                  </div>
+                  <div className="text-sm text-[#666666]">
+                    Avg Response Time
+                  </div>
                 </div>
                 <div className="bg-white rounded-xl p-6 border border-[#F2EEFF] text-center">
-                  <div className="text-3xl font-bold text-[#2EC5FF] mb-2">24/7</div>
-                  <div className="text-sm text-[#666666]">Support Available</div>
+                  <div className="text-3xl font-bold text-[#2EC5FF] mb-2">
+                    24/7
+                  </div>
+                  <div className="text-sm text-[#666666]">
+                    Support Available
+                  </div>
                 </div>
                 <div className="bg-white rounded-xl p-6 border border-[#F2EEFF] text-center">
-                  <div className="text-3xl font-bold text-[#00B894] mb-2">500+</div>
+                  <div className="text-3xl font-bold text-[#00B894] mb-2">
+                    500+
+                  </div>
                   <div className="text-sm text-[#666666]">UK Businesses</div>
                 </div>
               </div>
@@ -310,7 +357,8 @@ const ContactPage = () => {
                       <MessageSquare className="w-6 h-6" />
                     </div>
                     <p className="text-white/80">
-                      Fill out the form and our team will get back to you shortly
+                      Fill out the form and our team will get back to you
+                      shortly
                     </p>
                   </div>
 
@@ -320,8 +368,12 @@ const ContactPage = () => {
                       <div className="flex items-center gap-3 text-white">
                         <CheckCircle className="w-6 h-6" />
                         <div>
-                          <h4 className="font-bold">Message Sent Successfully!</h4>
-                          <p className="text-sm opacity-90">We'll contact you within 2 business hours.</p>
+                          <h4 className="font-bold">
+                            Message Sent Successfully!
+                          </h4>
+                          <p className="text-sm opacity-90">
+                            We'll contact you within 2 business hours.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -407,10 +459,16 @@ const ContactPage = () => {
                       >
                         <option value="">Select a subject</option>
                         <option value="General Inquiry">General Inquiry</option>
-                        <option value="Product Demo">Product Demo Request</option>
-                        <option value="Technical Support">Technical Support</option>
+                        <option value="Product Demo">
+                          Product Demo Request
+                        </option>
+                        <option value="Technical Support">
+                          Technical Support
+                        </option>
                         <option value="Sales Inquiry">Sales Inquiry</option>
-                        <option value="Partnership">Partnership Opportunity</option>
+                        <option value="Partnership">
+                          Partnership Opportunity
+                        </option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
@@ -437,9 +495,9 @@ const ContactPage = () => {
                         type="submit"
                         disabled={isSubmitting}
                         className={`w-full md:w-[50%]  group ${
-                          isSubmitting 
-                            ? 'bg-gray-400 cursor-not-allowed' 
-                            : 'bg-gradient-to-r from-[#E60023] to-[#B8001B] hover:shadow-xl hover:shadow-red-200'
+                          isSubmitting
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-[#E60023] to-[#B8001B] hover:shadow-xl hover:shadow-red-200"
                         } text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-3`}
                       >
                         {isSubmitting ? (
@@ -459,7 +517,10 @@ const ContactPage = () => {
                     <div className="text-center pt-4">
                       <p className="text-sm text-[#666666]">
                         By submitting, you agree to our{" "}
-                        <a href="#" className="text-[#1F2E9A] font-semibold hover:text-[#9B3DFF]">
+                        <a
+                          href="#"
+                          className="text-[#1F2E9A] font-semibold hover:text-[#9B3DFF]"
+                        >
                           Privacy Policy
                         </a>
                       </p>
@@ -476,8 +537,6 @@ const ContactPage = () => {
       <section className="py-20 bg-gradient-to-b from-white to-[#FAFAFF]">
         <div className="container mx-auto px-8">
           <div className="max-w-4xl mx-auto">
-            
-
             {/* FAQ Component */}
             <FAQComponent faqs={faqData} />
 
@@ -488,9 +547,10 @@ const ContactPage = () => {
                   Still Have Questions?
                 </h3>
                 <p className="text-lg text-[#666666] mb-8 max-w-xl mx-auto">
-                  Can't find what you're looking for? Our support team is ready to help.
+                  Can't find what you're looking for? Our support team is ready
+                  to help.
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <MagneticButton
                     variant="square"
@@ -499,16 +559,12 @@ const ContactPage = () => {
                     <span>Contact Support</span>
                     <Headphones className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                   </MagneticButton>
-                  
-                 
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-    
     </div>
   );
 };

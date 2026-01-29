@@ -14,6 +14,7 @@ import BlogDetails from "./pages/blog/BlogDetails";
 import PricingPage from "./pages/pricing/PricingPage";
 import ServiceDetails from "./pages/service/ServiceDetails";
 import AboutPage from "./pages/about/AboutPage";
+import CustomerSupport from "./pages/suport/CustomerSupport";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/cms/:Id" element={<ServiceDetails />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/customer-support" element={<CustomerSupport />} />
         </Route>
 
         {/* Admin Layout */}
