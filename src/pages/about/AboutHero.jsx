@@ -1,19 +1,18 @@
 import React, { useEffect, useRef } from "react";
 import { motion, useInView, useAnimation } from "framer-motion";
-import { 
-  Target, 
-  Users, 
-  Shield, 
-  Zap, 
-  ArrowRight, 
-  ChevronRight,
+import {
+  Heart,
+  Shield,
+  Users,
+  Zap,
   Award,
-  Globe
+  Globe,
+  ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import MagneticButton from "../common/MagneticButtonProps";
+import MagneticButton from "../../component/common/MagneticButtonProps";
 
-const AboutSection = () => {
+const AboutHero = () => {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
@@ -25,31 +24,31 @@ const AboutSection = () => {
     }
   }, [isInView, controls]);
 
-  const features = [
+  const values = [
     {
-      icon: <Target className="w-6 h-6" />,
-      title: "Precision HR Solutions",
-      description: "Tailored to UK business needs",
-      color: "from-[#E60023] to-[#FF1F1F]"
+      icon: <Heart className="w-6 h-6" />,
+      title: "Excellence",
+      description: "Commitment to quality in everything we do",
+      color: "from-[#E60023] to-[#FF1F1F]",
     },
     {
       icon: <Shield className="w-6 h-6" />,
-      title: "Legal Compliance",
-      description: "UK regulation ready",
-      color: "from-[#1F2E9A] to-[#2430A3]"
-    },
-    {
-      icon: <Zap className="w-6 h-6" />,
-      title: "Streamlined Operations",
-      description: "Automated workflows",
-      color: "from-[#2EC5FF] to-[#9B5CFF]"
+      title: "Integrity",
+      description: "Honest and ethical in all relationships",
+      color: "from-[#1F2E9A] to-[#2430A3]",
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: "Team Management",
-      description: "Employee focused",
-      color: "from-[#FF4D8D] to-[#FF9F1C]"
-    }
+      title: "Collaboration",
+      description: "Working together for shared success",
+      color: "from-[#2EC5FF] to-[#9B5CFF]",
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: "Innovation",
+      description: "Continuously improving and evolving",
+      color: "from-[#FF4D8D] to-[#FF9F1C]",
+    },
   ];
 
   const circleVariants = {
@@ -60,9 +59,9 @@ const AboutSection = () => {
       transition: {
         duration: 1,
         type: "spring",
-        bounce: 0.4
-      }
-    }
+        bounce: 0.4,
+      },
+    },
   };
 
   const contentVariants = {
@@ -72,9 +71,9 @@ const AboutSection = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        staggerChildren: 0.2
-      }
-    }
+        staggerChildren: 0.2,
+      },
+    },
   };
 
   const featureVariants = {
@@ -83,27 +82,24 @@ const AboutSection = () => {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: 0.5
-      }
-    }
-  };
-
-  const handleLearnMore = () => {
-    navigate("/about");
+        duration: 0.5,
+      },
+    },
   };
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden py-8 "
+      className="relative w-full overflow-hidden py-8  "
       style={{
-        background: "linear-gradient(135deg, #FAFAFF 0%, #F2EEFF 50%, #FAFAFF 100%)"
+        background:
+          "linear-gradient(135deg, #FAFAFF 0%, #F2EEFF 50%, #FAFAFF 100%)",
       }}
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 left-4 md:left-10 w-48 md:w-72 h-48 md:h-72 bg-[#1F2E9A] rounded-full blur-2xl md:blur-3xl"></div>
-        <div className="absolute bottom-10 right-4 md:right-10 w-64 md:w-96 h-64 md:h-96 bg-[#9B5CFF] rounded-full blur-2xl md:blur-3xl"></div>
+        <div className="absolute top-20 left-4 md:left-10 w-48 md:w-72 h-48 md:h-72 bg-[#1F2E9A] rounded-full blur-2xl md:blur-3xl"></div>
+        <div className="absolute bottom-20 right-4 md:right-10 w-64 md:w-96 h-64 md:h-96 bg-[#9B5CFF] rounded-full blur-2xl md:blur-3xl"></div>
         <div className="absolute top-1/2 left-1/4 w-32 md:w-64 h-32 md:h-64 bg-[#2EC5FF] rounded-full blur-2xl md:blur-3xl"></div>
       </div>
 
@@ -141,20 +137,29 @@ const AboutSection = () => {
                   <motion.div
                     key={index}
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="absolute w-5 h-5 sm:w-6 sm:h-6"
                     style={{
                       transform: `rotate(${degree}deg)`,
                       left: 'calc(50% - 10px)',
-                      top: '-10px'
+                      top: '-10px',
                     }}
                   >
-                    <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full ${
-                      index === 0 ? "bg-[#FF1F1F]" :
-                      index === 1 ? "bg-[#2EC5FF]" :
-                      index === 2 ? "bg-[#9B5CFF]" :
-                      "bg-[#FF4D8D]"
-                    }`}></div>
+                    <div
+                      className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full ${
+                        index === 0
+                          ? "bg-[#FF1F1F]"
+                          : index === 1
+                            ? "bg-[#2EC5FF]"
+                            : index === 2
+                              ? "bg-[#9B5CFF]"
+                              : "bg-[#FF4D8D]"
+                      }`}
+                    ></div>
                   </motion.div>
                 ))}
               </motion.div>
@@ -162,7 +167,6 @@ const AboutSection = () => {
               {/* Inner Ring */}
               <div className="absolute w-[210px] h-[210px] sm:w-[260px] sm:h-[260px] md:w-[310px] md:h-[310px] lg:w-[360px] lg:h-[360px] rounded-full border-2 sm:border-4 border-white/30 shadow-xl lg:shadow-2xl overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1F2E9A] via-[#2430A3] to-[#1F2E9A] rounded-full flex items-center justify-center">
-                  
                   {/* Animated Background Pattern */}
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 bg-white rounded-full top-1/4 left-1/4 animate-pulse"></div>
@@ -177,15 +181,15 @@ const AboutSection = () => {
                       transition={{ delay: 0.5 }}
                       className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4"
                     >
-                      GET TO
+                      OUR
                       <br />
-                      KNOW
+                      STORY
                       <br />
                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2EC5FF] to-[#9B5CFF]">
-                        US
+                        UNFOLDS
                       </span>
                     </motion.h2>
-                    
+
                     {/* Animated Line */}
                     <motion.div
                       initial={{ width: 0 }}
@@ -197,7 +201,7 @@ const AboutSection = () => {
                 </div>
               </div>
 
-              {/* Floating Badge */}
+              {/* Floating Badge - Top */}
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -205,11 +209,13 @@ const AboutSection = () => {
               >
                 <div className="flex items-center space-x-1 sm:space-x-2">
                   <Award className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#FF9F1C]" />
-                  <span className="text-xs sm:text-sm font-bold text-[#1F2E9A]">UK BASED</span>
+                  <span className="text-xs sm:text-sm font-bold text-[#1F2E9A]">
+                    UK BASED
+                  </span>
                 </div>
               </motion.div>
 
-              {/* Floating Badge 2 */}
+              {/* Floating Badge - Bottom */}
               <motion.div
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
@@ -217,7 +223,9 @@ const AboutSection = () => {
               >
                 <div className="flex items-center space-x-1 sm:space-x-2">
                   <Globe className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#2EC5FF]" />
-                  <span className="text-xs sm:text-sm font-bold text-[#1F2E9A]">HR-TECH LEADER</span>
+                  <span className="text-xs sm:text-sm font-bold text-[#1F2E9A]">
+                    SINCE 2020
+                  </span>
                 </div>
               </motion.div>
             </motion.div>
@@ -237,7 +245,7 @@ const AboutSection = () => {
                   About Skilled Workers Cloud
                 </span>
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#9B3DFF] to-[#E60023]">
-                  UK HRMS Provider
+                  UK HR-Tech Pioneer
                 </span>
               </h2>
             </div>
@@ -253,42 +261,33 @@ const AboutSection = () => {
             {/* Content */}
             <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
               <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
-                <strong className="text-[#1F2E9A]">SKILLED WORKERS CLOUD</strong> is a premier UK HR-tech company dedicated to helping you manage your workforce skillfully and effectively. We specialize in cutting-edge HR-TECH systems tailored for businesses across the UK.
+                <strong className="text-[#1F2E9A]">
+                  SKILLED WORKERS CLOUD
+                </strong>{" "}
+                was founded in 2020 with a clear mission: to revolutionize HR
+                technology for UK businesses. We recognized the growing need for
+                comprehensive, cloud-based HR solutions that could adapt to the
+                unique challenges of the UK market.
               </p>
 
               <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
-                Our enterprise-ready software and services provide comprehensive solutions that ensure compliance with UK legal guidance while enabling smooth business operations. From maintaining up-to-date employee records to ensuring regulatory compliance, we've got you covered.
+                What started as a vision to simplify HR processes has grown into
+                a leading HR-tech company serving 500+ businesses across the UK.
+                Our journey has been driven by innovation, customer focus, and a
+                deep understanding of UK employment regulations.
               </p>
 
               <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
-                Our expert HR team combined with innovative software delivers realistic, feasible solutions that eliminate operational hassles, allowing you to focus on growing your business.
+                Today, we're proud to be at the forefront of HR technology,
+                helping businesses transform their HR operations through
+                intelligent software solutions, expert consulting, and
+                unparalleled support.
               </p>
             </div>
 
-           
+          
 
-            {/* CTA Button */}
-            <div className="pt-4 sm:pt-6 flex justify-center lg:justify-start">
-              {/* <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleLearnMore}
-                className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-red-200 transition-all duration-300 flex items-center space-x-2 sm:space-x-3"
-              >
-                <span>Learn More About Our UK HRMS Software</span>
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
-              </motion.button> */}
-
-              <MagneticButton
-                variant="square"
-                size={140}
-                onClick={handleLearnMore}
-                className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-red-200 transition-all duration-300 flex items-center space-x-2 sm:space-x-3"
-              >
-                <span>Learn More About Our UK HRMS Software</span>
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
-              </MagneticButton>
-            </div>
+            
           </motion.div>
         </div>
       </div>
@@ -296,7 +295,8 @@ const AboutSection = () => {
       {/* Add CSS animations */}
       <style jsx>{`
         @keyframes float {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px);
           }
           50% {
@@ -305,7 +305,8 @@ const AboutSection = () => {
         }
 
         @keyframes float-slow {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px);
           }
           50% {
@@ -353,4 +354,4 @@ const AboutSection = () => {
   );
 };
 
-export default AboutSection;
+export default AboutHero;

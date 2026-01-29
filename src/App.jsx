@@ -13,6 +13,7 @@ import BlogPage from "./pages/blog/BlogPage";
 import BlogDetails from "./pages/blog/BlogDetails";
 import PricingPage from "./pages/pricing/PricingPage";
 import ServiceDetails from "./pages/service/ServiceDetails";
+import AboutPage from "./pages/about/AboutPage";
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/blog/:Id" element={<BlogDetails />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/cms/:Id" element={<ServiceDetails />} />
+          <Route path="/about" element={<AboutPage />} />
         </Route>
 
         {/* Admin Layout */}
