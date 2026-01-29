@@ -15,6 +15,8 @@ import PricingPage from "./pages/pricing/PricingPage";
 import ServiceDetails from "./pages/service/ServiceDetails";
 import AboutPage from "./pages/about/AboutPage";
 import CustomerSupport from "./pages/suport/CustomerSupport";
+import Recruitment from "./pages/recruitment/Recruitment";
+import RecruitmentDetails from "./pages/recruitment/RecruitmentDetails";
 
 const App = () => {
   return (
@@ -32,6 +34,8 @@ const App = () => {
           <Route path="/cms/:Id" element={<ServiceDetails />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
+          <Route path="/recruitment" element={<Recruitment />} />
+          <Route path="/recruitment/apply/:id" element={<RecruitmentDetails />} />
         </Route>
 
         {/* Admin Layout */}
