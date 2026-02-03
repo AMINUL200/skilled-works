@@ -17,6 +17,11 @@ import AboutPage from "./pages/about/AboutPage";
 import CustomerSupport from "./pages/suport/CustomerSupport";
 import Recruitment from "./pages/recruitment/Recruitment";
 import RecruitmentDetails from "./pages/recruitment/RecruitmentDetails";
+import ProductPage from "./pages/product/ProductPage";
+import ProductDetailspage from "./pages/product/ProductDetailspage";
+import PrivacyPolicy from "./pages/policy/PrivacyPolicy";
+import TermsOfUse from "./pages/policy/TermsOfUse";
+import PrivacyRights from "./pages/policy/PrivacyRights";
 
 const App = () => {
   return (
@@ -36,6 +41,11 @@ const App = () => {
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/recruitment" element={<Recruitment />} />
           <Route path="/recruitment/apply/:id" element={<RecruitmentDetails />} />
+          <Route path="/product" element={<ProductPage />} />
+          <Route path="/product/:id" element={<ProductDetailspage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-use" element={<TermsOfUse />} />
+          <Route path="/privacy-rights" element={<PrivacyRights />} />
         </Route>
 
         {/* Admin Layout */}

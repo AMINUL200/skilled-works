@@ -331,14 +331,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Optional: Back to Top Button */}
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-6 right-6 w-12 h-12 bg-gradient-to-r from-[#1F2E9A] to-[#9B3DFF] rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-40"
-        aria-label="Back to top"
-      >
-        ↑
-      </button>
+      
     </footer>
   );
 };

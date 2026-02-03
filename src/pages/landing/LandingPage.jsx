@@ -22,6 +22,7 @@ import WhyChooseUs from "../../component/landing/WhyChooseUs";
 import CTASection from "../../component/landing/CTASection";
 import PopupSection from "../../component/landing/PopupSection";
 import PageLoader from "../../component/common/PageLoader";
+import OurProduct from "../../component/landing/OurProduct";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -49,15 +50,19 @@ const LandingPage = () => {
 
       {/* About Section */}
       <AboutSection />
+      
 
       {/* Features Section */}
       <FeaturesSection />
 
-      {/* We Serve Section */}
-      <WeServeSection />
+      {/* Our Product Section */}
+      <OurProduct />
 
       {/* Why Choose Us Section */}
       <WhyChooseUs />
+
+      {/* We Serve Section */}
+      <WeServeSection />
 
       {/* CTA Section */}
       <CTASection />
