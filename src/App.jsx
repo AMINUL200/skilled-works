@@ -22,6 +22,10 @@ import ProductDetailspage from "./pages/product/ProductDetailspage";
 import PrivacyPolicy from "./pages/policy/PrivacyPolicy";
 import TermsOfUse from "./pages/policy/TermsOfUse";
 import PrivacyRights from "./pages/policy/PrivacyRights";
+import ServiceRender from "./pages/service/ServiceRender";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import ServicePage from "./pages/service/ServicePage";
 
 const App = () => {
   return (
@@ -29,6 +33,8 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route element={<AppLayout />}>
           <Route index path="/" element={<LandingPage />} />
@@ -37,6 +43,8 @@ const App = () => {
           <Route path="/blog/:Id" element={<BlogDetails />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/cms/:Id" element={<ServiceDetails />} />
+          <Route path="/services" element={<ServicePage />} />
+          <Route path="/service/:slug" element={<ServiceRender />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/recruitment" element={<Recruitment />} />

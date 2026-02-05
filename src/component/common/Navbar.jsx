@@ -124,7 +124,7 @@ const Navbar = ({ toggleMenu }) => {
         {
           id: "hrms_software",
           label: "HRMS Software",
-          path: "/cms/hrms-software",
+          path: "/service/hrms-software",
         },
         {
           id: "hr_file_preparation",
