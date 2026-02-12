@@ -25,6 +25,7 @@ import {
   User2,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { label, path } from "framer-motion/client";
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
@@ -39,97 +40,16 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       path: "/admin",
     },
     {
-      id: "profile",
-      label: "Profile",
-      icon: <User2 className="w-5 h-5" />,
-      path: "/admin/profile",
-    },
-    {
-      id: "users",
-      label: "Users Management",
-      icon: <Users className="w-5 h-5" />,
-      children: [
-        {
-          id: "all-users",
-          label: "All Users",
-          icon: <Users className="w-4 h-4" />,
-          path: "/admin/users/all",
-        },
-        {
-          id: "user-roles",
-          label: "User Roles",
-          icon: <UserCog className="w-4 h-4" />,
-          path: "/admin/users/roles",
-        },
-        {
-          id: "permissions",
-          label: "Permissions",
-          icon: <Shield className="w-4 h-4" />,
-          path: "/admin/users/permissions",
-        },
-      ],
-    },
-    {
-      id: "products",
-      label: "Products",
-      icon: <Package className="w-5 h-5" />,
-      children: [
-        {
-          id: "all-products",
-          label: "All Products",
-          icon: <Package className="w-4 h-4" />,
-          path: "/admin/products/all",
-        },
-        {
-          id: "categories",
-          label: "Categories",
-          icon: <Tag className="w-4 h-4" />,
-          path: "/admin/products/categories",
-        },
-        {
-          id: "inventory",
-          label: "Inventory",
-          icon: <Database className="w-4 h-4" />,
-          path: "/admin/products/inventory",
-        },
-      ],
-    },
-    {
-      id: "orders",
-      label: "Orders",
-      icon: <ShoppingCart className="w-5 h-5" />,
-      path: "/admin/orders",
-    },
-    {
-      id: "analytics",
-      label: "Analytics",
-      icon: <BarChart className="w-5 h-5" />,
-      children: [
-        {
-          id: "overview",
-          label: "Overview",
-          icon: <TrendingUp className="w-4 h-4" />,
-          path: "/admin/analytics/overview",
-        },
-        {
-          id: "sales",
-          label: "Sales Analytics",
-          icon: <DollarSign className="w-4 h-4" />,
-          path: "/admin/analytics/sales",
-        },
-        {
-          id: "user-behavior",
-          label: "User Behavior",
-          icon: <Users className="w-4 h-4" />,
-          path: "/admin/analytics/behavior",
-        },
-      ],
-    },
-    {
-      id: "reports",
-      label: "Reports",
+      id: "blogs_handle",
+      label: "Handle Blogs",
       icon: <FileText className="w-5 h-5" />,
-      path: "/admin/reports",
+      path: "/admin/handle-blogs",
+    },
+    {
+      id: "faq_handle",
+      label: "Handle FAQ",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-faqs",
     },
     {
       id: "settings",
@@ -143,24 +63,61 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           path: "/admin/site-settings",
         },
         {
-          id: "appearance",
-          label: "Appearance",
+          id: "seo_settings",
+          label: "SEO Settings",
           icon: <Palette className="w-4 h-4" />,
-          path: "/admin/settings/appearance",
+          path: "/admin/seo-settings",
         },
         {
-          id: "notifications",
-          label: "Notifications",
-          icon: <Bell className="w-4 h-4" />,
-          path: "/admin/settings/notifications",
+          id: "popup-settings",
+          label: "Popup Settings",
+          icon: <Settings className="w-4 h-4" />,
+          path: "/admin/popup-settings",
         },
         {
-          id: "integrations",
-          label: "Integrations",
-          icon: <Globe className="w-4 h-4" />,
-          path: "/admin/settings/integrations",
+          id: "note_settings",
+          label: "Note Settings",
+          icon: <Settings className="w-4 h-4" />,
+          path: "/admin/note-settings",
         },
       ],
+    },
+    {
+      id: "service_handle",
+      label: "Handle Service",
+      icon: <Settings className="w-5 h-5" />,
+      children: [
+        {
+          id: "service_type",
+          label: "Service Type",
+          icon: <Settings className="w-4 h-4" />,
+          path: "/admin/handle-service-type",
+        },
+        {
+          id: "service_type_feature",
+          label: "Service Type Feature",
+          icon: <Settings className="w-4 h-4" />,
+          path: "/admin/handle-service-type-feature",
+        },
+      ],
+    },
+    {
+      id: "why_chose_use",
+      label: "Why Chose Our Platform",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-why-chose-our-platform",
+    },
+    {
+      id: "what_we_offer",
+      label: "What We Offer",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-what-we-offer",
+    },
+    {
+      id: "booking_handle",
+      label: "Handle Booking",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-booking",
     },
   ];
 

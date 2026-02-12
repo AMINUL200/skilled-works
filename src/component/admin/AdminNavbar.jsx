@@ -11,6 +11,7 @@ import {
   Mail,
   ChevronDown,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const AdminNavbar = ({ setSidebarOpen }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -18,6 +19,7 @@ const AdminNavbar = ({ setSidebarOpen }) => {
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Dummy user data - replace with your actual user data
   const userData = {
@@ -71,8 +73,10 @@ const AdminNavbar = ({ setSidebarOpen }) => {
 
   const handleLogout = () => {
     console.log("Logging out...");
+
     // Add your logout logic here
-    navigate("/signin");
+    logout();
+    navigate("/");
   };
 
   const handleProfileClick = () => {

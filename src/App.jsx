@@ -26,10 +26,22 @@ import ServiceRender from "./pages/service/ServiceRender";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import ServicePage from "./pages/service/ServicePage";
+import { ToastContainer } from "react-toastify";
+import SEOSettings from "./pages/admin/settings/SEOSettings";
+import PopupSettings from "./pages/admin/settings/PopupSettings";
+import NoteSettings from "./pages/admin/settings/NoteSettings";
+import HandleFaq from "./pages/admin/faq/HandleFaq";
+import HandleBlog from "./pages/admin/blog/HandleBlog";
+import HandleServiceType from "./pages/admin/services/HandleServiceType";
+import HandleServiceTypeFeature from "./pages/admin/services/HandleServiceTypeFeature";
+import HandleBooking from "./pages/admin/booking/HandleBooking";
+import HandleWhyChoseOurPlatform from "./pages/admin/about/HandleWhyChoseOurPlatform";
+import HandleWhatWeOffer from "./pages/admin/about/HandleWhatWeOffer";
 
 const App = () => {
   return (
     <Router>
+      <ToastContainer position="top-right" zIndex={9999} />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -48,7 +60,10 @@ const App = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/recruitment" element={<Recruitment />} />
-          <Route path="/recruitment/apply/:id" element={<RecruitmentDetails />} />
+          <Route
+            path="/recruitment/apply/:id"
+            element={<RecruitmentDetails />}
+          />
           <Route path="/product" element={<ProductPage />} />
           <Route path="/product/:id" element={<ProductDetailspage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -61,7 +76,27 @@ const App = () => {
           <Route index element={<AdminDashboard />} />
           {/* Additional admin routes can be added here */}
           <Route path="site-settings" element={<SiteSettings />} />
-          <Route path="profile" element={<AdminProfile />} />
+          <Route path="seo-settings" element={<SEOSettings />} />
+          <Route path="popup-settings" element={<PopupSettings />} />
+          <Route path="note-settings" element={<NoteSettings />} />
+          <Route path="handle-booking" element={<HandleBooking />} />
+          <Route
+            path="handle-why-chose-our-platform"
+            element={<HandleWhyChoseOurPlatform />}
+          />
+          <Route path="handle-what-we-offer" element={<HandleWhatWeOffer/>}/>
+
+          <Route path="handle-faqs" element={<HandleFaq />} />
+
+          <Route path="handle-blogs" element={<HandleBlog />} />
+
+          <Route path="handle-service-type" element={<HandleServiceType />} />
+          <Route
+            path="handle-service-type-feature"
+            element={<HandleServiceTypeFeature />}
+          />
+
+          {/* <Route path="profile" element={<AdminProfile />} /> */}
         </Route>
       </Routes>
     </Router>

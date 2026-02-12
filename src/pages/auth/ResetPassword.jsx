@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Lock, Check } from "lucide-react";
 import CustomInput from "../../component/form/CustomInput";
+import { toast } from "react-toastify";
+import { api } from "../../utils/app";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +22,7 @@ const ResetPassword = () => {
     // Extract token and email from URL
     const tokenFromUrl = searchParams.get("token");
     const emailFromUrl = searchParams.get("email");
-    
+
     if (tokenFromUrl && emailFromUrl) {
       setToken(tokenFromUrl);
       setEmail(decodeURIComponent(emailFromUrl));
@@ -33,57 +35,68 @@ const ResetPassword = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
-    // Simulate API call to reset password
-    setTimeout(() => {
+
+    try {
+      const res = await api.post("/auth/reset-password", {
+        email,
+        token,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
+
+      if (res.status === 200) {
+        toast.success(res.data.message || "Password reset successful");
+
+        setIsSuccess(true);
+
+        // Optional auto redirect after 3 sec
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      }
+    } catch (error) {
+      console.log(error);
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to reset password";
+
+      toast.error(message);
+    } finally {
       setIsLoading(false);
-      setIsSuccess(true);
-      
-      // In real app, you would send to backend:
-      // fetch("/api/reset-password", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     token,
-      //     email,
-      //     newPassword: formData.password
-      //   })
-      // })
-      
-      console.log("Password reset for:", email);
-      console.log("Token:", token);
-      console.log("New password set");
-    }, 1500);
+    }
   };
 
   if (!token || !email) {
@@ -99,7 +112,6 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F2EEFF] via-[#E6F7FF] to-white px-4">
-      
       {/* Background blur */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#9B3DFF]/20 rounded-full blur-3xl" />
@@ -107,7 +119,6 @@ const ResetPassword = () => {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-
         {/* Back */}
         <button
           onClick={() => navigate("/login")}
@@ -119,7 +130,6 @@ const ResetPassword = () => {
 
         {/* Card */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-[#E6E0FF] shadow-2xl">
-
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -132,10 +142,9 @@ const ResetPassword = () => {
               {isSuccess ? "Password Reset!" : "Reset Password"}
             </h2>
             <p className="text-[#666666] mt-2">
-              {isSuccess 
+              {isSuccess
                 ? "Your password has been successfully reset"
-                : `Set new password for ${email}`
-              }
+                : `Set new password for ${email}`}
             </p>
           </div>
 
@@ -215,7 +224,7 @@ const ResetPassword = () => {
                   You can now log in with your new password
                 </p>
               </div>
-              
+
               <button
                 onClick={() => navigate("/login")}
                 className="

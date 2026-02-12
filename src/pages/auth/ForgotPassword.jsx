@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail } from "lucide-react";
 import CustomInput from "../../component/form/CustomInput";
+import { toast } from "react-toastify";
+import { api } from "../../utils/app";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -28,29 +30,30 @@ const ForgotPassword = () => {
     if (!validateEmail()) return;
 
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const res = api.post("/forgot-password", { email });
+      console.log(res);
+      if (res.status === 200) {
+        toast.success("Reset link sent! Check your email.");
+      } else {
+        toast.error(res.data.message || "Failed to send reset link");
+      }
+    } catch (error) {
+      console.log(
+        error.message || "Something happened while sending the reset link",
+      );
+      toast.error(
+        error.message || "Something happened while sending the reset link",
+      );
+    } finally {
       setIsLoading(false);
       setIsSent(true);
-      
-      // In real app, you would send the reset link email here
-      console.log("Reset link sent to:", email);
-      
-      // For demo, simulate sending reset link with token
-      const token = "demo-reset-token-" + Date.now();
-      // In real app, this would come from your backend
-      const resetLink = `${window.location.origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
-      console.log("Reset Link:", resetLink);
-      
-      // Show success message
-      alert(`Reset link has been sent to ${email}\nCheck your email inbox.`);
-    }, 1500);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F2EEFF] via-[#E6F7FF] to-white px-4">
-      
       {/* Background blur */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#9B3DFF]/20 rounded-full blur-3xl" />
@@ -58,7 +61,6 @@ const ForgotPassword = () => {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-
         {/* Back */}
         <button
           onClick={() => navigate("/login")}
@@ -70,7 +72,6 @@ const ForgotPassword = () => {
 
         {/* Card */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-[#E6E0FF] shadow-2xl">
-
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -83,10 +84,9 @@ const ForgotPassword = () => {
               Forgot Password?
             </h2>
             <p className="text-[#666666] mt-2">
-              {isSent 
+              {isSent
                 ? "Check your email for the reset link"
-                : "Enter your email to receive a reset link"
-              }
+                : "Enter your email to receive a reset link"}
             </p>
           </div>
 
@@ -107,9 +107,7 @@ const ForgotPassword = () => {
                   icon={<Mail className="w-5 h-5 text-gray-400" />}
                   className="focus:border-[#9B3DFF] focus:ring-[#9B3DFF]/30"
                 />
-                {error && (
-                  <p className="mt-1 text-sm text-red-600">{error}</p>
-                )}
+                {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
               </div>
 
               <button
@@ -145,11 +143,12 @@ const ForgotPassword = () => {
                   Email Sent Successfully!
                 </div>
                 <p className="text-sm text-gray-600">
-                  We've sent a password reset link to<br />
+                  We've sent a password reset link to
+                  <br />
                   <span className="font-semibold">{email}</span>
                 </p>
               </div>
-              
+
               <div className="text-sm text-gray-500">
                 Didn't receive the email? Check your spam folder or
                 <button
@@ -159,7 +158,7 @@ const ForgotPassword = () => {
                   try again
                 </button>
               </div>
-              
+
               <button
                 onClick={() => navigate("/login")}
                 className="
