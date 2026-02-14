@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Search, 
-  Filter, 
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  Filter,
   Eye,
   EyeOff,
   X,
@@ -12,9 +12,10 @@ import {
   Image as ImageIcon,
   Link,
   Type,
-  List
-} from 'lucide-react';
-import { api } from '../../../utils/app';
+  List,
+} from "lucide-react";
+import { api } from "../../../utils/app";
+import CustomTextEditor from "../../../component/form/CustomTextEditor";
 
 const HandleServiceTypeFeature = () => {
   const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
@@ -23,39 +24,39 @@ const HandleServiceTypeFeature = () => {
   const [featureList, setFeatureList] = useState([]);
   const [filteredFeatures, setFilteredFeatures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // State for search and filter
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [serviceTypeFilter, setServiceTypeFilter] = useState('all');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState("all");
+
   // State for popup
   const [showFormPopup, setShowFormPopup] = useState(false);
-  const [formMode, setFormMode] = useState('add');
+  const [formMode, setFormMode] = useState("add");
   const [currentId, setCurrentId] = useState(null);
-  
+
   // State for form data
   const [formData, setFormData] = useState({
-    service_type_id: '',
-    feature_name: '',
-    feature_heading: '',
-    highlighted_text: '',
-    heading_meta: '',
-    desc: '',
-    desc_meta: '',
-    long_desc: '',
-    long_desc_meta: '',
+    service_type_id: "",
+    feature_name: "",
+    feature_heading: "",
+    highlighted_text: "",
+    heading_meta: "",
+    desc: "",
+    desc_meta: "",
+    long_desc: "",
+    long_desc_meta: "",
     image: null,
-    video_link: '',
-    image_alt: '',
-    is_active: true
+    video_link: "",
+    image_alt: "",
+    is_active: true,
   });
-  
+
   // State for image file and preview
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [existingImage, setExistingImage] = useState(null);
-  
+
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,21 +64,21 @@ const HandleServiceTypeFeature = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Fetch service types
-      const serviceResponse = await api.get('/admin/service-type');
+      const serviceResponse = await api.get("/admin/service-type");
       if (serviceResponse.data.status) {
         setServiceTypes(serviceResponse.data.data);
       }
-      
+
       // Fetch features
-      const featureResponse = await api.get('/admin/service-features');
+      const featureResponse = await api.get("/admin/service-features");
       if (featureResponse.data.status) {
         setFeatureList(featureResponse.data.data);
         setFilteredFeatures(featureResponse.data.data);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -92,21 +93,24 @@ const HandleServiceTypeFeature = () => {
     let filtered = featureList;
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.feature_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.feature_heading.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.desc.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.feature_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.feature_heading
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          item.desc.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (statusFilter !== 'all') {
-      const isActive = statusFilter === 'active';
+    if (statusFilter !== "all") {
+      const isActive = statusFilter === "active";
       filtered = filtered.filter((item) => item.is_active === isActive);
     }
 
-    if (serviceTypeFilter !== 'all') {
-      filtered = filtered.filter((item) => 
-        item.service_type_id === parseInt(serviceTypeFilter)
+    if (serviceTypeFilter !== "all") {
+      filtered = filtered.filter(
+        (item) => item.service_type_id === parseInt(serviceTypeFilter),
       );
     }
 
@@ -115,21 +119,21 @@ const HandleServiceTypeFeature = () => {
 
   // Handle popup open for add
   const handleAddNew = () => {
-    setFormMode('add');
+    setFormMode("add");
     setFormData({
-      service_type_id: serviceTypes[0]?.id || '',
-      feature_name: '',
-      feature_heading: '',
-      highlighted_text: '',
-      heading_meta: '',
-      desc: '',
-      desc_meta: '',
-      long_desc: '',
-      long_desc_meta: '',
+      service_type_id: serviceTypes[0]?.id || "",
+      feature_name: "",
+      feature_heading: "",
+      highlighted_text: "",
+      heading_meta: "",
+      desc: "",
+      desc_meta: "",
+      long_desc: "",
+      long_desc_meta: "",
       image: null,
-      video_link: '',
-      image_alt: '',
-      is_active: true
+      video_link: "",
+      image_alt: "",
+      is_active: true,
     });
     setImageFile(null);
     setImagePreview(null);
@@ -140,22 +144,22 @@ const HandleServiceTypeFeature = () => {
 
   // Handle popup open for edit
   const handleEdit = (item) => {
-    setFormMode('edit');
+    setFormMode("edit");
     setCurrentId(item.id);
     setFormData({
-      service_type_id: item.service_type_id || '',
-      feature_name: item.feature_name || '',
-      feature_heading: item.feature_heading || '',
-      highlighted_text: item.highlighted_text || '',
-      heading_meta: item.heading_meta || '',
-      desc: item.desc || '',
-      desc_meta: item.desc_meta || '',
-      long_desc: item.long_desc || '',
-      long_desc_meta: item.long_desc_meta || '',
+      service_type_id: item.service_type_id || "",
+      feature_name: item.feature_name || "",
+      feature_heading: item.feature_heading || "",
+      highlighted_text: item.highlighted_text || "",
+      heading_meta: item.heading_meta || "",
+      desc: item.desc || "",
+      desc_meta: item.desc_meta || "",
+      long_desc: item.long_desc || "",
+      long_desc_meta: item.long_desc_meta || "",
       image: null,
-      video_link: item.video_link || '',
-      image_alt: item.image_alt || '',
-      is_active: item.is_active
+      video_link: item.video_link || "",
+      image_alt: item.image_alt || "",
+      is_active: item.is_active,
     });
     setImageFile(null);
     setImagePreview(item.image || null);
@@ -166,12 +170,12 @@ const HandleServiceTypeFeature = () => {
 
   // Handle delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this feature?')) {
+    if (window.confirm("Are you sure you want to delete this feature?")) {
       try {
         await api.delete(`/admin/service-features/${id}`);
         fetchData();
       } catch (error) {
-        console.error('Error deleting feature:', error);
+        console.error("Error deleting feature:", error);
       }
     }
   };
@@ -181,11 +185,11 @@ const HandleServiceTypeFeature = () => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -193,11 +197,11 @@ const HandleServiceTypeFeature = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
       if (!validTypes.includes(file.type)) {
         setFormErrors((prev) => ({
           ...prev,
-          image: 'Please upload a valid image (JPG, JPEG, PNG, or WebP)'
+          image: "Please upload a valid image (JPG, JPEG, PNG, or WebP)",
         }));
         return;
       }
@@ -205,7 +209,7 @@ const HandleServiceTypeFeature = () => {
       if (file.size > 5 * 1024 * 1024) {
         setFormErrors((prev) => ({
           ...prev,
-          image: 'Image size should be less than 5MB'
+          image: "Image size should be less than 5MB",
         }));
         return;
       }
@@ -216,14 +220,14 @@ const HandleServiceTypeFeature = () => {
       setExistingImage(null); // Clear existing image when new file is uploaded
 
       if (formErrors.image) {
-        setFormErrors((prev) => ({ ...prev, image: '' }));
+        setFormErrors((prev) => ({ ...prev, image: "" }));
       }
     }
   };
 
   // Remove image
   const handleRemoveImage = () => {
-    if (imagePreview && imagePreview.startsWith('blob:')) {
+    if (imagePreview && imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
     }
     setImagePreview(null);
@@ -236,23 +240,23 @@ const HandleServiceTypeFeature = () => {
     const errors = {};
 
     if (!formData.service_type_id) {
-      errors.service_type_id = 'Please select a service type';
+      errors.service_type_id = "Please select a service type";
     }
 
     if (!formData.feature_name.trim()) {
-      errors.feature_name = 'Feature name is required';
+      errors.feature_name = "Feature name is required";
     }
 
     if (!formData.feature_heading.trim()) {
-      errors.feature_heading = 'Feature heading is required';
+      errors.feature_heading = "Feature heading is required";
     }
 
     if (!formData.desc.trim()) {
-      errors.desc = 'Description is required';
+      errors.desc = "Description is required";
     }
 
     if (!formData.long_desc.trim()) {
-      errors.long_desc = 'Long description is required';
+      errors.long_desc = "Long description is required";
     }
 
     setFormErrors(errors);
@@ -265,9 +269,14 @@ const HandleServiceTypeFeature = () => {
 
     // Add all text fields
     Object.keys(formData).forEach((key) => {
-      if (key !== 'image' && formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-        if (key === 'is_active') {
-          formDataObj.append(key, formData[key] ? '1' : '0');
+      if (
+        key !== "image" &&
+        formData[key] !== null &&
+        formData[key] !== undefined &&
+        formData[key] !== ""
+      ) {
+        if (key === "is_active") {
+          formDataObj.append(key, formData[key] ? "1" : "0");
         } else {
           formDataObj.append(key, formData[key]);
         }
@@ -276,12 +285,12 @@ const HandleServiceTypeFeature = () => {
 
     // Add image file if exists
     if (imageFile) {
-      formDataObj.append('image', imageFile);
+      formDataObj.append("image", imageFile);
     }
 
     // For edit mode: if existing image was removed and no new image uploaded
-    if (formMode === 'edit' && !existingImage && !imageFile) {
-      formDataObj.append('image', ''); // Send empty to delete existing image
+    if (formMode === "edit" && !existingImage && !imageFile) {
+      formDataObj.append("image", ""); // Send empty to delete existing image
     }
 
     // if (formMode === 'edit') {
@@ -301,20 +310,24 @@ const HandleServiceTypeFeature = () => {
 
     try {
       const formDataObj = prepareFormData();
-      
+
       let response;
-      if (formMode === 'add') {
-        response = await api.post('/admin/service-features', formDataObj, {
+      if (formMode === "add") {
+        response = await api.post("/admin/service-features", formDataObj, {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            "Content-Type": "multipart/form-data",
+          },
         });
       } else {
-        response = await api.post(`/admin/service-features/${currentId}`, formDataObj, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+        response = await api.post(
+          `/admin/service-features/${currentId}`,
+          formDataObj,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
       }
 
       if (response.data.status) {
@@ -322,7 +335,7 @@ const HandleServiceTypeFeature = () => {
         fetchData();
       }
     } catch (error) {
-      console.error('Error saving feature:', error);
+      console.error("Error saving feature:", error);
       if (error.response?.data?.errors) {
         const backendErrors = {};
         Object.keys(error.response.data.errors).forEach((key) => {
@@ -343,17 +356,17 @@ const HandleServiceTypeFeature = () => {
   const toggleActiveStatus = async (id, currentStatus) => {
     try {
       await api.patch(`/admin/service-features/${id}/status`, {
-        is_active: !currentStatus
+        is_active: !currentStatus,
       });
       fetchData();
     } catch (error) {
-      console.error('Error toggling status:', error);
+      console.error("Error toggling status:", error);
     }
   };
 
   // Close form popup
   const closeFormPopup = () => {
-    if (imagePreview && imagePreview.startsWith('blob:')) {
+    if (imagePreview && imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
     }
     setShowFormPopup(false);
@@ -363,7 +376,7 @@ const HandleServiceTypeFeature = () => {
   // Clean up object URLs
   useEffect(() => {
     return () => {
-      if (imagePreview && imagePreview.startsWith('blob:')) {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
         URL.revokeObjectURL(imagePreview);
       }
     };
@@ -371,8 +384,8 @@ const HandleServiceTypeFeature = () => {
 
   // Get service type name by id
   const getServiceTypeName = (id) => {
-    const service = serviceTypes.find(s => s.id === id);
-    return service ? service.name : 'Unknown';
+    const service = serviceTypes.find((s) => s.id === id);
+    return service ? service.name : "Unknown";
   };
 
   if (isLoading) {
@@ -507,7 +520,8 @@ const HandleServiceTypeFeature = () => {
                         {feature.feature_name}
                       </h3>
                       <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                        {feature.service_type?.name || getServiceTypeName(feature.service_type_id)}
+                        {feature.service_type?.name ||
+                          getServiceTypeName(feature.service_type_id)}
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -531,20 +545,24 @@ const HandleServiceTypeFeature = () => {
                         )}
                       </span>
                       <span className="text-sm text-[#4B5563]">
-                        Heading: {feature.feature_heading} {feature.highlighted_text}
+                        Heading: {feature.feature_heading}{" "}
+                        {feature.highlighted_text}
                       </span>
                       <span className="text-sm text-[#4B5563]">
-                        Last updated: {new Date(feature.updated_at).toLocaleDateString()}
+                        Last updated:{" "}
+                        {new Date(feature.updated_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleActiveStatus(feature.id, feature.is_active)}
+                      onClick={() =>
+                        toggleActiveStatus(feature.id, feature.is_active)
+                      }
                       className="px-4 py-2 text-sm border border-[#E5E7EB] rounded-lg hover:bg-[#F3F4F6] transition"
                     >
-                      {feature.is_active ? 'Deactivate' : 'Activate'}
+                      {feature.is_active ? "Deactivate" : "Activate"}
                     </button>
                     <button
                       onClick={() => handleEdit(feature)}
@@ -580,7 +598,8 @@ const HandleServiceTypeFeature = () => {
                             className="w-full h-48 object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                              e.target.src =
+                                "https://via.placeholder.com/800x600?text=Image+Not+Found";
                             }}
                           />
                         ) : (
@@ -689,9 +708,11 @@ const HandleServiceTypeFeature = () => {
                 No Features Found
               </h3>
               <p className="text-[#4B5563] mb-6">
-                {searchTerm || statusFilter !== 'all' || serviceTypeFilter !== 'all'
-                  ? 'No features match your search criteria'
-                  : 'Get started by creating your first service feature'}
+                {searchTerm ||
+                statusFilter !== "all" ||
+                serviceTypeFilter !== "all"
+                  ? "No features match your search criteria"
+                  : "Get started by creating your first service feature"}
               </p>
               <button
                 onClick={handleAddNew}
@@ -699,9 +720,9 @@ const HandleServiceTypeFeature = () => {
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#0A0A0A] text-white rounded-xl hover:bg-[#1F2937] transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus size={20} />
-                {serviceTypes.length === 0 
-                  ? 'Create a Service Type First' 
-                  : 'Create Your First Feature'}
+                {serviceTypes.length === 0
+                  ? "Create a Service Type First"
+                  : "Create Your First Feature"}
               </button>
             </div>
           </div>
@@ -716,7 +737,7 @@ const HandleServiceTypeFeature = () => {
             <div className="flex justify-between items-center p-6 border-b border-[#E5E7EB]">
               <div>
                 <h3 className="text-xl font-semibold text-[#0A0A0A]">
-                  {formMode === 'add' ? 'Add New Feature' : 'Edit Feature'}
+                  {formMode === "add" ? "Add New Feature" : "Edit Feature"}
                 </h3>
                 <p className="text-[#4B5563] text-sm mt-1">
                   Create and manage service features
@@ -741,7 +762,7 @@ const HandleServiceTypeFeature = () => {
                   <h4 className="text-lg font-semibold text-[#0A0A0A]">
                     Service Type
                   </h4>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-[#4B5563] mb-2">
                       Select Service Type *
@@ -752,8 +773,8 @@ const HandleServiceTypeFeature = () => {
                       onChange={handleInputChange}
                       className={`w-full p-3 rounded-xl border ${
                         formErrors.service_type_id
-                          ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                          : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                          ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                          : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                       }`}
                     >
                       <option value="">Select a service type</option>
@@ -789,8 +810,8 @@ const HandleServiceTypeFeature = () => {
                         onChange={handleInputChange}
                         className={`w-full p-3 rounded-xl border ${
                           formErrors.feature_name
-                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                            : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                            : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                         }`}
                         placeholder="e.g., Core HR, Payroll, Attendance"
                       />
@@ -829,8 +850,8 @@ const HandleServiceTypeFeature = () => {
                         onChange={handleInputChange}
                         className={`w-full p-3 rounded-xl border ${
                           formErrors.feature_heading
-                            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                            : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                            : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                         }`}
                         placeholder="e.g., Powerful Features for"
                       />
@@ -856,51 +877,70 @@ const HandleServiceTypeFeature = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-[#4B5563] mb-2">
-                      Description *
+                  <div
+                    className={`rounded-xl border ${
+                      formErrors.desc ? "border-red-300" : "border-[#E5E7EB]"
+                    }`}
+                  >
+                     <label className="block text-sm font-medium text-[#4B5563] mb-2">
+                       Description *
                     </label>
-                    <textarea
-                      name="desc"
+                    <CustomTextEditor
                       value={formData.desc}
-                      onChange={handleInputChange}
-                      rows="3"
-                      className={`w-full p-3 rounded-xl border ${
-                        formErrors.desc
-                          ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                          : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
-                      }`}
-                      placeholder="Brief description of the feature"
+                      height={220}
+                      placeholder="Brief description of the feature..."
+                      onChange={(content) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          desc: content,
+                        }));
+
+                        if (formErrors.desc) {
+                          setFormErrors((prev) => ({ ...prev, desc: "" }));
+                        }
+                      }}
                     />
-                    {formErrors.desc && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {formErrors.desc}
-                      </p>
-                    )}
                   </div>
 
-                  <div>
+                  {formErrors.desc && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.desc}
+                    </p>
+                  )}
+
+                  <div
+                    className={`rounded-xl border ${
+                      formErrors.long_desc
+                        ? "border-red-300"
+                        : "border-[#E5E7EB]"
+                    }`}
+                  >
                     <label className="block text-sm font-medium text-[#4B5563] mb-2">
                       Long Description *
                     </label>
-                    <textarea
-                      name="long_desc"
+                    <CustomTextEditor
                       value={formData.long_desc}
-                      onChange={handleInputChange}
-                      rows="5"
-                      className={`w-full p-3 rounded-xl border ${
-                        formErrors.long_desc
-                          ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                          : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
-                      }`}
-                      placeholder="Detailed description of the feature"
+                      height={350}
+                      placeholder="Detailed description of the feature..."
+                      onChange={(content) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          long_desc: content,
+                        }));
+
+                        if (formErrors.long_desc) {
+                          setFormErrors((prev) => ({ ...prev, long_desc: "" }));
+                        }
+                      }}
                     />
-                    {formErrors.long_desc && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {formErrors.long_desc}
-                      </p>
-                    )}
                   </div>
+
+                  {formErrors.long_desc && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.long_desc}
+                    </p>
+                  )}
+
                 </div>
 
                 {/* Image Section */}
@@ -919,9 +959,10 @@ const HandleServiceTypeFeature = () => {
                         <div className="space-y-4">
                           <div className="relative">
                             <img
-                              src={imagePreview.startsWith('blob:') 
-                                ? imagePreview 
-                                : `${STORAGE_URL}${imagePreview}`
+                              src={
+                                imagePreview.startsWith("blob:")
+                                  ? imagePreview
+                                  : `${STORAGE_URL}${imagePreview}`
                               }
                               alt="Preview"
                               className="w-full max-h-64 object-contain mx-auto"
@@ -947,9 +988,14 @@ const HandleServiceTypeFeature = () => {
                       ) : (
                         <div>
                           <div className="w-full h-48 bg-gray-50 rounded-lg flex flex-col items-center justify-center mb-4">
-                            <ImageIcon className="text-gray-400 mb-2" size={32} />
-                            <p className="text-sm text-gray-500">No image selected</p>
-                            {formMode === 'edit' && existingImage && (
+                            <ImageIcon
+                              className="text-gray-400 mb-2"
+                              size={32}
+                            />
+                            <p className="text-sm text-gray-500">
+                              No image selected
+                            </p>
+                            {formMode === "edit" && existingImage && (
                               <p className="text-xs text-gray-400 mt-1">
                                 Existing image will be kept
                               </p>
@@ -1089,7 +1135,9 @@ const HandleServiceTypeFeature = () => {
                     ) : (
                       <>
                         <Save size={18} />
-                        {formMode === 'add' ? 'Create Feature' : 'Update Feature'}
+                        {formMode === "add"
+                          ? "Create Feature"
+                          : "Update Feature"}
                       </>
                     )}
                   </button>

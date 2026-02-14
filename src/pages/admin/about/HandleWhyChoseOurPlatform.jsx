@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Search, 
-  Filter, 
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  Filter,
   Eye,
   EyeOff,
   X,
@@ -19,47 +19,48 @@ import {
   AlertCircle,
   Image as ImageIcon,
   Hash,
-} from 'lucide-react';
-import { api } from '../../../utils/app';
+} from "lucide-react";
+import { api } from "../../../utils/app";
+import CustomTextEditor from "../../../component/form/CustomTextEditor";
 
 const HandleWhyChoseOurPlatform = () => {
   const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
-  
+
   // State for list
   const [itemList, setItemList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // State for search and filter
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   // State for form (add/edit)
   const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState('add');
+  const [formMode, setFormMode] = useState("add");
   const [currentId, setCurrentId] = useState(null);
-  
+
   // State for form data
   const [formData, setFormData] = useState({
-    number: '',
-    heading: '',
-    heading_meta: '',
-    description: '',
-    description_meta: '',
-    button_name: '',
-    button_url: '',
+    number: "",
+    heading: "",
+    heading_meta: "",
+    description: "",
+    description_meta: "",
+    button_name: "",
+    button_url: "",
     image: null,
-    is_active: true
+    is_active: true,
   });
-  
+
   // State for image preview
   const [imagePreview, setImagePreview] = useState(null);
   const [existingImage, setExistingImage] = useState(null);
-  
+
   // State for form errors
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // State for expanded items
   const [expandedItems, setExpandedItems] = useState([]);
 
@@ -67,13 +68,13 @@ const HandleWhyChoseOurPlatform = () => {
   const fetchList = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/admin/why-choose');
+      const response = await api.get("/admin/why-choose");
       if (response.data.status) {
         setItemList(response.data.data);
         setFilteredList(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching list:', error);
+      console.error("Error fetching list:", error);
     } finally {
       setIsLoading(false);
     }
@@ -88,15 +89,16 @@ const HandleWhyChoseOurPlatform = () => {
     let filtered = itemList;
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.heading.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.button_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.heading.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.button_name?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (statusFilter !== 'all') {
-      const isActive = statusFilter === 'active';
+    if (statusFilter !== "all") {
+      const isActive = statusFilter === "active";
       filtered = filtered.filter((item) => item.is_active === isActive);
     }
 
@@ -108,61 +110,61 @@ const HandleWhyChoseOurPlatform = () => {
     setExpandedItems((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 
   // Handle add new
   const handleAddNew = () => {
-    setFormMode('add');
+    setFormMode("add");
     setFormData({
-      number: '',
-      heading: '',
-      heading_meta: '',
-      description: '',
-      description_meta: '',
-      button_name: '',
-      button_url: '',
+      number: "",
+      heading: "",
+      heading_meta: "",
+      description: "",
+      description_meta: "",
+      button_name: "",
+      button_url: "",
       image: null,
-      is_active: true
+      is_active: true,
     });
     setImagePreview(null);
     setExistingImage(null);
     setFormErrors({});
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Handle edit
   const handleEdit = (item) => {
-    setFormMode('edit');
+    setFormMode("edit");
     setCurrentId(item.id);
     setFormData({
-      number: item.number || '',
-      heading: item.heading || '',
-      heading_meta: item.heading_meta || '',
-      description: item.description || '',
-      description_meta: item.description_meta || '',
-      button_name: item.button_name || '',
-      button_url: item.button_url || '',
+      number: item.number || "",
+      heading: item.heading || "",
+      heading_meta: item.heading_meta || "",
+      description: item.description || "",
+      description_meta: item.description_meta || "",
+      button_name: item.button_name || "",
+      button_url: item.button_url || "",
       image: null,
-      is_active: item.is_active
+      is_active: item.is_active,
     });
     setImagePreview(item.image || null);
     setExistingImage(item.image || null);
     setFormErrors({});
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Handle delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
+    if (window.confirm("Are you sure you want to delete this item?")) {
       try {
         await api.delete(`/admin/why-choose/${id}`);
         fetchList();
       } catch (error) {
-        console.error('Error deleting item:', error);
+        console.error("Error deleting item:", error);
       }
     }
   };
@@ -170,14 +172,14 @@ const HandleWhyChoseOurPlatform = () => {
   // Handle form input change
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -186,10 +188,10 @@ const HandleWhyChoseOurPlatform = () => {
     const file = e.target.files[0];
     if (file) {
       // Check file type
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith("image/")) {
         setFormErrors((prev) => ({
           ...prev,
-          image: 'Please upload a valid image file'
+          image: "Please upload a valid image file",
         }));
         return;
       }
@@ -198,7 +200,7 @@ const HandleWhyChoseOurPlatform = () => {
       if (file.size > 2 * 1024 * 1024) {
         setFormErrors((prev) => ({
           ...prev,
-          image: 'Image size should be less than 2MB'
+          image: "Image size should be less than 2MB",
         }));
         return;
       }
@@ -207,25 +209,25 @@ const HandleWhyChoseOurPlatform = () => {
       setImagePreview(previewUrl);
       setFormData((prev) => ({
         ...prev,
-        image: file
+        image: file,
       }));
       setExistingImage(null);
 
       if (formErrors.image) {
-        setFormErrors((prev) => ({ ...prev, image: '' }));
+        setFormErrors((prev) => ({ ...prev, image: "" }));
       }
     }
   };
 
   // Remove image
   const handleRemoveImage = () => {
-    if (imagePreview && imagePreview.startsWith('blob:')) {
+    if (imagePreview && imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
     }
     setImagePreview(null);
     setFormData((prev) => ({
       ...prev,
-      image: null
+      image: null,
     }));
     setExistingImage(null);
   };
@@ -236,9 +238,14 @@ const HandleWhyChoseOurPlatform = () => {
 
     // Add all text fields
     Object.keys(formData).forEach((key) => {
-      if (key !== 'image' && formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-        if (key === 'is_active') {
-          formDataObj.append(key, formData[key] ? '1' : '0');
+      if (
+        key !== "image" &&
+        formData[key] !== null &&
+        formData[key] !== undefined &&
+        formData[key] !== ""
+      ) {
+        if (key === "is_active") {
+          formDataObj.append(key, formData[key] ? "1" : "0");
         } else {
           formDataObj.append(key, formData[key]);
         }
@@ -247,12 +254,12 @@ const HandleWhyChoseOurPlatform = () => {
 
     // Add image file if exists
     if (formData.image) {
-      formDataObj.append('image', formData.image);
+      formDataObj.append("image", formData.image);
     }
 
     // For edit mode: if existing image was removed and no new image uploaded
-    if (formMode === 'edit' && !existingImage && !formData.image) {
-      formDataObj.append('image', ''); // Send empty to delete existing image
+    if (formMode === "edit" && !existingImage && !formData.image) {
+      formDataObj.append("image", ""); // Send empty to delete existing image
     }
 
     return formDataObj;
@@ -263,21 +270,21 @@ const HandleWhyChoseOurPlatform = () => {
     const errors = {};
 
     if (!formData.number) {
-      errors.number = 'Number is required';
+      errors.number = "Number is required";
     } else if (isNaN(formData.number) || parseInt(formData.number) < 0) {
-      errors.number = 'Please enter a valid positive number';
+      errors.number = "Please enter a valid positive number";
     }
 
     if (!formData.heading.trim()) {
-      errors.heading = 'Heading is required';
+      errors.heading = "Heading is required";
     }
 
     if (!formData.description.trim()) {
-      errors.description = 'Description is required';
+      errors.description = "Description is required";
     }
 
     if (formData.button_name && !formData.button_url) {
-      errors.button_url = 'Button URL is required when button name is provided';
+      errors.button_url = "Button URL is required when button name is provided";
     }
 
     setFormErrors(errors);
@@ -296,18 +303,22 @@ const HandleWhyChoseOurPlatform = () => {
       const formDataObj = prepareFormData();
 
       let response;
-      if (formMode === 'add') {
-        response = await api.post('/admin/why-choose', formDataObj, {
+      if (formMode === "add") {
+        response = await api.post("/admin/why-choose", formDataObj, {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            "Content-Type": "multipart/form-data",
+          },
         });
       } else {
-        response = await api.post(`/admin/why-choose/${currentId}`, formDataObj, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+        response = await api.post(
+          `/admin/why-choose/${currentId}`,
+          formDataObj,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
       }
 
       if (response.data.status) {
@@ -315,7 +326,7 @@ const HandleWhyChoseOurPlatform = () => {
         fetchList();
       }
     } catch (error) {
-      console.error('Error saving item:', error);
+      console.error("Error saving item:", error);
       if (error.response?.data?.errors) {
         const backendErrors = {};
         Object.keys(error.response.data.errors).forEach((key) => {
@@ -336,18 +347,18 @@ const HandleWhyChoseOurPlatform = () => {
   const toggleActiveStatus = async (id, currentStatus) => {
     try {
       await api.patch(`/admin/why-choose-us/${id}/status`, {
-        is_active: !currentStatus
+        is_active: !currentStatus,
       });
       fetchList();
     } catch (error) {
-      console.error('Error toggling status:', error);
+      console.error("Error toggling status:", error);
     }
   };
 
   // Clean up object URLs
   useEffect(() => {
     return () => {
-      if (imagePreview && imagePreview.startsWith('blob:')) {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
         URL.revokeObjectURL(imagePreview);
       }
     };
@@ -392,12 +403,12 @@ const HandleWhyChoseOurPlatform = () => {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-xl font-semibold text-[#0A0A0A]">
-                {formMode === 'add' ? 'Add New Item' : 'Edit Item'}
+                {formMode === "add" ? "Add New Item" : "Edit Item"}
               </h3>
               <p className="text-[#4B5563] text-sm mt-1">
-                {formMode === 'add' 
-                  ? 'Create a new reason to choose your platform' 
-                  : 'Update the item details'}
+                {formMode === "add"
+                  ? "Create a new reason to choose your platform"
+                  : "Update the item details"}
               </p>
             </div>
             <button
@@ -430,13 +441,15 @@ const HandleWhyChoseOurPlatform = () => {
                     min="1"
                     className={`w-full p-3 rounded-xl border ${
                       formErrors.number
-                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                        : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                        ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                     }`}
                     placeholder="e.g., 1, 2, 3"
                   />
                   {formErrors.number && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.number}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.number}
+                    </p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
                     Display number/order for this item
@@ -473,13 +486,15 @@ const HandleWhyChoseOurPlatform = () => {
                   onChange={handleInputChange}
                   className={`w-full p-3 rounded-xl border ${
                     formErrors.heading
-                      ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                      : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                      ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                      : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                   }`}
                   placeholder="e.g., UK-compliant, 24/7 Support, Customizable"
                 />
                 {formErrors.heading && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.heading}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {formErrors.heading}
+                  </p>
                 )}
               </div>
 
@@ -499,27 +514,36 @@ const HandleWhyChoseOurPlatform = () => {
               </div>
 
               {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-[#4B5563] mb-2">
-                  <MessageSquare size={16} className="inline mr-2" />
-                  Description *
-                </label>
-                <textarea
-                  name="description"
+              <div
+                className={`rounded-xl border ${
+                  formErrors.description ? "border-red-300" : "border-[#E5E7EB]"
+                }`}
+              >
+                <CustomTextEditor
                   value={formData.description}
-                  onChange={handleInputChange}
-                  rows="4"
-                  className={`w-full p-3 rounded-xl border ${
-                    formErrors.description
-                      ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                      : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
-                  }`}
+                  height={300}
                   placeholder="Detailed description of why customers should choose your platform"
+                  onChange={(content) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: content,
+                    }));
+
+                    if (formErrors.description) {
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        description: "",
+                      }));
+                    }
+                  }}
                 />
-                {formErrors.description && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
-                )}
               </div>
+
+              {formErrors.description && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.description}
+                </p>
+              )}
 
               {/* Description Meta */}
               <div>
@@ -571,13 +595,15 @@ const HandleWhyChoseOurPlatform = () => {
                     onChange={handleInputChange}
                     className={`w-full p-3 rounded-xl border ${
                       formErrors.button_url
-                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                        : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                        ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                     }`}
                     placeholder="https://example.com/page"
                   />
                   {formErrors.button_url && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.button_url}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.button_url}
+                    </p>
                   )}
                 </div>
               </div>
@@ -599,9 +625,10 @@ const HandleWhyChoseOurPlatform = () => {
                     <div className="space-y-4">
                       <div className="relative">
                         <img
-                          src={imagePreview.startsWith('blob:') 
-                            ? imagePreview 
-                            : `${STORAGE_URL}${imagePreview}`
+                          src={
+                            imagePreview.startsWith("blob:")
+                              ? imagePreview
+                              : `${STORAGE_URL}${imagePreview}`
                           }
                           alt="Preview"
                           className="w-full max-h-64 object-contain mx-auto"
@@ -628,8 +655,10 @@ const HandleWhyChoseOurPlatform = () => {
                     <div>
                       <div className="w-full h-48 bg-gray-50 rounded-lg flex flex-col items-center justify-center mb-4">
                         <ImageIcon className="text-gray-400 mb-2" size={32} />
-                        <p className="text-sm text-gray-500">No image selected</p>
-                        {formMode === 'edit' && existingImage && (
+                        <p className="text-sm text-gray-500">
+                          No image selected
+                        </p>
+                        {formMode === "edit" && existingImage && (
                           <p className="text-xs text-gray-400 mt-1">
                             Existing image will be kept
                           </p>
@@ -648,7 +677,9 @@ const HandleWhyChoseOurPlatform = () => {
                   )}
                 </div>
                 {formErrors.image && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.image}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {formErrors.image}
+                  </p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   Recommended size: 800x600px. Max size: 2MB.
@@ -679,7 +710,7 @@ const HandleWhyChoseOurPlatform = () => {
                   ) : (
                     <>
                       <Save size={18} />
-                      {formMode === 'add' ? 'Create Item' : 'Update Item'}
+                      {formMode === "add" ? "Create Item" : "Update Item"}
                     </>
                   )}
                 </button>
@@ -729,7 +760,9 @@ const HandleWhyChoseOurPlatform = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl shadow border border-[#E5E7EB] p-4">
           <p className="text-[#4B5563] text-sm">Total Items</p>
-          <p className="text-2xl font-semibold text-[#0A0A0A]">{itemList.length}</p>
+          <p className="text-2xl font-semibold text-[#0A0A0A]">
+            {itemList.length}
+          </p>
         </div>
         <div className="bg-white rounded-xl shadow border border-[#E5E7EB] p-4">
           <p className="text-[#4B5563] text-sm">Active Items</p>
@@ -764,8 +797,8 @@ const HandleWhyChoseOurPlatform = () => {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${
                           item.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                         }`}
                       >
                         {item.is_active ? (
@@ -791,10 +824,12 @@ const HandleWhyChoseOurPlatform = () => {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleActiveStatus(item.id, item.is_active)}
+                      onClick={() =>
+                        toggleActiveStatus(item.id, item.is_active)
+                      }
                       className="px-4 py-2 text-sm border border-[#E5E7EB] rounded-lg hover:bg-[#F3F4F6] transition whitespace-nowrap"
                     >
-                      {item.is_active ? 'Deactivate' : 'Activate'}
+                      {item.is_active ? "Deactivate" : "Activate"}
                     </button>
                     <button
                       onClick={() => handleEdit(item)}
@@ -813,7 +848,9 @@ const HandleWhyChoseOurPlatform = () => {
                     <button
                       onClick={() => toggleExpand(item.id)}
                       className="p-2 text-[#4B5563] hover:text-[#0A0A0A] hover:bg-[#F3F4F6] rounded-lg transition"
-                      title={expandedItems.includes(item.id) ? 'Collapse' : 'Expand'}
+                      title={
+                        expandedItems.includes(item.id) ? "Collapse" : "Expand"
+                      }
                     >
                       {expandedItems.includes(item.id) ? (
                         <ChevronUp size={18} />
@@ -829,7 +866,7 @@ const HandleWhyChoseOurPlatform = () => {
                   <span className="flex items-center gap-1">
                     <MessageSquare size={14} />
                     {item.description.substring(0, 100)}
-                    {item.description.length > 100 && '...'}
+                    {item.description.length > 100 && "..."}
                   </span>
                 </div>
 
@@ -851,13 +888,16 @@ const HandleWhyChoseOurPlatform = () => {
                               className="w-full h-48 object-cover"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                                e.target.src =
+                                  "https://via.placeholder.com/800x600?text=Image+Not+Found";
                               }}
                             />
                           ) : (
                             <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
                               <ImageIcon className="text-gray-400" size={32} />
-                              <span className="text-gray-400 ml-2">No image</span>
+                              <span className="text-gray-400 ml-2">
+                                No image
+                              </span>
                             </div>
                           )}
                         </div>
@@ -885,7 +925,9 @@ const HandleWhyChoseOurPlatform = () => {
                               </a>
                             </>
                           ) : (
-                            <span className="text-gray-400 italic">No button configured</span>
+                            <span className="text-gray-400 italic">
+                              No button configured
+                            </span>
                           )}
                         </div>
                       </div>
@@ -909,7 +951,11 @@ const HandleWhyChoseOurPlatform = () => {
                           Heading Meta
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4">
-                          {item.heading_meta || <span className="text-gray-400 italic">Not set</span>}
+                          {item.heading_meta || (
+                            <span className="text-gray-400 italic">
+                              Not set
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div>
@@ -917,7 +963,11 @@ const HandleWhyChoseOurPlatform = () => {
                           Description Meta
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4">
-                          {item.description_meta || <span className="text-gray-400 italic">Not set</span>}
+                          {item.description_meta || (
+                            <span className="text-gray-400 italic">
+                              Not set
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -930,7 +980,7 @@ const HandleWhyChoseOurPlatform = () => {
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4">
                           <p className="text-sm text-gray-600">
-                            {new Date(item.created_at).toLocaleDateString()}{' '}
+                            {new Date(item.created_at).toLocaleDateString()}{" "}
                             {new Date(item.created_at).toLocaleTimeString()}
                           </p>
                         </div>
@@ -941,7 +991,7 @@ const HandleWhyChoseOurPlatform = () => {
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4">
                           <p className="text-sm text-gray-600">
-                            {new Date(item.updated_at).toLocaleDateString()}{' '}
+                            {new Date(item.updated_at).toLocaleDateString()}{" "}
                             {new Date(item.updated_at).toLocaleTimeString()}
                           </p>
                         </div>
@@ -962,8 +1012,8 @@ const HandleWhyChoseOurPlatform = () => {
                 No Items Found
               </h3>
               <p className="text-[#4B5563] mb-6">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'No items match your search criteria'
+                {searchTerm || statusFilter !== "all"
+                  ? "No items match your search criteria"
                   : 'Get started by adding your first "Why Choose Us" item'}
               </p>
               <button
@@ -991,11 +1041,16 @@ const HandleWhyChoseOurPlatform = () => {
             <ul className="text-blue-700 text-sm space-y-1">
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Display key reasons why customers should choose your platform</span>
+                <span>
+                  Display key reasons why customers should choose your platform
+                </span>
               </li>
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Each item includes a number, heading, description, and optional button</span>
+                <span>
+                  Each item includes a number, heading, description, and
+                  optional button
+                </span>
               </li>
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />

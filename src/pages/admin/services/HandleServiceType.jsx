@@ -22,10 +22,11 @@ import {
   Star,
 } from "lucide-react";
 import { api } from "../../../utils/app";
+import CustomTextEditor from "../../../component/form/CustomTextEditor";
 
 const HandleServiceType = () => {
   const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
-  
+
   // State for service list
   const [serviceList, setServiceList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
@@ -159,7 +160,7 @@ const HandleServiceType = () => {
       image_alt: service.image_alt || "",
       is_active: service.is_active,
     });
-    
+
     // Set image preview using the image path with storage URL
     setImagePreview(service.image || null);
     setExistingImage(service.image || null);
@@ -524,32 +525,36 @@ const HandleServiceType = () => {
               </div>
 
               {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-[#4B5563] mb-2">
-                  <MessageSquare size={16} className="inline mr-2" />
-                  Description *
-                </label>
-                <textarea
-                  name="description"
+              <div
+                className={`rounded-xl border ${
+                  formErrors.description ? "border-red-300" : "border-[#E5E7EB]"
+                }`}
+              >
+                <CustomTextEditor
                   value={formData.description}
-                  onChange={handleInputChange}
-                  rows="6"
-                  className={`w-full p-3 rounded-xl border ${
-                    formErrors.description
-                      ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                      : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
-                  }`}
-                  placeholder="Provide a detailed description of the service. Use \n\n for paragraph breaks."
+                  height={320}
+                  placeholder="Provide a detailed description of the service..."
+                  onChange={(content) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: content,
+                    }));
+
+                    if (formErrors.description) {
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        description: "",
+                      }));
+                    }
+                  }}
                 />
-                {formErrors.description && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {formErrors.description}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  Use double line breaks (\n\n) to separate paragraphs
-                </p>
               </div>
+
+              {formErrors.description && (
+                <p className="mt-1 text-sm text-red-600">
+                  {formErrors.description}
+                </p>
+              )}
             </div>
 
             {/* Button Section */}
@@ -619,9 +624,10 @@ const HandleServiceType = () => {
                         <div className="relative">
                           {/* Check if it's a new upload (blob URL) or existing image (storage path) */}
                           <img
-                            src={imagePreview.startsWith('blob:') 
-                              ? imagePreview 
-                              : `${STORAGE_URL}${imagePreview}`
+                            src={
+                              imagePreview.startsWith("blob:")
+                                ? imagePreview
+                                : `${STORAGE_URL}${imagePreview}`
                             }
                             alt="Service preview"
                             className="w-full h-48 object-contain mx-auto"
@@ -927,7 +933,8 @@ const HandleServiceType = () => {
                               className="w-full h-48 object-cover"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                                e.target.src =
+                                  "https://via.placeholder.com/800x600?text=Image+Not+Found";
                               }}
                             />
                           ) : (

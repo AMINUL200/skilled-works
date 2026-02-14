@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Search, 
-  Filter, 
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  Filter,
   Eye,
   EyeOff,
   X,
@@ -17,39 +17,40 @@ import {
   Link,
   Check,
   AlertCircle,
-} from 'lucide-react';
-import { api } from '../../../utils/app';
+} from "lucide-react";
+import { api } from "../../../utils/app";
+import CustomTextEditor from "../../../component/form/CustomTextEditor";
 
 const HandleWhatWeOffer = () => {
   // State for list
   const [itemList, setItemList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // State for search and filter
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   // State for form (add/edit)
   const [showForm, setShowForm] = useState(false);
-  const [formMode, setFormMode] = useState('add');
+  const [formMode, setFormMode] = useState("add");
   const [currentId, setCurrentId] = useState(null);
-  
+
   // State for form data
   const [formData, setFormData] = useState({
-    heading: '',
-    heading_meta: '',
-    description: '',
-    description_meta: '',
-    button_name: '',
-    button_url: '',
-    is_active: true
+    heading: "",
+    heading_meta: "",
+    description: "",
+    description_meta: "",
+    button_name: "",
+    button_url: "",
+    is_active: true,
   });
-  
+
   // State for form errors
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // State for expanded items
   const [expandedItems, setExpandedItems] = useState([]);
 
@@ -57,13 +58,13 @@ const HandleWhatWeOffer = () => {
   const fetchList = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/admin/what-we-offer');
+      const response = await api.get("/admin/what-we-offer");
       if (response.data.status) {
         setItemList(response.data.data);
         setFilteredList(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching list:', error);
+      console.error("Error fetching list:", error);
     } finally {
       setIsLoading(false);
     }
@@ -78,15 +79,16 @@ const HandleWhatWeOffer = () => {
     let filtered = itemList;
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.heading.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.button_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.heading.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.button_name?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (statusFilter !== 'all') {
-      const isActive = statusFilter === 'active';
+    if (statusFilter !== "all") {
+      const isActive = statusFilter === "active";
       filtered = filtered.filter((item) => item.is_active === isActive);
     }
 
@@ -98,53 +100,53 @@ const HandleWhatWeOffer = () => {
     setExpandedItems((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 
   // Handle add new
   const handleAddNew = () => {
-    setFormMode('add');
+    setFormMode("add");
     setFormData({
-      heading: '',
-      heading_meta: '',
-      description: '',
-      description_meta: '',
-      button_name: '',
-      button_url: '',
-      is_active: true
+      heading: "",
+      heading_meta: "",
+      description: "",
+      description_meta: "",
+      button_name: "",
+      button_url: "",
+      is_active: true,
     });
     setFormErrors({});
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Handle edit
   const handleEdit = (item) => {
-    setFormMode('edit');
+    setFormMode("edit");
     setCurrentId(item.id);
     setFormData({
-      heading: item.heading || '',
-      heading_meta: item.heading_meta || '',
-      description: item.description || '',
-      description_meta: item.description_meta || '',
-      button_name: item.button_name || '',
-      button_url: item.button_url || '',
-      is_active: item.is_active
+      heading: item.heading || "",
+      heading_meta: item.heading_meta || "",
+      description: item.description || "",
+      description_meta: item.description_meta || "",
+      button_name: item.button_name || "",
+      button_url: item.button_url || "",
+      is_active: item.is_active,
     });
     setFormErrors({});
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Handle delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
+    if (window.confirm("Are you sure you want to delete this item?")) {
       try {
         await api.delete(`/admin/what-we-offer/${id}`);
         fetchList();
       } catch (error) {
-        console.error('Error deleting item:', error);
+        console.error("Error deleting item:", error);
       }
     }
   };
@@ -152,14 +154,14 @@ const HandleWhatWeOffer = () => {
   // Handle form input change
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
 
     if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -168,15 +170,15 @@ const HandleWhatWeOffer = () => {
     const errors = {};
 
     if (!formData.heading.trim()) {
-      errors.heading = 'Heading is required';
+      errors.heading = "Heading is required";
     }
 
     if (!formData.description.trim()) {
-      errors.description = 'Description is required';
+      errors.description = "Description is required";
     }
 
     if (formData.button_name && !formData.button_url) {
-      errors.button_url = 'Button URL is required when button name is provided';
+      errors.button_url = "Button URL is required when button name is provided";
     }
 
     setFormErrors(errors);
@@ -193,10 +195,13 @@ const HandleWhatWeOffer = () => {
 
     try {
       let response;
-      if (formMode === 'add') {
-        response = await api.post('/admin/what-we-offer', formData);
+      if (formMode === "add") {
+        response = await api.post("/admin/what-we-offer", formData);
       } else {
-        response = await api.post(`/admin/what-we-offer/${currentId}`, formData);
+        response = await api.post(
+          `/admin/what-we-offer/${currentId}`,
+          formData,
+        );
       }
 
       if (response.data.status) {
@@ -204,7 +209,7 @@ const HandleWhatWeOffer = () => {
         fetchList();
       }
     } catch (error) {
-      console.error('Error saving item:', error);
+      console.error("Error saving item:", error);
       if (error.response?.data?.errors) {
         const backendErrors = {};
         Object.keys(error.response.data.errors).forEach((key) => {
@@ -225,11 +230,11 @@ const HandleWhatWeOffer = () => {
   const toggleActiveStatus = async (id, currentStatus) => {
     try {
       await api.patch(`/admin/what-we-offer/${id}/status`, {
-        is_active: !currentStatus
+        is_active: !currentStatus,
       });
       fetchList();
     } catch (error) {
-      console.error('Error toggling status:', error);
+      console.error("Error toggling status:", error);
     }
   };
 
@@ -272,12 +277,12 @@ const HandleWhatWeOffer = () => {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-xl font-semibold text-[#0A0A0A]">
-                {formMode === 'add' ? 'Add New Item' : 'Edit Item'}
+                {formMode === "add" ? "Add New Item" : "Edit Item"}
               </h3>
               <p className="text-[#4B5563] text-sm mt-1">
-                {formMode === 'add' 
-                  ? 'Create a new service or solution you offer' 
-                  : 'Update the item details'}
+                {formMode === "add"
+                  ? "Create a new service or solution you offer"
+                  : "Update the item details"}
               </p>
             </div>
             <button
@@ -309,13 +314,15 @@ const HandleWhatWeOffer = () => {
                     onChange={handleInputChange}
                     className={`w-full p-3 rounded-xl border ${
                       formErrors.heading
-                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                        : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                        ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                     }`}
                     placeholder="e.g., Custom Business Software, Cloud Solutions"
                   />
                   {formErrors.heading && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.heading}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.heading}
+                    </p>
                   )}
                 </div>
 
@@ -352,29 +359,45 @@ const HandleWhatWeOffer = () => {
               </div>
 
               {/* Description */}
+              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-[#4B5563] mb-2">
                   <MessageSquare size={16} className="inline mr-2" />
                   Description *
                 </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows="6"
-                  className={`w-full p-3 rounded-xl border ${
+
+                <div
+                  className={`rounded-xl border ${
                     formErrors.description
-                      ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                      : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                      ? "border-red-300"
+                      : "border-[#E5E7EB]"
                   }`}
-                  placeholder="Describe the service or solution you offer. Use bullet points with • for lists."
-                />
+                >
+                  <CustomTextEditor
+                    value={formData.description}
+                    height={300}
+                    placeholder="Describe the service or solution you offer..."
+                    onChange={(content) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: content,
+                      }));
+
+                      if (formErrors.description) {
+                        setFormErrors((prev) => ({
+                          ...prev,
+                          description: "",
+                        }));
+                      }
+                    }}
+                  />
+                </div>
+
                 {formErrors.description && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {formErrors.description}
+                  </p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
-                  Use • for bullet points and \n for line breaks
-                </p>
               </div>
 
               {/* Description Meta */}
@@ -426,13 +449,15 @@ const HandleWhatWeOffer = () => {
                     onChange={handleInputChange}
                     className={`w-full p-3 rounded-xl border ${
                       formErrors.button_url
-                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                        : 'border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20'
+                        ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                        : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
                     }`}
                     placeholder="https://example.com/service"
                   />
                   {formErrors.button_url && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.button_url}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.button_url}
+                    </p>
                   )}
                 </div>
               </div>
@@ -464,7 +489,7 @@ const HandleWhatWeOffer = () => {
                   ) : (
                     <>
                       <Save size={18} />
-                      {formMode === 'add' ? 'Create Item' : 'Update Item'}
+                      {formMode === "add" ? "Create Item" : "Update Item"}
                     </>
                   )}
                 </button>
@@ -514,7 +539,9 @@ const HandleWhatWeOffer = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl shadow border border-[#E5E7EB] p-4">
           <p className="text-[#4B5563] text-sm">Total Items</p>
-          <p className="text-2xl font-semibold text-[#0A0A0A]">{itemList.length}</p>
+          <p className="text-2xl font-semibold text-[#0A0A0A]">
+            {itemList.length}
+          </p>
         </div>
         <div className="bg-white rounded-xl shadow border border-[#E5E7EB] p-4">
           <p className="text-[#4B5563] text-sm">Active Items</p>
@@ -546,8 +573,8 @@ const HandleWhatWeOffer = () => {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${
                           item.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                         }`}
                       >
                         {item.is_active ? (
@@ -573,10 +600,12 @@ const HandleWhatWeOffer = () => {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleActiveStatus(item.id, item.is_active)}
+                      onClick={() =>
+                        toggleActiveStatus(item.id, item.is_active)
+                      }
                       className="px-4 py-2 text-sm border border-[#E5E7EB] rounded-lg hover:bg-[#F3F4F6] transition whitespace-nowrap"
                     >
-                      {item.is_active ? 'Deactivate' : 'Activate'}
+                      {item.is_active ? "Deactivate" : "Activate"}
                     </button>
                     <button
                       onClick={() => handleEdit(item)}
@@ -595,7 +624,9 @@ const HandleWhatWeOffer = () => {
                     <button
                       onClick={() => toggleExpand(item.id)}
                       className="p-2 text-[#4B5563] hover:text-[#0A0A0A] hover:bg-[#F3F4F6] rounded-lg transition"
-                      title={expandedItems.includes(item.id) ? 'Collapse' : 'Expand'}
+                      title={
+                        expandedItems.includes(item.id) ? "Collapse" : "Expand"
+                      }
                     >
                       {expandedItems.includes(item.id) ? (
                         <ChevronUp size={18} />
@@ -610,8 +641,8 @@ const HandleWhatWeOffer = () => {
                 <div className="flex flex-wrap gap-4 text-sm text-[#4B5563] mb-2">
                   <span className="flex items-center gap-1">
                     <MessageSquare size={14} />
-                    {item.description.split('\n')[0].substring(0, 80)}
-                    {item.description.length > 80 && '...'}
+                    {item.description.split("\n")[0].substring(0, 80)}
+                    {item.description.length > 80 && "..."}
                   </span>
                 </div>
 
@@ -653,7 +684,9 @@ const HandleWhatWeOffer = () => {
                               </a>
                             </>
                           ) : (
-                            <span className="text-gray-400 italic">No button configured</span>
+                            <span className="text-gray-400 italic">
+                              No button configured
+                            </span>
                           )}
                         </div>
                       </div>
@@ -665,15 +698,27 @@ const HandleWhatWeOffer = () => {
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4 space-y-3">
                           <div>
-                            <p className="text-xs text-[#4B5563] mb-1">Heading Meta:</p>
+                            <p className="text-xs text-[#4B5563] mb-1">
+                              Heading Meta:
+                            </p>
                             <p className="text-sm text-[#0A0A0A]">
-                              {item.heading_meta || <span className="text-gray-400 italic">Not set</span>}
+                              {item.heading_meta || (
+                                <span className="text-gray-400 italic">
+                                  Not set
+                                </span>
+                              )}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-[#4B5563] mb-1">Description Meta:</p>
+                            <p className="text-xs text-[#4B5563] mb-1">
+                              Description Meta:
+                            </p>
                             <p className="text-sm text-[#0A0A0A]">
-                              {item.description_meta || <span className="text-gray-400 italic">Not set</span>}
+                              {item.description_meta || (
+                                <span className="text-gray-400 italic">
+                                  Not set
+                                </span>
+                              )}
                             </p>
                           </div>
                         </div>
@@ -688,7 +733,7 @@ const HandleWhatWeOffer = () => {
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4">
                           <p className="text-sm text-gray-600">
-                            {new Date(item.created_at).toLocaleDateString()}{' '}
+                            {new Date(item.created_at).toLocaleDateString()}{" "}
                             {new Date(item.created_at).toLocaleTimeString()}
                           </p>
                         </div>
@@ -699,7 +744,7 @@ const HandleWhatWeOffer = () => {
                         </label>
                         <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-4">
                           <p className="text-sm text-gray-600">
-                            {new Date(item.updated_at).toLocaleDateString()}{' '}
+                            {new Date(item.updated_at).toLocaleDateString()}{" "}
                             {new Date(item.updated_at).toLocaleTimeString()}
                           </p>
                         </div>
@@ -720,8 +765,8 @@ const HandleWhatWeOffer = () => {
                 No Items Found
               </h3>
               <p className="text-[#4B5563] mb-6">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'No items match your search criteria'
+                {searchTerm || statusFilter !== "all"
+                  ? "No items match your search criteria"
                   : 'Get started by adding your first "What We Offer" item'}
               </p>
               <button
@@ -749,15 +794,22 @@ const HandleWhatWeOffer = () => {
             <ul className="text-blue-700 text-sm space-y-1">
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Display the services and solutions your company provides</span>
+                <span>
+                  Display the services and solutions your company provides
+                </span>
               </li>
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Each item includes a heading, detailed description, and optional button</span>
+                <span>
+                  Each item includes a heading, detailed description, and
+                  optional button
+                </span>
               </li>
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                <span>Use bullet points (•) in the description for feature lists</span>
+                <span>
+                  Use bullet points (•) in the description for feature lists
+                </span>
               </li>
               <li className="flex items-start">
                 <Check className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />

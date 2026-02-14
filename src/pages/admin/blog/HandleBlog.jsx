@@ -15,10 +15,13 @@ import {
   Link,
   Type,
   Youtube,
+  Hash,
 } from "lucide-react";
 import { api } from "../../../utils/app";
 
 const HandleBlog = () => {
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+  
   // State for blog list
   const [blogList, setBlogList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
@@ -49,11 +52,17 @@ const HandleBlog = () => {
 
   // State for image files and previews
   const [imageFiles, setImageFiles] = useState({
+    web_image: null,
+    mobile_image: null,
+  });
+
+  const [imagePreviews, setImagePreviews] = useState({
     web: null,
     mobile: null,
   });
 
-  const [imagePreviews, setImagePreviews] = useState({
+  // State for existing images (when editing)
+  const [existingImages, setExistingImages] = useState({
     web: null,
     mobile: null,
   });
@@ -125,8 +134,9 @@ const HandleBlog = () => {
       youtube_link: "",
       is_active: true,
     });
-    setImageFiles({ web: null, mobile: null });
+    setImageFiles({ web_image: null, mobile_image: null });
     setImagePreviews({ web: null, mobile: null });
+    setExistingImages({ web: null, mobile: null });
     setFormErrors({});
     setShowFormPopup(true);
   };
@@ -147,10 +157,14 @@ const HandleBlog = () => {
       youtube_link: item.youtube_link || "",
       is_active: item.is_active,
     });
-    setImageFiles({ web: null, mobile: null });
+    setImageFiles({ web_image: null, mobile_image: null });
     setImagePreviews({
-      web: item.web_image_url || null,
-      mobile: item.mobile_image_url || null,
+      web: item.web_image || null,
+      mobile: item.mobile_image || null,
+    });
+    setExistingImages({
+      web: item.web_image || null,
+      mobile: item.mobile_image || null,
     });
     setFormErrors({});
     setShowFormPopup(true);
@@ -200,7 +214,7 @@ const HandleBlog = () => {
       if (!validTypes.includes(file.type)) {
         setFormErrors((prev) => ({
           ...prev,
-          [type]: "Please upload a valid image (JPG, JPEG, PNG, or WebP)",
+          [`${type}_image`]: "Please upload a valid image (JPG, JPEG, PNG, or WebP)",
         }));
         return;
       }
@@ -209,7 +223,7 @@ const HandleBlog = () => {
       if (file.size > 5 * 1024 * 1024) {
         setFormErrors((prev) => ({
           ...prev,
-          [type]: "Image size should be less than 5MB",
+          [`${type}_image`]: "Image size should be less than 5MB",
         }));
         return;
       }
@@ -222,13 +236,38 @@ const HandleBlog = () => {
 
       setImageFiles((prev) => ({
         ...prev,
-        [type]: file,
+        [`${type}_image`]: file,
       }));
 
-      if (formErrors[type]) {
-        setFormErrors((prev) => ({ ...prev, [type]: "" }));
+      // Clear existing image
+      setExistingImages((prev) => ({
+        ...prev,
+        [type]: null,
+      }));
+
+      if (formErrors[`${type}_image`]) {
+        setFormErrors((prev) => ({ ...prev, [`${type}_image`]: "" }));
       }
     }
+  };
+
+  // Remove image
+  const handleRemoveImage = (type) => {
+    if (imagePreviews[type] && imagePreviews[type].startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreviews[type]);
+    }
+    setImagePreviews((prev) => ({
+      ...prev,
+      [type]: null,
+    }));
+    setImageFiles((prev) => ({
+      ...prev,
+      [`${type}_image`]: null,
+    }));
+    setExistingImages((prev) => ({
+      ...prev,
+      [type]: null,
+    }));
   };
 
   // Validate form
@@ -251,10 +290,6 @@ const HandleBlog = () => {
       errors.long_desc = "Long description is required";
     }
 
-    if (formMode === "add" && !imageFiles.web && !imageFiles.mobile) {
-      errors.web_image = "At least one image (web or mobile) is required";
-    }
-
     // Validate YouTube URL if provided
     if (formData.youtube_link) {
       const youtubeRegex =
@@ -268,6 +303,46 @@ const HandleBlog = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // Prepare FormData for submission
+  const prepareFormData = () => {
+    const formDataObj = new FormData();
+
+    // Add all text fields
+    Object.keys(formData).forEach((key) => {
+      if (
+        formData[key] !== null &&
+        formData[key] !== undefined &&
+        formData[key] !== ""
+      ) {
+        if (key === "is_active") {
+          formDataObj.append(key, formData[key] ? "1" : "0");
+        } else {
+          formDataObj.append(key, formData[key]);
+        }
+      }
+    });
+
+    // Add image files if they exist
+    if (imageFiles.web_image) {
+      formDataObj.append("web_image", imageFiles.web_image);
+    }
+    if (imageFiles.mobile_image) {
+      formDataObj.append("mobile_image", imageFiles.mobile_image);
+    }
+
+    // For edit mode: if existing images were removed, send empty to delete
+    if (formMode === "edit") {
+      if (!existingImages.web && !imageFiles.web_image) {
+        formDataObj.append("web_image", "");
+      }
+      if (!existingImages.mobile && !imageFiles.mobile_image) {
+        formDataObj.append("mobile_image", "");
+      }
+    }
+
+    return formDataObj;
+  };
+
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -277,33 +352,7 @@ const HandleBlog = () => {
     setIsSubmitting(true);
 
     try {
-      const formDataObj = new FormData();
-
-      Object.keys(formData).forEach((key) => {
-        if (
-          formData[key] !== null &&
-          formData[key] !== undefined &&
-          formData[key] !== ""
-        ) {
-          // Convert is_active to boolean string format expected by Laravel
-          if (key === "is_active") {
-            formDataObj.append(key, formData[key] ? "1" : "0");
-          } else {
-            formDataObj.append(key, formData[key]);
-          }
-        }
-      });
-
-      if (imageFiles.web) {
-        formDataObj.append("web_image", imageFiles.web);
-      }
-      if (imageFiles.mobile) {
-        formDataObj.append("mobile_image", imageFiles.mobile);
-      }
-
-    //   if (formMode === "edit") {
-    //     formDataObj.append("_method", "PUT");
-    //   }
+      const formDataObj = prepareFormData();
 
       let response;
       if (formMode === "add") {
@@ -508,6 +557,7 @@ const HandleBlog = () => {
                         )}
                       </span>
                       <span className="text-sm text-[#4B5563]">
+                        <Hash size={14} className="inline mr-1" />
                         Slug: {blog.title_slug}
                       </span>
                       <span className="text-sm text-[#4B5563]">
@@ -553,11 +603,15 @@ const HandleBlog = () => {
                         Web Image
                       </div>
                       <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
-                        {blog.web_image_url ? (
+                        {blog.web_image ? (
                           <img
-                            src={blog.web_image_url}
+                            src={`${STORAGE_URL}${blog.web_image}`}
                             alt={blog.image_alt || blog.title}
                             className="w-full h-48 object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
@@ -573,11 +627,15 @@ const HandleBlog = () => {
                         Mobile Image
                       </div>
                       <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
-                        {blog.mobile_image_url ? (
+                        {blog.mobile_image ? (
                           <img
-                            src={blog.mobile_image_url}
+                            src={`${STORAGE_URL}${blog.mobile_image}`}
                             alt={blog.image_alt || blog.title}
                             className="w-full h-48 object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
@@ -767,6 +825,7 @@ const HandleBlog = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-[#4B5563] mb-2">
+                        <Hash size={16} className="inline mr-2" />
                         Slug *
                       </label>
                       <input
@@ -857,6 +916,9 @@ const HandleBlog = () => {
                 <div className="space-y-6">
                   <h4 className="text-lg font-semibold text-[#0A0A0A]">
                     Images
+                    <span className="text-sm text-gray-500 font-normal ml-2">
+                      (Accepted: JPG, JPEG, PNG, WebP - Max: 5MB)
+                    </span>
                   </h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -869,38 +931,32 @@ const HandleBlog = () => {
                       <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-4 text-center">
                         {imagePreviews.web ? (
                           <div className="space-y-4">
-                            <img
-                              src={imagePreviews.web}
-                              alt="Web preview"
-                              className="w-full h-48 object-contain mx-auto"
-                            />
-                            <div className="space-y-2">
-                              <label className="block px-4 py-2 bg-[#0A0A0A] text-white rounded-xl cursor-pointer hover:bg-[#1F2937] transition">
-                                Change Image
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  onChange={(e) => handleImageUpload(e, "web")}
-                                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                                />
-                              </label>
+                            <div className="relative">
+                              <img
+                                src={imagePreviews.web.startsWith('blob:') 
+                                  ? imagePreviews.web 
+                                  : `${STORAGE_URL}${imagePreviews.web}`
+                                }
+                                alt="Web preview"
+                                className="w-full h-48 object-contain mx-auto"
+                              />
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setImagePreviews((prev) => ({
-                                    ...prev,
-                                    web: null,
-                                  }));
-                                  setImageFiles((prev) => ({
-                                    ...prev,
-                                    web: null,
-                                  }));
-                                }}
-                                className="block w-full px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition"
+                                onClick={() => handleRemoveImage('web')}
+                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                               >
-                                Remove Image
+                                <X size={16} />
                               </button>
                             </div>
+                            <label className="block px-4 py-2 bg-[#0A0A0A] text-white rounded-xl cursor-pointer hover:bg-[#1F2937] transition">
+                              Change Image
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => handleImageUpload(e, "web")}
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                              />
+                            </label>
                           </div>
                         ) : (
                           <div>
@@ -912,6 +968,11 @@ const HandleBlog = () => {
                               <p className="text-sm text-gray-500">
                                 No image selected
                               </p>
+                              {formMode === "edit" && existingImages.web && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Existing image will be kept
+                                </p>
+                              )}
                             </div>
                             <label className="block px-4 py-2 bg-[#0A0A0A] text-white rounded-xl cursor-pointer hover:bg-[#1F2937] transition">
                               Upload Web Image
@@ -941,40 +1002,32 @@ const HandleBlog = () => {
                       <div className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-4 text-center">
                         {imagePreviews.mobile ? (
                           <div className="space-y-4">
-                            <img
-                              src={imagePreviews.mobile}
-                              alt="Mobile preview"
-                              className="w-full h-48 object-contain mx-auto"
-                            />
-                            <div className="space-y-2">
-                              <label className="block px-4 py-2 bg-[#0A0A0A] text-white rounded-xl cursor-pointer hover:bg-[#1F2937] transition">
-                                Change Image
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  onChange={(e) =>
-                                    handleImageUpload(e, "mobile")
-                                  }
-                                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                                />
-                              </label>
+                            <div className="relative">
+                              <img
+                                src={imagePreviews.mobile.startsWith('blob:') 
+                                  ? imagePreviews.mobile 
+                                  : `${STORAGE_URL}${imagePreviews.mobile}`
+                                }
+                                alt="Mobile preview"
+                                className="w-full h-48 object-contain mx-auto"
+                              />
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setImagePreviews((prev) => ({
-                                    ...prev,
-                                    mobile: null,
-                                  }));
-                                  setImageFiles((prev) => ({
-                                    ...prev,
-                                    mobile: null,
-                                  }));
-                                }}
-                                className="block w-full px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition"
+                                onClick={() => handleRemoveImage('mobile')}
+                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                               >
-                                Remove Image
+                                <X size={16} />
                               </button>
                             </div>
+                            <label className="block px-4 py-2 bg-[#0A0A0A] text-white rounded-xl cursor-pointer hover:bg-[#1F2937] transition">
+                              Change Image
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => handleImageUpload(e, "mobile")}
+                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                              />
+                            </label>
                           </div>
                         ) : (
                           <div>
@@ -986,6 +1039,11 @@ const HandleBlog = () => {
                               <p className="text-sm text-gray-500">
                                 No image selected
                               </p>
+                              {formMode === "edit" && existingImages.mobile && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Existing image will be kept
+                                </p>
+                              )}
                             </div>
                             <label className="block px-4 py-2 bg-[#0A0A0A] text-white rounded-xl cursor-pointer hover:bg-[#1F2937] transition">
                               Upload Mobile Image
