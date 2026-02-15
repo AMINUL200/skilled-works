@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const PopupSection = () => {
+const PopupSection = ({ popupData }) => {
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
@@ -16,23 +18,45 @@ const PopupSection = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const handleClose = () => {
     setIsOpen(false);
   };
 
-  const handleTryNow = () => {
-    navigate("/signup");
+  const handleButton1Click = () => {
+    if (popupData?.button1_url) {
+      window.open(popupData.button1_url, "_blank", "noopener,noreferrer");
+    }
     setIsOpen(false);
   };
 
-  const handleLearnMore = () => {
-    navigate("/services/hrms-software");
+  const handleButton2Click = () => {
+    if (popupData?.button2_url) {
+      window.open(popupData.button2_url, "_blank", "noopener,noreferrer");
+    }
     setIsOpen(false);
   };
+
+  const popupImage = isMobile
+    ? `${STORAGE_URL}${popupData?.mobile_image}`
+    : `${STORAGE_URL}${popupData?.web_image}`;
+
+  // Parse description to handle line breaks
+  const formattedDescription = popupData?.desc?.replace(/\r\n/g, '<br />');
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && popupData?.is_active && (
         <>
           {/* Overlay */}
           <motion.div
@@ -66,9 +90,13 @@ const PopupSection = () => {
                   {/* Image Section - Top on Mobile */}
                   <div className="relative w-full h-48 sm:h-64">
                     <img
-                      src="/image/268622882_mpopup.jpg"
-                      alt="HRMS Platform"
+                      src={popupImage}
+                      alt={popupData?.image_alt || "HRMS Platform"}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Image failed to load:", popupImage);
+                        e.target.src = "/fallback-image.jpg"; // Add a fallback image
+                      }}
                     />
                   </div>
 
@@ -77,40 +105,37 @@ const PopupSection = () => {
                     <div className="space-y-4 sm:space-y-6">
                       {/* Header */}
                       <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-[#040d91] mb-2 sm:mb-3">
-                          Explore Our Powerful HRMS Platform!
+                        <h2 className="text-2xl sm:text-3xl font-bold text-[#040d91] mb-2 sm:mb-3"
+                         aria-level={popupData?.title_meta}
+                        >
+                          {popupData?.title || "Explore Our Powerful HRMS Platform!"}
                         </h2>
-                        <p className="text-base sm:text-lg text-gray-600">
-                          Looking for a smarter way to manage recruitment,
-                          compliance, and employee operations?
-                        </p>
                       </div>
-
-                      {/* Main Content */}
-                      <div className="space-y-3 sm:space-y-4">
-                        <p className="text-sm sm:text-base text-gray-700">
-                          Access our feature-rich HRMS software built
-                          specifically for UK businesses. Streamline your HR
-                          processes, ensure compliance, and boost productivity
-                          with our comprehensive solution.
-                        </p>
-                      </div>
+                      
+                      {/* Description */}
+                      <div
+                        className="text-base md:text-lg text-gray-700"
+                        dangerouslySetInnerHTML={{ 
+                          __html: formattedDescription || "Looking for a smarter way to manage recruitment, compliance, and employee operations? Access our feature-rich HRMS software built specifically for UK businesses. Streamline your HR processes, ensure compliance, and boost productivity with our comprehensive solution."
+                        }}
+                        aria-label={popupData?.desc_meta}
+                      />
 
                       {/* CTA Buttons */}
                       <div className="flex flex-col gap-3 sm:gap-4 pt-2 sm:pt-4">
                         <button
-                          onClick={handleTryNow}
+                          onClick={handleButton1Click}
                           className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-red-200 transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3"
                         >
-                          <span>Try Now For Free</span>
+                          <span>{popupData?.button1_name || "Visit SponicHR"}</span>
                           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
                         </button>
 
                         <button
-                          onClick={handleLearnMore}
+                          onClick={handleButton2Click}
                           className="group border-2 border-[#1F2E9A] text-[#1F2E9A] px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-[#1F2E9A] hover:text-white transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3"
                         >
-                          <span>Learn More</span>
+                          <span>{popupData?.button2_name || "Let's Schedule Demo"}</span>
                           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" />
                         </button>
                       </div>
@@ -123,9 +148,13 @@ const PopupSection = () => {
                   {/* Left Side - Image/Illustration */}
                   <div className="relative bg-white p-0">
                     <img
-                      src="/image/268622882_mpopup.jpg"
-                      alt="HRMS Platform"
+                      src={popupImage}
+                      alt={popupData?.image_alt || "HRMS Platform"}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Image failed to load:", popupImage);
+                        e.target.src = "/fallback-image.jpg"; // Add a fallback image
+                      }}
                     />
                   </div>
 
@@ -135,40 +164,34 @@ const PopupSection = () => {
                       {/* Header */}
                       <div>
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#040d91] mb-2 md:mb-3">
-                          Explore Our Powerful HRMS Platform!
+                          {popupData?.title || "Explore Our Powerful HRMS Platform!"}
                         </h2>
-                        <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                          Looking for a smarter way to manage recruitment,
-                          compliance, and employee operations?
-                        </p>
                       </div>
 
                       {/* Main Content */}
                       <div className="space-y-4 md:space-y-6">
-                        <p className="text-base md:text-lg text-gray-700">
-                          Access our feature-rich HRMS software built
-                          specifically for UK businesses. Streamline your HR
-                          processes, ensure compliance, and boost productivity
-                          with our comprehensive solution.
-                        </p>
+                        <div
+                          className="text-base md:text-lg text-gray-700"
+                          dangerouslySetInnerHTML={{ 
+                            __html: formattedDescription || "Looking for a smarter way to manage recruitment, compliance, and employee operations? Access our feature-rich HRMS software built specifically for UK businesses. Streamline your HR processes, ensure compliance, and boost productivity with our comprehensive solution."
+                          }}
+                        />
                       </div>
 
                       {/* CTA Buttons */}
                       <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-6">
                         <button
-                          onClick={handleTryNow}
+                          onClick={handleButton1Click}
                           className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:shadow-xl hover:shadow-red-200 transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3"
                         >
-                          <span>Visit SponicHR</span>
-                          {/* <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" /> */}
+                          <span>{popupData?.button1_name || "Visit SponicHR"}</span>
                         </button>
 
                         <button
-                          onClick={handleLearnMore}
+                          onClick={handleButton2Click}
                           className="group border-2 border-[#1F2E9A] text-[#1F2E9A] px-6 py-3 sm:px-8 sm:py-4 rounded-lg font-bold text-base sm:text-lg hover:bg-[#1F2E9A] hover:text-white transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3"
                         >
-                          <span>Let's Schedule a Demo</span>
-                          {/* <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-2 transition-transform duration-300" /> */}
+                          <span>{popupData?.button2_name || "Let's Schedule a Demo"}</span>
                         </button>
                       </div>
                     </div>

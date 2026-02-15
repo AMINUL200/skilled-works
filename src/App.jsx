@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import './App.css';
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import AppLayout from "./layout/AppLayout";
@@ -37,6 +38,8 @@ import HandleServiceTypeFeature from "./pages/admin/services/HandleServiceTypeFe
 import HandleBooking from "./pages/admin/booking/HandleBooking";
 import HandleWhyChoseOurPlatform from "./pages/admin/about/HandleWhyChoseOurPlatform";
 import HandleWhatWeOffer from "./pages/admin/about/HandleWhatWeOffer";
+import HandleAbout from "./pages/admin/about/HandleAbout";
+import HandleContact from "./pages/admin/booking/HandleContact";
 
 const App = () => {
   return (
@@ -52,7 +55,7 @@ const App = () => {
           <Route index path="/" element={<LandingPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:Id" element={<BlogDetails />} />
+          <Route path="/blog/:slug" element={<BlogDetails />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/cms/:Id" element={<ServiceDetails />} />
           <Route path="/services" element={<ServicePage />} />
@@ -80,6 +83,8 @@ const App = () => {
           <Route path="popup-settings" element={<PopupSettings />} />
           <Route path="note-settings" element={<NoteSettings />} />
           <Route path="handle-booking" element={<HandleBooking />} />
+          <Route path="handle-contact" element={<HandleContact />} />
+          <Route path="handle-about" element={<HandleAbout />} />
           <Route
             path="handle-why-chose-our-platform"
             element={<HandleWhyChoseOurPlatform />}

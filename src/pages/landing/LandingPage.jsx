@@ -23,6 +23,7 @@ import CTASection from "../../component/landing/CTASection";
 import PopupSection from "../../component/landing/PopupSection";
 import PageLoader from "../../component/common/PageLoader";
 import OurProduct from "../../component/landing/OurProduct";
+import { api } from "../../utils/app";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -30,13 +31,33 @@ const LandingPage = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // ⏳ 2 second loader
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+  const [landingData, setLandingData] = useState({
+    popup: null,
+    about: null,
+  });
 
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    const fetchLandingData = async () => {
+      try {
+        setLoading(true);
+
+        const [popupRes, aboutRes] = await Promise.all([
+          api.get("/popup"),
+          api.get("/about"),
+        ]);
+
+        setLandingData({
+          popup: popupRes.data.data,
+          about: aboutRes.data.data,
+        });
+      } catch (error) {
+        console.error("Landing API error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLandingData();
   }, []);
 
   if (loading) {
@@ -49,8 +70,7 @@ const LandingPage = () => {
       <HeroSection />
 
       {/* About Section */}
-      <AboutSection />
-      
+      <AboutSection aboutData={landingData.about} />
 
       {/* Features Section */}
       <FeaturesSection />
@@ -67,7 +87,7 @@ const LandingPage = () => {
       {/* CTA Section */}
       <CTASection />
 
-      <PopupSection />
+      <PopupSection popupData={landingData.popup} />
     </div>
   );
 };

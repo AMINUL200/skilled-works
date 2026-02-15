@@ -57,3 +57,97 @@
 .animate-fade-in {
   animation: fadeInUp 0.4s ease-out;
 }
+
+
+/* ================================
+   GLOBAL TEXT EDITOR CONTENT STYLE
+================================ */
+
+.editor-content {
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* Paragraph */
+.editor-content p {
+  margin-bottom: 1rem;
+}
+
+/* Headings */
+.editor-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.2rem 0 0.8rem;
+}
+
+.editor-content h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 1.2rem 0 0.6rem;
+}
+
+.editor-content h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+
+/* Lists */
+.editor-content ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.editor-content ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.editor-content li {
+  margin-bottom: 0.4rem;
+}
+
+/* Links */
+.editor-content a {
+  color: #1f2e9a;
+  text-decoration: underline;
+}
+
+/* Bold & Italic */
+.editor-content strong {
+  font-weight: 600;
+}
+
+.editor-content em {
+  font-style: italic;
+}
+
+/* Images from editor */
+.editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* Blockquote */
+.editor-content blockquote {
+  border-left: 4px solid #1f2e9a;
+  padding-left: 1rem;
+  color: #555;
+  margin: 1rem 0;
+}
+/* Remove any background color coming from editor */
+.editor-content * {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+
+/* Remove any inline background color from editor content */
+.editor-content [style] {
+  background: transparent !important;
+  background-color: transparent !important;
+}

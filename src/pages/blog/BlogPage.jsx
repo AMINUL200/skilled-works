@@ -6,10 +6,7 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Tag,
-  Eye,
-  MessageCircle,
   BookOpen,
   ArrowRight,
   TrendingUp,
@@ -17,274 +14,101 @@ import {
 import FAQComponent from "../../component/common/FAQComponent";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 import { useNavigate } from "react-router-dom";
+import { api } from "../../utils/app";
 import PageLoader from "../../component/common/PageLoader";
 
 const BlogPage = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredBlogs, setFilteredBlogs] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const blogsPerPage = 6;
   const navigate = useNavigate();
+  
+  // Get storage URL from environment
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
 
-  const blogData = [
-    {
-      id: 1,
-      title: "The Future of HR Technology in UK Businesses",
-      excerpt:
-        "How AI and automation are transforming HR processes across UK industries with real-time analytics and predictive insights.",
-      image:
-        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
-      category: "HR Tech",
-      author: "Sarah Johnson",
-      date: "2024-03-15",
-      readTime: "5 min read",
-      views: "2.4k",
-      comments: 42,
-      tags: ["AI", "Automation", "HRMS", "UK"],
-    },
-    {
-      id: 2,
-      title: "Compliance Made Easy: UK Employment Law Updates 2024",
-      excerpt:
-        "Latest changes in UK employment legislation and how our HR platform ensures your business stays compliant automatically.",
-      image:
-        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&q=80",
-      category: "Compliance",
-      author: "Michael Chen",
-      date: "2024-03-12",
-      readTime: "7 min read",
-      views: "3.1k",
-      comments: 38,
-      tags: ["Compliance", "Law", "UK", "Updates"],
-    },
-    {
-      id: 3,
-      title: "Streamlining Recruitment with AI-Powered Screening",
-      excerpt:
-        "How intelligent algorithms are reducing hiring time by 60% while improving candidate quality for UK businesses.",
-      image:
-        "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&q=80",
-      category: "Recruitment",
-      author: "Emma Wilson",
-      date: "2024-03-10",
-      readTime: "6 min read",
-      views: "4.2k",
-      comments: 56,
-      tags: ["AI", "Recruitment", "Screening", "Automation"],
-    },
-    {
-      id: 4,
-      title: "Cloud HR vs Traditional Systems: A Cost Analysis",
-      excerpt:
-        "Detailed breakdown of cost savings and efficiency gains when switching to cloud-based HR solutions in the UK market.",
-      image:
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
-      category: "Technology",
-      author: "David Roberts",
-      date: "2024-03-08",
-      readTime: "8 min read",
-      views: "2.8k",
-      comments: 29,
-      tags: ["Cloud", "Cost", "Analysis", "SaaS"],
-    },
-    {
-      id: 5,
-      title: "Employee Engagement Strategies That Actually Work",
-      excerpt:
-        "Data-driven approaches to boost employee satisfaction and retention in post-pandemic UK workplaces.",
-      image:
-        "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80",
-      category: "Engagement",
-      author: "Lisa Thompson",
-      date: "2024-03-05",
-      readTime: "4 min read",
-      views: "5.6k",
-      comments: 89,
-      tags: ["Engagement", "Retention", "Strategy", "Wellbeing"],
-    },
-    {
-      id: 6,
-      title: "GDPR Compliance in HR: Best Practices for 2024",
-      excerpt:
-        "Essential GDPR guidelines for UK HR departments and how to implement them effectively using modern HR software.",
-      image:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-      category: "Security",
-      author: "James Miller",
-      date: "2024-03-01",
-      readTime: "9 min read",
-      views: "3.9k",
-      comments: 47,
-      tags: ["GDPR", "Security", "Compliance", "Data"],
-    },
-    {
-      id: 7,
-      title: "The Rise of Remote Work: HR Challenges and Solutions",
-      excerpt:
-        "Managing distributed teams effectively with tools and policies designed for the modern UK workforce.",
-      image:
-        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
-      category: "Remote Work",
-      author: "Rachel Green",
-      date: "2024-02-28",
-      readTime: "6 min read",
-      views: "6.2k",
-      comments: 112,
-      tags: ["Remote", "Hybrid", "Management", "Tools"],
-    },
-    {
-      id: 8,
-      title: "Payroll Automation: Saving Time and Reducing Errors",
-      excerpt:
-        "How automated payroll systems are transforming finance departments across UK organizations of all sizes.",
-      image:
-        "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
-      category: "Payroll",
-      author: "Thomas Wright",
-      date: "2024-02-25",
-      readTime: "5 min read",
-      views: "2.1k",
-      comments: 31,
-      tags: ["Payroll", "Automation", "Finance", "Accuracy"],
-    },
-    {
-      id: 9,
-      title: "Building a Diverse and Inclusive Workplace Culture",
-      excerpt:
-        "Practical steps and metrics for creating truly inclusive environments that drive innovation and growth.",
-      image:
-        "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80",
-      category: "Diversity",
-      author: "Priya Sharma",
-      date: "2024-02-22",
-      readTime: "7 min read",
-      views: "4.7k",
-      comments: 67,
-      tags: ["Diversity", "Inclusion", "Culture", "Innovation"],
-    },
-    {
-      id: 10,
-      title: "HR Analytics: Turning Data into Strategic Insights",
-      excerpt:
-        "Leveraging HR data to make informed decisions about talent management, retention, and organizational growth.",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
-      category: "Analytics",
-      author: "Alex Morgan",
-      date: "2024-02-20",
-      readTime: "8 min read",
-      views: "3.4k",
-      comments: 41,
-      tags: ["Analytics", "Data", "Insights", "Strategy"],
-    },
-    {
-      id: 11,
-      title: "Onboarding Excellence: Creating Great First Impressions",
-      excerpt:
-        "Structured onboarding processes that boost productivity and retention from day one in UK companies.",
-      image:
-        "https://images.unsplash.com/photo-1573164713714-d95e436ab234?w=800&q=80",
-      category: "Onboarding",
-      author: "Sophie Brown",
-      date: "2024-02-18",
-      readTime: "4 min read",
-      views: "2.9k",
-      comments: 28,
-      tags: ["Onboarding", "Retention", "Productivity", "Process"],
-    },
-    {
-      id: 12,
-      title: "Future-Proofing Your HR Department",
-      excerpt:
-        "Skills and technologies HR professionals need to master for the evolving workplace landscape in the UK.",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
-      category: "Future",
-      author: "Robert King",
-      date: "2024-02-15",
-      readTime: "6 min read",
-      views: "5.1k",
-      comments: 73,
-      tags: ["Future", "Skills", "Technology", "Trends"],
-    },
-  ];
+  // Fetch blogs and FAQs from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/blogs'); // Adjust the endpoint as needed
+        
+        if (response.data.status && response.data.data) {
+          // Transform blogs data
+          const transformedBlogs = response.data.data.blogs.map(blog => ({
+            id: blog.id,
+            title: blog.title,
+            excerpt: blog.short_desc.replace(/<[^>]*>/g, '').substring(0, 150) + '...', // Strip HTML and truncate
+            image: `${STORAGE_URL}${blog.web_image}`, // Use web_image_url if available
+            author: "Skilled Workers Cloud", // Default author
+            date: new Date(blog.created_at).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            }),
+            readTime: calculateReadTime(blog.long_desc),
+            title_slug: blog.title_slug,
+            short_desc: blog.short_desc,
+            long_desc: blog.long_desc,
+          }));
+          
+          setBlogs(transformedBlogs);
 
-  const categories = [
-    { id: "all", label: "All Articles", icon: "📚" },
-    { id: "hr-tech", label: "HR Tech", icon: "🤖" },
-    { id: "compliance", label: "Compliance", icon: "⚖️" },
-    { id: "recruitment", label: "Recruitment", icon: "👥" },
-    { id: "engagement", label: "Engagement", icon: "❤️" },
-    { id: "analytics", label: "Analytics", icon: "📊" },
-    { id: "remote-work", label: "Remote Work", icon: "🏠" },
-  ];
+          // Transform FAQs data
+          if (response.data.data.faq && response.data.data.faq.length > 0) {
+            const transformedFaqs = response.data.data.faq.map((faq, index) => ({
+              id: faq.id || index + 1,
+              question: faq.faq_question,
+              answer: faq.faq_answer,
+              category: faq.faq_type || "General",
+            }));
+            setFaqs(transformedFaqs);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load content. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const faqData = [
-    {
-      id: 1,
-      question: "How often do you publish new articles?",
-      answer:
-        "We publish 2-3 new articles weekly, covering the latest HR trends, compliance updates, and technology insights specifically for UK businesses.",
-      category: "Content",
-    },
-    {
-      id: 2,
-      question: "Can I contribute as a guest writer?",
-      answer:
-        "Yes! We welcome contributions from HR professionals and industry experts. Please submit your article proposal through our contact form with your credentials and topic outline.",
-      category: "Contribution",
-    },
-    {
-      id: 3,
-      question: "Are the articles specific to UK regulations?",
-      answer:
-        "Yes, all our content is tailored to UK employment law, GDPR regulations, and market-specific challenges. We work with UK-based HR experts to ensure accuracy and relevance.",
-      category: "Relevance",
-    },
-    {
-      id: 4,
-      question: "How can I stay updated with new articles?",
-      answer:
-        "Subscribe to our newsletter for weekly roundups, follow us on LinkedIn, or enable notifications for our blog RSS feed to get instant updates on new publications.",
-      category: "Updates",
-    },
-    {
-      id: 5,
-      question: "Can I use your articles for training purposes?",
-      answer:
-        "Yes, our articles can be used for internal training and educational purposes with proper attribution. Contact us for commercial usage or bulk licensing options.",
-      category: "Usage",
-    },
-  ];
+    fetchData();
+  }, []);
+
+  // Helper function to calculate read time based on content length
+  const calculateReadTime = (content) => {
+    if (!content) return '5 min read';
+    const wordsPerMinute = 200;
+    const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+    const readTime = Math.ceil(wordCount / wordsPerMinute);
+    return `${Math.max(1, readTime)} min read`;
+  };
 
   // Filter and search blogs
   useEffect(() => {
-    let filtered = [...blogData];
+    if (blogs.length > 0) {
+      let filtered = [...blogs];
 
-    // Apply category filter
-    if (activeFilter !== "all") {
-      filtered = filtered.filter(
-        (blog) =>
-          blog.category.toLowerCase().replace(/\s+/g, "-") === activeFilter,
-      );
+      // Apply search filter only
+      if (searchTerm) {
+        filtered = filtered.filter(
+          (blog) =>
+            blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            blog.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
+      setFilteredBlogs(filtered);
+      setCurrentPage(1); // Reset to first page when search changes
     }
-
-    // Apply search filter
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (blog) =>
-          blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          blog.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          blog.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase()),
-          ),
-      );
-    }
-
-    setFilteredBlogs(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [activeFilter, searchTerm]);
+  }, [searchTerm, blogs]);
 
   // Pagination logic
   const indexOfLastBlog = currentPage * blogsPerPage;
@@ -311,19 +135,26 @@ const BlogPage = () => {
     }
   };
 
-  const [loading, setLoading] = useState(true);
-
-  // ⏳ 2 second loader
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   if (loading) {
     return <PageLoader />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-2xl font-bold text-[#1F2E9A] mb-2">Error</h3>
+          <p className="text-[#666666]">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-6 py-2 bg-[#1F2E9A] text-white rounded-lg hover:bg-[#2430A3] transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -367,6 +198,20 @@ const BlogPage = () => {
                 </span>
               </div>
             </div>
+
+            {/* Search Bar */}
+            <div className="mt-8 max-w-2xl mx-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-6 py-4 pl-14 rounded-full border border-[#E6E0FF] focus:outline-none focus:ring-2 focus:ring-[#1F2E9A] focus:border-transparent shadow-lg"
+                />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#666666] w-5 h-5" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -379,7 +224,7 @@ const BlogPage = () => {
               Latest Articles ({filteredBlogs.length})
             </h3>
             <div className="text-sm text-[#666666]">
-              Showing {indexOfFirstBlog + 1}-
+              Showing {filteredBlogs.length > 0 ? indexOfFirstBlog + 1 : 0}-
               {Math.min(indexOfLastBlog, filteredBlogs.length)} of{" "}
               {filteredBlogs.length}
             </div>
@@ -392,7 +237,7 @@ const BlogPage = () => {
                 No articles found
               </h4>
               <p className="text-[#666666]">
-                Try adjusting your filters or search terms
+                Try adjusting your search terms
               </p>
             </div>
           ) : (
@@ -411,18 +256,10 @@ const BlogPage = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a143c] via-[#0a143cbf] to-transparent transition-all duration-500 group-hover:from-[#465aff] group-hover:via-[#465affbf]" />
                   </div>
 
-                  {/* CATEGORY BADGE */}
-                  <div className="absolute top-4 right-4 bg-white/95 backdrop-blur px-4 py-2 rounded-full shadow-md z-20 flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-[#1F2E9A]" />
-                    <span className="text-sm font-semibold text-[#1F2E9A]">
-                      {blog.category}
-                    </span>
-                  </div>
-
                   {/* CENTER HOVER ICON */}
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div
-                      onClick={() => navigate(`/blog/${blog.id}`)}
+                      onClick={() => navigate(`/blog/${blog.title_slug}`)}
                       className="w-16 h-16 bg-white/95 backdrop-blur rounded-xl flex items-center justify-center opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 shadow-xl"
                     >
                       <ArrowRight className="w-6 h-6 text-[#1F2E9A] group-hover:-rotate-40 transition-transform duration-300" />
@@ -521,7 +358,39 @@ const BlogPage = () => {
       <section className="py-20 bg-gradient-to-b from-white to-[#FAFAFF]">
         <div className="container mx-auto px-8">
           <FAQComponent
-            faqs={faqData}
+            faqs={faqs.length > 0 ? faqs : [
+              // Fallback FAQs in case API returns empty
+              {
+                id: 1,
+                question: "How often do you publish new articles?",
+                answer: "We publish 2-3 new articles weekly, covering the latest HR trends, compliance updates, and technology insights specifically for UK businesses.",
+                category: "Content",
+              },
+              {
+                id: 2,
+                question: "Can I contribute as a guest writer?",
+                answer: "Yes! We welcome contributions from HR professionals and industry experts. Please submit your article proposal through our contact form with your credentials and topic outline.",
+                category: "Contribution",
+              },
+              {
+                id: 3,
+                question: "Are the articles specific to UK regulations?",
+                answer: "Yes, all our content is tailored to UK employment law, GDPR regulations, and market-specific challenges. We work with UK-based HR experts to ensure accuracy and relevance.",
+                category: "Relevance",
+              },
+              {
+                id: 4,
+                question: "How can I stay updated with new articles?",
+                answer: "Subscribe to our newsletter for weekly roundups, follow us on LinkedIn, or enable notifications for our blog RSS feed to get instant updates on new publications.",
+                category: "Updates",
+              },
+              {
+                id: 5,
+                question: "Can I use your articles for training purposes?",
+                answer: "Yes, our articles can be used for internal training and educational purposes with proper attribution. Contact us for commercial usage or bulk licensing options.",
+                category: "Usage",
+              },
+            ]}
             title="Blog Questions Answered"
             description="Find answers to common questions about our blog content, contributions, and updates."
           />
@@ -529,7 +398,7 @@ const BlogPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12">
+      {/* <section className="py-12">
         <div className="container mx-auto px-8">
           <div className="bg-gradient-to-r from-[#FAFAFF] to-[#F2EEFF] rounded-3xl p-8 border border-[#E6E0FF] text-center">
             <h3 className="text-2xl font-bold text-[#1F2E9A] mb-4">
@@ -559,7 +428,7 @@ const BlogPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

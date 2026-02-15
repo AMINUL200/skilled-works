@@ -41,13 +41,16 @@ const countries = [
   },
 ];
 
-const Navbar = ({ toggleMenu }) => {
+const Navbar = ({ toggleMenu, noteData = {} }) => {
   const [scrolled, setScrolled] = useState(false);
   const [showTopHeader, setShowTopHeader] = useState(true);
   const [openDropdowns, setOpenDropdowns] = useState({});
   const dropdownRefs = useRef({});
   const desktopCountryRef = useRef(null);
   const mobileCountryRef = useRef(null);
+  const servicesDropdownRef = useRef(null);
+  const [servicesHover, setServicesHover] = useState(false);
+  const hoverTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -92,8 +95,13 @@ const Navbar = ({ toggleMenu }) => {
         mobileCountryRef.current &&
         mobileCountryRef.current.contains(event.target);
 
-      if (!clickedDesktop && !clickedMobile) {
+      const clickedServices =
+        servicesDropdownRef.current &&
+        servicesDropdownRef.current.contains(event.target);
+
+      if (!clickedDesktop && !clickedMobile && !clickedServices) {
         setCountryOpen(false);
+        setServicesHover(false);
       }
 
       // other dropdowns
@@ -113,6 +121,15 @@ const Navbar = ({ toggleMenu }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Navigation links with updated colors
   const navLinks = [
     { id: "home", label: "Home", path: "/" },
@@ -120,6 +137,7 @@ const Navbar = ({ toggleMenu }) => {
     {
       id: "services",
       label: "Services",
+      path: "/services", // Add path for the main services page
       dropdown: [
         {
           id: "hrms_software",
@@ -159,7 +177,7 @@ const Navbar = ({ toggleMenu }) => {
         { id: "careers", label: "Careers", path: "/cms/careers" },
       ],
     },
-    { id: "pricing", label: "Pricing", path: "/pricing" },
+    // { id: "pricing", label: "Pricing", path: "/pricing" },
     { id: "blog", label: "Blog", path: "/blog" },
     { id: "contact", label: "Contacts", path: "/contact" },
   ];
@@ -248,8 +266,30 @@ const Navbar = ({ toggleMenu }) => {
   };
 
   const handleNavClick = (path) => {
+    console.log("click::", path);
+
     navigate(path);
     setOpenDropdowns({});
+  };
+
+  // Services hover handlers
+  const handleServicesMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setServicesHover(true);
+  };
+
+  const handleServicesMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setServicesHover(false);
+    }, 200); // Small delay to allow moving to dropdown
+  };
+
+  const handleServicesClick = () => {
+    // Navigate to the main services page
+    navigate("/services");
+    setServicesHover(false);
   };
 
   // Render dropdown items recursively
@@ -280,7 +320,10 @@ const Navbar = ({ toggleMenu }) => {
             className={`block px-4 py-2 text-sm hover:bg-[#F2EEFF] transition-colors ${
               level > 1 ? "pl-8" : ""
             } text-[#333333] hover:text-[#9B3DFF]`}
-            onClick={() => setOpenDropdowns({})}
+            onClick={() => {
+              setOpenDropdowns({});
+              setServicesHover(false);
+            }}
           >
             {item.label}
           </RouterLink>
@@ -303,6 +346,57 @@ const Navbar = ({ toggleMenu }) => {
     const isOpen = openDropdowns[item.id];
     const isActive = location.pathname === item.path;
 
+    // Special handling for Services menu
+    if (item.id === "services") {
+      return (
+        <div
+          key={item.id}
+          className="relative"
+          ref={servicesDropdownRef}
+          onMouseEnter={handleServicesMouseEnter}
+          onMouseLeave={handleServicesMouseLeave}
+        >
+          {/* Services link that can be clicked */}
+          <div
+            className={`font-semibold hover:text-[#D00EFF] transition-colors px-2 py-1 flex items-center space-x-1 cursor-pointer ${
+              servicesHover || isActive ? "text-[#D00EFF]" : "text-[#333333]"
+            }`}
+            onClick={handleServicesClick}
+          >
+            <span>{item.label}</span>
+            <ChevronDown
+              className={`w-4 h-4 transition-transform duration-200 ${
+                servicesHover ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+
+          {/* Dropdown that appears on hover */}
+          {servicesHover && (
+            <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-[#F2EEFF] rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="py-2">
+                {/* "View All Services" option at the top */}
+                {/* <RouterLink
+                  to={item.path}
+                  className="block px-4 py-2 text-sm font-semibold text-[#9B3DFF] hover:bg-[#F2EEFF] transition-colors border-b border-[#F2EEFF]"
+                  onClick={() => {
+                    setServicesHover(false);
+                    setOpenDropdowns({});
+                  }}
+                >
+                  View All Services
+                </RouterLink> */}
+                {item.dropdown.map((dropdownItem) =>
+                  renderDropdownItem(dropdownItem),
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Regular menu items (without hover dropdown)
     return (
       <div
         key={item.id}
@@ -561,12 +655,9 @@ const Navbar = ({ toggleMenu }) => {
 
           <div className="announcement-marquee">
             <div className="announcement-track">
-              Specialised Cloud-Based HR And Recruitment Systems. Comply with HR
-              rules and develop your business infrastructure — try our
-              cutting-edge software for a month free trial. To register your
-              company click on&nbsp;
+              {noteData?.note}&nbsp;
               <a
-                href="http://www.skilledworkerscloud.co.uk/hrms/"
+                href="https://skilledworkerscloud.co.uk/hrms-v2/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="announcement-link"

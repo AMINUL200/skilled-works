@@ -102,6 +102,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       ],
     },
     {
+      id: "about_handle",
+      label: "Handle About",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-about",
+    },
+    {
       id: "why_chose_use",
       label: "Why Chose Our Platform",
       icon: <FileText className="w-5 h-5" />,
@@ -118,6 +124,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       label: "Handle Booking",
       icon: <FileText className="w-5 h-5" />,
       path: "/admin/handle-booking",
+    },
+    {
+      id: "contact_handle",
+      label: "Handle Contact",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-contact",
     },
   ];
 

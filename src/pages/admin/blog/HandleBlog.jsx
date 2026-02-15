@@ -18,10 +18,11 @@ import {
   Hash,
 } from "lucide-react";
 import { api } from "../../../utils/app";
+import CustomTextEditor from "../../../component/form/CustomTextEditor";
 
 const HandleBlog = () => {
   const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
-  
+
   // State for blog list
   const [blogList, setBlogList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
@@ -214,7 +215,8 @@ const HandleBlog = () => {
       if (!validTypes.includes(file.type)) {
         setFormErrors((prev) => ({
           ...prev,
-          [`${type}_image`]: "Please upload a valid image (JPG, JPEG, PNG, or WebP)",
+          [`${type}_image`]:
+            "Please upload a valid image (JPG, JPEG, PNG, or WebP)",
         }));
         return;
       }
@@ -610,7 +612,8 @@ const HandleBlog = () => {
                             className="w-full h-48 object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                              e.target.src =
+                                "https://via.placeholder.com/800x600?text=Image+Not+Found";
                             }}
                           />
                         ) : (
@@ -634,7 +637,8 @@ const HandleBlog = () => {
                             className="w-full h-48 object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                              e.target.src =
+                                "https://via.placeholder.com/800x600?text=Image+Not+Found";
                             }}
                           />
                         ) : (
@@ -853,18 +857,33 @@ const HandleBlog = () => {
                       <label className="block text-sm font-medium text-[#4B5563] mb-2">
                         Short Description *
                       </label>
-                      <textarea
-                        name="short_desc"
-                        value={formData.short_desc}
-                        onChange={handleInputChange}
-                        rows="3"
-                        className={`w-full p-3 rounded-xl border ${
+                      <div
+                        className={`rounded-xl border ${
                           formErrors.short_desc
-                            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                            : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
+                            ? "border-red-300"
+                            : "border-[#E5E7EB]"
                         }`}
-                        placeholder="Brief summary of the blog post"
-                      />
+                      >
+                        <CustomTextEditor
+                          value={formData.short_desc}
+                          height={220}
+                          placeholder="Brief summary of the blog post"
+                          onChange={(content) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              short_desc: content,
+                            }));
+
+                            if (formErrors.short_desc) {
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                short_desc: "",
+                              }));
+                            }
+                          }}
+                        />
+                      </div>
+
                       {formErrors.short_desc && (
                         <p className="mt-1 text-sm text-red-600">
                           {formErrors.short_desc}
@@ -892,18 +911,33 @@ const HandleBlog = () => {
                     <label className="block text-sm font-medium text-[#4B5563] mb-2">
                       Long Description *
                     </label>
-                    <textarea
-                      name="long_desc"
-                      value={formData.long_desc}
-                      onChange={handleInputChange}
-                      rows="6"
-                      className={`w-full p-3 rounded-xl border ${
+                    <div
+                      className={`rounded-xl border ${
                         formErrors.long_desc
-                          ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                          : "border-[#E5E7EB] focus:border-[#0A0A0A] focus:ring-2 focus:ring-[#0A0A0A]/20"
+                          ? "border-red-300"
+                          : "border-[#E5E7EB]"
                       }`}
-                      placeholder="Full blog post content"
-                    />
+                    >
+                      <CustomTextEditor
+                        value={formData.long_desc}
+                        height={350}
+                        placeholder="Full blog post content"
+                        onChange={(content) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            long_desc: content,
+                          }));
+
+                          if (formErrors.long_desc) {
+                            setFormErrors((prev) => ({
+                              ...prev,
+                              long_desc: "",
+                            }));
+                          }
+                        }}
+                      />
+                    </div>
+
                     {formErrors.long_desc && (
                       <p className="mt-1 text-sm text-red-600">
                         {formErrors.long_desc}
@@ -933,16 +967,17 @@ const HandleBlog = () => {
                           <div className="space-y-4">
                             <div className="relative">
                               <img
-                                src={imagePreviews.web.startsWith('blob:') 
-                                  ? imagePreviews.web 
-                                  : `${STORAGE_URL}${imagePreviews.web}`
+                                src={
+                                  imagePreviews.web.startsWith("blob:")
+                                    ? imagePreviews.web
+                                    : `${STORAGE_URL}${imagePreviews.web}`
                                 }
                                 alt="Web preview"
                                 className="w-full h-48 object-contain mx-auto"
                               />
                               <button
                                 type="button"
-                                onClick={() => handleRemoveImage('web')}
+                                onClick={() => handleRemoveImage("web")}
                                 className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                               >
                                 <X size={16} />
@@ -1004,16 +1039,17 @@ const HandleBlog = () => {
                           <div className="space-y-4">
                             <div className="relative">
                               <img
-                                src={imagePreviews.mobile.startsWith('blob:') 
-                                  ? imagePreviews.mobile 
-                                  : `${STORAGE_URL}${imagePreviews.mobile}`
+                                src={
+                                  imagePreviews.mobile.startsWith("blob:")
+                                    ? imagePreviews.mobile
+                                    : `${STORAGE_URL}${imagePreviews.mobile}`
                                 }
                                 alt="Mobile preview"
                                 className="w-full h-48 object-contain mx-auto"
                               />
                               <button
                                 type="button"
-                                onClick={() => handleRemoveImage('mobile')}
+                                onClick={() => handleRemoveImage("mobile")}
                                 className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                               >
                                 <X size={16} />

@@ -12,8 +12,11 @@ import {
   Shield,
   ArrowRight,
   Globe,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import MagneticButton from "../common/MagneticButtonProps";
+import { api } from "../../utils/app";
 
 const CTASection = () => {
   const [formData, setFormData] = useState({
@@ -27,7 +30,7 @@ const CTASection = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,27 +40,87 @@ const CTASection = () => {
     }));
   };
 
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => {
+      setToast({ show: false, type: "", message: "" });
+    }, 5000);
+  };
+
+  // Convert 12-hour time format to 24-hour format (H:i)
+  const formatTimeTo24Hour = (time12h) => {
+    if (!time12h) return "";
+    
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    
+    if (hours === '12') {
+      hours = '00';
+    }
+    
+    if (modifier === 'PM') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    
+    // Format hours to always be 2 digits
+    hours = hours.toString().padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Format time to H:i format (e.g., "14:30")
+      const formattedTime = formatTimeTo24Hour(formData.time);
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({
-      name: "",
-      company: "",
-      email: "",
-      phone: "",
-      date: "",
-      time: "",
-      message: "",
-    });
+      const payload = {
+        full_name: formData.name,
+        company_name: formData.company,
+        email: formData.email,
+        phone_number: formData.phone || "",
+        preferred_date: formData.date,
+        preferred_time: formattedTime,
+        additional_notes: formData.message || "",
+      };
 
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+      console.log("Submitting payload:", payload); // For debugging
+
+      const response = await api.post("/demo-booking", payload);
+
+      if (response.data.status) {
+        showToast("success", "Demo booking submitted successfully! We'll contact you shortly.");
+        
+        // Reset form
+        setFormData({
+          name: "",
+          company: "",
+          email: "",
+          phone: "",
+          date: "",
+          time: "",
+          message: "",
+        });
+      } else {
+        showToast("error", response.data.message || "Failed to submit booking. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting demo booking:", error);
+      
+      // Handle validation errors
+      if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors)
+          .flat()
+          .join(", ");
+        showToast("error", errorMessages);
+      } else {
+        showToast("error", error.response?.data?.message || "Failed to submit booking. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactDetails = [
@@ -115,6 +178,39 @@ const CTASection = () => {
           "linear-gradient(135deg, #FAFAFF 0%, #F2EEFF 50%, #FAFAFF 100%)",
       }}
     >
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className="fixed top-6 right-6 z-50 animate-slideIn">
+          <div
+            className={`flex items-start gap-3 p-4 rounded-xl shadow-2xl border ${
+              toast.type === "success"
+                ? "bg-gradient-to-r from-[#00B894] to-[#2EC5FF] border-[#00B894]"
+                : "bg-gradient-to-r from-[#FF6B6B] to-[#FFA726] border-[#FF6B6B]"
+            } text-white min-w-[320px] max-w-md`}
+          >
+            <div className="flex-shrink-0 mt-0.5">
+              {toast.type === "success" ? (
+                <CheckCircle className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-sm mb-1">
+                {toast.type === "success" ? "Success!" : "Error!"}
+              </h4>
+              <p className="text-sm opacity-90">{toast.message}</p>
+            </div>
+            <button
+              onClick={() => setToast({ show: false, type: "", message: "" })}
+              className="flex-shrink-0 hover:opacity-80 transition-opacity"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-96 h-96 bg-[#1F2E9A] rounded-full blur-3xl"></div>
@@ -247,21 +343,6 @@ const CTASection = () => {
                   </p>
                 </div>
 
-                {/* Success Message */}
-                {isSubmitted && (
-                  <div className="mx-8 mt-8 p-4 bg-gradient-to-r from-[#00B894] to-[#2EC5FF] rounded-xl">
-                    <div className="flex items-center gap-3 text-white">
-                      <CheckCircle className="w-6 h-6" />
-                      <div>
-                        <h4 className="font-bold">Demo Request Submitted!</h4>
-                        <p className="text-sm opacity-90">
-                          We'll contact you shortly to confirm your booking.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -339,6 +420,7 @@ const CTASection = () => {
                         value={formData.date}
                         onChange={handleChange}
                         required
+                        min={new Date().toISOString().split('T')[0]}
                         className="w-full px-4 py-3 rounded-xl border border-[#E6E0FF] bg-[#FAFAFF] focus:outline-none focus:ring-2 focus:ring-[#9B3DFF] focus:border-transparent transition-all duration-300"
                       />
                     </div>
@@ -439,6 +521,21 @@ const CTASection = () => {
 
         input[type="date"]::-webkit-calendar-picker-indicator:hover {
           filter: invert(0.3);
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
         }
       `}</style>
     </section>

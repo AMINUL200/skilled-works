@@ -18,174 +18,144 @@ import {
   Printer,
   Mail,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 import PageLoader from "../../component/common/PageLoader";
+import { api } from "../../utils/app";
+import FAQComponent from "../../component/common/FAQComponent";
 
 const BlogDetails = () => {
   const navigate = useNavigate();
+  const { slug } = useParams();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(156);
+  const [likeCount, setLikeCount] = useState(0);
+  const [blog, setBlog] = useState(null);
+  const [relatedArticles, setRelatedArticles] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample blog data - in real app, this would come from API/state
-  const blog = {
-    id: 1,
-    title: "The Future of HR Technology in UK Businesses: A 2024 Perspective",
-    excerpt:
-      "How AI and automation are transforming HR processes across UK industries with real-time analytics and predictive insights.",
-    image:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&q=80",
-    category: "HR Tech",
-    author: {
-      name: "Sarah Johnson",
-      role: "HR Technology Expert",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&q=80",
-    },
-    date: "March 15, 2024",
-    readTime: "5 min read",
-    views: "2.4k",
-    comments: 42,
-    tags: [
-      "AI",
-      "Automation",
-      "HRMS",
-      "UK Business",
-      "Digital Transformation",
-      "HR Analytics",
-    ],
-    content: `
-      <h2>The Evolution of HR Technology in the UK</h2>
-      <p>The landscape of Human Resources in the United Kingdom has undergone a remarkable transformation over the past decade. From traditional paper-based systems to sophisticated cloud-based platforms, the journey has been nothing short of revolutionary.</p>
-      
-      <p>In 2024, we're witnessing an unprecedented acceleration in HR technology adoption, driven by several key factors:</p>
-      
-      <ul>
-        <li><strong>Remote Work Revolution:</strong> The pandemic-induced shift to remote work has made digital HR tools essential for business continuity.</li>
-        <li><strong>Data-Driven Decision Making:</strong> Organizations now demand real-time insights into workforce analytics.</li>
-        <li><strong>Compliance Complexity:</strong> With evolving UK employment laws, automated compliance has become non-negotiable.</li>
-        <li><strong>Employee Experience Focus:</strong> Modern employees expect seamless digital experiences from onboarding to retirement.</li>
-      </ul>
-      
-      <h3>AI-Powered Recruitment: Beyond Basic Automation</h3>
-      
-      <p>Artificial Intelligence has moved beyond simple automation to become an intelligent partner in the recruitment process. UK companies are leveraging AI for:</p>
-      
-      <div class="highlight-box">
-        <h4>Key AI Applications in UK HR:</h4>
-        <ul>
-          <li><strong>Predictive Candidate Matching:</strong> Algorithms that analyze thousands of data points to identify ideal candidates</li>
-          <li><strong>Automated Interview Scheduling:</strong> Intelligent systems that coordinate across time zones and calendars</li>
-          <li><strong>Bias Reduction:</strong> AI tools designed to eliminate unconscious bias in hiring</li>
-          <li><strong>Skill Gap Analysis:</strong> Predictive analytics identifying future skill requirements</li>
-        </ul>
-      </div>
-      
-      <p>According to recent studies, UK companies using AI-powered recruitment have reduced hiring time by an average of <strong>60%</strong> while improving candidate quality by <strong>45%</strong>.</p>
-      
-      <h3>Cloud-Based HRMS: The New Standard</h3>
-      
-      <p>The shift to cloud-based Human Resource Management Systems (HRMS) has become the standard across UK organizations of all sizes. The benefits are compelling:</p>
-      
-      <blockquote>
-        <p>"Cloud HR platforms aren't just about cost savings anymore. They're strategic tools that provide unprecedented agility and insight into workforce management. For UK businesses navigating post-Brexit regulations and hybrid work models, these platforms have become essential."</p>
-        <cite>— Michael Chen, HR Technology Analyst</cite>
-      </blockquote>
-      
-      <h3>Data Security and GDPR Compliance</h3>
-      
-      <p>With stringent GDPR regulations in place, UK HR departments face unique challenges in data management. Modern HR technology addresses these concerns through:</p>
-      
-      <ul>
-        <li><strong>UK-Based Data Centers:</strong> Ensuring data sovereignty and compliance</li>
-        <li><strong>Automated Compliance Audits:</strong> Real-time monitoring of data handling practices</li>
-        <li><strong>Employee Consent Management:</strong> Streamlined processes for data privacy compliance</li>
-        <li><strong>Breach Detection Systems:</strong> AI-powered monitoring for potential data security issues</li>
-      </ul>
-      
-      <h3>The Future: Predictive Analytics and Employee Wellbeing</h3>
-      
-      <p>Looking ahead, we see several emerging trends that will shape HR technology in the UK:</p>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Technology</th>
-            <th>Impact</th>
-            <th>Adoption Timeline</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Predictive Turnover Analysis</td>
-            <td>Reduce employee attrition by 40%</td>
-            <td>2024-2025</td>
-          </tr>
-          <tr>
-            <td>AI-Powered Wellbeing Platforms</td>
-            <td>Improve employee satisfaction by 35%</td>
-            <td>2024</td>
-          </tr>
-          <tr>
-            <td>Blockchain for Credential Verification</td>
-            <td>Reduce hiring fraud by 90%</td>
-            <td>2025-2026</td>
-          </tr>
-          <tr>
-            <td>Virtual Reality Onboarding</td>
-            <td>Improve new hire retention by 25%</td>
-            <td>2024</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <h3>Conclusion: Embracing the Digital HR Revolution</h3>
-      
-      <p>The transformation of HR technology in the UK is not just about adopting new tools—it's about fundamentally reimagining how we manage and engage with our most valuable asset: people. As we move through 2024, UK businesses that embrace these technological advancements will find themselves better positioned to attract, retain, and develop talent in an increasingly competitive market.</p>
-      
-      <p>The key to success lies in strategic implementation, focusing on solutions that address specific UK business challenges while maintaining the human touch that defines effective HR management.</p>
-    `,
+  // Get storage URL from environment
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+
+  // Fetch blog from API
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        setLoading(true);
+        // Use slug to fetch specific blog
+        const response = await api.get(`/blogs/${slug}`); // Adjust endpoint as needed
+
+        if (response.data.status && response.data.data) {
+          const blogData = response.data.data;
+
+          // Transform API data to match component structure
+          const transformedBlog = {
+            id: blogData.id,
+            title: blogData.title,
+            excerpt:
+              blogData.short_desc.replace(/<[^>]*>/g, "").substring(0, 200) +
+              "...",
+            image: `${STORAGE_URL}${blogData.web_image}`,
+            category: extractCategory(blogData.title),
+            author: {
+              name: "Skilled Workers Cloud",
+              role: "HR Technology Expert",
+              avatar:
+                "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&q=80", // Default avatar
+            },
+            date: new Date(blogData.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            readTime: calculateReadTime(blogData.long_desc),
+            views: "0", // Default value
+            comments: 0, // Default value
+            tags: extractTags(blogData.title),
+            content: blogData.long_desc, // Use long_desc as main content
+          };
+
+          setBlog(transformedBlog);
+
+          // Transform related blogs
+          if (blogData.related_blog && blogData.related_blog.length > 0) {
+            const transformedRelated = blogData.related_blog.map((related) => ({
+              id: related.id,
+              title: related.title,
+              image: `${STORAGE_URL}${related.web_image}`,
+              category: extractCategory(related.title),
+              date: new Date(related.created_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }),
+              readTime: calculateReadTime(related.long_desc),
+              title_slug: related.title_slug,
+            }));
+            setRelatedArticles(transformedRelated);
+          }
+
+          // Transform FAQs
+          if (blogData.faq && blogData.faq.length > 0) {
+            const transformedFaqs = blogData.faq.map((faq, index) => ({
+              id: faq.id || index + 1,
+              question: faq.faq_question,
+              answer: faq.faq_answer,
+              category: faq.faq_type || "General",
+            }));
+            setFaqs(transformedFaqs);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching blog:", err);
+        setError("Failed to load blog. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchBlog();
+    }
+  }, [slug]);
+
+  // Helper function to extract category from title
+  const extractCategory = (title) => {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes("hr") || titleLower.includes("human resource"))
+      return "HR Tech";
+    if (titleLower.includes("attendance")) return "HR Tech";
+    if (titleLower.includes("smart")) return "Technology";
+    if (titleLower.includes("compliance")) return "Compliance";
+    if (titleLower.includes("recruitment")) return "Recruitment";
+    if (titleLower.includes("engagement")) return "Engagement";
+    if (titleLower.includes("remote")) return "Remote Work";
+    if (titleLower.includes("analytics")) return "Analytics";
+    if (titleLower.includes("diversity")) return "Diversity";
+    if (titleLower.includes("payroll")) return "Payroll";
+    if (titleLower.includes("onboarding")) return "Onboarding";
+    if (titleLower.includes("future")) return "Future";
+    if (titleLower.includes("security") || titleLower.includes("gdpr"))
+      return "Security";
+    return "HR Tech";
   };
 
-  const relatedArticles = [
-    {
-      id: 2,
-      title: "GDPR Compliance in HR: Best Practices for 2024",
-      image:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w-400&q=80",
-      category: "Compliance",
-      date: "March 1, 2024",
-      readTime: "9 min read",
-    },
-    {
-      id: 3,
-      title: "Streamlining Recruitment with AI-Powered Screening",
-      image:
-        "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&q=80",
-      category: "Recruitment",
-      date: "March 10, 2024",
-      readTime: "6 min read",
-    },
-    {
-      id: 4,
-      title: "Cloud HR vs Traditional Systems: A Cost Analysis",
-      image:
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80",
-      category: "Technology",
-      date: "March 8, 2024",
-      readTime: "8 min read",
-    },
-    {
-      id: 5,
-      title: "Employee Engagement Strategies That Actually Work",
-      image:
-        "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=400&q=80",
-      category: "Engagement",
-      date: "March 5, 2024",
-      readTime: "4 min read",
-    },
-  ];
+  // Helper function to calculate read time
+  const calculateReadTime = (content) => {
+    if (!content) return "5 min read";
+    const wordsPerMinute = 200;
+    const wordCount = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
+    const readTime = Math.ceil(wordCount / wordsPerMinute);
+    return `${Math.max(1, readTime)} min read`;
+  };
+
+  // Helper function to extract tags from title
+  const extractTags = (title) => {
+    const words = title.split(" ");
+    return words.slice(0, 5).map((word) => word.replace(/[^a-zA-Z]/g, ""));
+  };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -201,49 +171,77 @@ const BlogDetails = () => {
       icon: <Facebook className="w-4 h-4" />,
       label: "Facebook",
       color: "hover:bg-[#1877F2] hover:text-white",
+      action: () =>
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+          "_blank",
+        ),
     },
     {
       icon: <Twitter className="w-4 h-4" />,
       label: "Twitter",
       color: "hover:bg-[#1DA1F2] hover:text-white",
+      action: () =>
+        window.open(
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(blog?.title || "")}`,
+          "_blank",
+        ),
     },
     {
       icon: <Linkedin className="w-4 h-4" />,
       label: "LinkedIn",
       color: "hover:bg-[#0A66C2] hover:text-white",
+      action: () =>
+        window.open(
+          `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`,
+          "_blank",
+        ),
     },
     {
       icon: <Mail className="w-4 h-4" />,
       label: "Email",
       color: "hover:bg-[#EA4335] hover:text-white",
+      action: () =>
+        (window.location.href = `mailto:?subject=${encodeURIComponent(blog?.title || "")}&body=${encodeURIComponent(`Check out this article: ${window.location.href}`)}`),
     },
     {
       icon: <Printer className="w-4 h-4" />,
       label: "Print",
       color: "hover:bg-[#4285F4] hover:text-white",
+      action: () => window.print(),
     },
     {
       icon: <LinkIcon className="w-4 h-4" />,
       label: "Copy Link",
       color: "hover:bg-[#34A853] hover:text-white",
+      action: () => {
+        navigator.clipboard.writeText(window.location.href);
+        alert("Link copied to clipboard!");
+      },
     },
   ];
-
-  const [loading, setLoading] = useState(true);
-
-  // ⏳ 2 second loader
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   if (loading) {
     return <PageLoader />;
   }
 
+  if (error || !blog) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-2xl font-bold text-[#1F2E9A] mb-2">Error</h3>
+          <p className="text-[#666666]">{error || "Blog not found"}</p>
+          <button
+            onClick={() => navigate("/blog")}
+            className="mt-4 px-6 py-2 bg-[#1F2E9A] text-white rounded-lg hover:bg-[#2430A3] transition-colors"
+          >
+            Back to Blog
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-50">
@@ -302,9 +300,6 @@ const BlogDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2">
-            {/* Blog Header */}
-          
-
             {/* Featured Image */}
             <div className="relative rounded-2xl overflow-hidden mb-8 shadow-xl">
               <div className="aspect-[16/9] overflow-hidden">
@@ -361,12 +356,7 @@ const BlogDetails = () => {
                     <button
                       key={index}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E6E0FF] text-[#666666] ${option.color} transition-all duration-300`}
-                      onClick={() => {
-                        if (option.label === "Copy Link") {
-                          navigator.clipboard.writeText(window.location.href);
-                          alert("Link copied to clipboard!");
-                        }
-                      }}
+                      onClick={option.action}
                     >
                       {option.icon}
                       <span className="hidden sm:inline">{option.label}</span>
@@ -376,81 +366,68 @@ const BlogDetails = () => {
               </div>
             </div>
 
-            {/* Author Bio */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-[#FAFAFF] to-[#F2EEFF] rounded-2xl border border-[#E6E0FF]">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-[#1F2E9A] to-[#2430A3] flex-shrink-0">
-                  <img
-                    src={blog.author.avatar}
-                    alt={blog.author.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#1F2E9A] mb-2">
-                    {blog.author.name}
-                  </h3>
-                  <p className="text-[#666666] mb-3">{blog.author.role}</p>
-                  <p className="text-[#666666]">
-                    Sarah is a leading HR technology expert with over 15 years
-                    of experience helping UK businesses implement digital
-                    transformation strategies. She specializes in AI adoption
-                    and compliance automation for HR departments.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-8">
             {/* Related Articles */}
-            <div className="bg-white rounded-2xl border border-[#F2EEFF] shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] p-6 text-white">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <ChevronRight className="w-5 h-5" />
-                  Related Articles
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="space-y-6">
-                  {relatedArticles.map((article) => (
-                    <Link
-                      key={article.id}
-                      to={`/blog/${article.id}`}
-                      className="group block"
-                    >
-                      <div className="flex gap-4">
-                        <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                          <img
-                            src={article.image}
-                            alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        </div>
-                        <div>
-                          <span className="text-xs font-semibold px-2 py-1 bg-gradient-to-r from-[#F2EEFF] to-[#E6F7FF] text-[#9B3DFF] rounded-full mb-2 inline-block">
-                            {article.category}
-                          </span>
-                          <h4 className="font-bold text-[#1F2E9A] group-hover:text-[#9B3DFF] transition-colors duration-300 mb-2 line-clamp-2">
-                            {article.title}
-                          </h4>
-                          <div className="flex items-center gap-3 text-xs text-[#666666]">
-                            <span>{article.date}</span>
-                            <span>•</span>
-                            <span>{article.readTime}</span>
+            {relatedArticles.length > 0 && (
+              <div className="bg-white rounded-2xl border border-[#F2EEFF] shadow-lg overflow-hidden">
+                <div className="bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] p-6 text-white">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <ChevronRight className="w-5 h-5" />
+                    Related Articles
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-6">
+                    {relatedArticles.map((article) => (
+                      <Link
+                        key={article.id}
+                        to={`/blog/${article.title_slug || article.id}`}
+                        className="group block"
+                      >
+                        <div className="flex gap-4">
+                          <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                            <img
+                              src={article.image}
+                              alt={article.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold px-2 py-1 bg-gradient-to-r from-[#F2EEFF] to-[#E6F7FF] text-[#9B3DFF] rounded-full mb-2 inline-block">
+                              {article.category}
+                            </span>
+                            <h4 className="font-bold text-[#1F2E9A] group-hover:text-[#9B3DFF] transition-colors duration-300 mb-2 line-clamp-2">
+                              {article.title}
+                            </h4>
+                            <div className="flex items-center gap-3 text-xs text-[#666666]">
+                              <span>{article.date}</span>
+                              <span>•</span>
+                              <span>{article.readTime}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-       
+        {/* FAQ FULL WIDTH BOTTOM */}
+        {faqs.length > 0 && (
+          <div className="max-w-5xl mx-auto mt-16">
+            <FAQComponent
+              faqs={faqs}
+              title={`Frequently Asked Questions about ${blog.title}`}
+              description="Find answers to common questions about this topic."
+            />
+          </div>
+        )}
       </div>
 
       {/* Custom CSS for blog content */}

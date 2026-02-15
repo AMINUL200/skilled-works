@@ -16,10 +16,13 @@ import {
   Star,
   Award,
   Headphones,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 import FAQComponent from "../../component/common/FAQComponent";
 import PageLoader from "../../component/common/PageLoader";
+import { api } from "../../utils/app";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -32,7 +35,7 @@ const ContactPage = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [activeFAQ, setActiveFAQ] = useState(null);
 
   const handleChange = (e) => {
@@ -40,25 +43,59 @@ const ContactPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const showToast = (type, message) => {
+    setToast({ show: true, type, message });
+    setTimeout(() => {
+      setToast({ show: false, type: "", message: "" });
+    }, 5000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const payload = {
+        full_name: formData.name,
+        company_name: formData.company || "",
+        email: formData.email,
+        phone_number: formData.phone || "",
+        subject: formData.subject,
+        message: formData.message,
+      };
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      subject: "",
-      message: "",
-    });
+      const response = await api.post("/contact", payload);
 
-    setTimeout(() => setIsSubmitted(false), 5000);
+      if (response.data.status) {
+        showToast("success", "Message sent successfully! We'll contact you within 2 business hours.");
+        
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          company: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        showToast("error", response.data.message || "Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error sending contact message:", error);
+      
+      // Handle validation errors
+      if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors)
+          .flat()
+          .join(", ");
+        showToast("error", errorMessages);
+      } else {
+        showToast("error", error.response?.data?.message || "Failed to send message. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactDetails = [
@@ -183,6 +220,39 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-30 md:pt-30">
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className="fixed top-6 right-6 z-50 animate-slideIn">
+          <div
+            className={`flex items-start gap-3 p-4 rounded-xl shadow-2xl border ${
+              toast.type === "success"
+                ? "bg-gradient-to-r from-[#00B894] to-[#2EC5FF] border-[#00B894]"
+                : "bg-gradient-to-r from-[#FF6B6B] to-[#FFA726] border-[#FF6B6B]"
+            } text-white min-w-[320px] max-w-md`}
+          >
+            <div className="flex-shrink-0 mt-0.5">
+              {toast.type === "success" ? (
+                <CheckCircle className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-sm mb-1">
+                {toast.type === "success" ? "Success!" : "Error!"}
+              </h4>
+              <p className="text-sm opacity-90">{toast.message}</p>
+            </div>
+            <button
+              onClick={() => setToast({ show: false, type: "", message: "" })}
+              className="flex-shrink-0 hover:opacity-80 transition-opacity"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Header */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-5">
@@ -248,9 +318,9 @@ const ContactPage = () => {
                       <div className="h-full bg-white rounded-2xl border border-[#F2EEFF] p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
                         <div className="flex items-start gap-4">
                           <div
-                            className={`p-3 rounded-xl ${contact.color} shadow-lg`}
+                            className={`p-3 rounded-xl bg-gradient-to-br ${contact.color} shadow-lg`}
                           >
-                            <div className="text-black">{contact.icon}</div>
+                            <div className="text-white">{contact.icon}</div>
                           </div>
                           <div className="flex-1">
                             <h3 className="text-lg font-bold text-[#1F2E9A] mb-1">
@@ -361,23 +431,6 @@ const ContactPage = () => {
                       shortly
                     </p>
                   </div>
-
-                  {/* Success Message */}
-                  {isSubmitted && (
-                    <div className="mx-8 mt-8 p-4 bg-gradient-to-r from-[#00B894] to-[#2EC5FF] rounded-xl">
-                      <div className="flex items-center gap-3 text-white">
-                        <CheckCircle className="w-6 h-6" />
-                        <div>
-                          <h4 className="font-bold">
-                            Message Sent Successfully!
-                          </h4>
-                          <p className="text-sm opacity-90">
-                            We'll contact you within 2 business hours.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Form */}
                   <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -494,7 +547,7 @@ const ContactPage = () => {
                         variant="square"
                         type="submit"
                         disabled={isSubmitting}
-                        className={`w-full md:w-[50%]  group ${
+                        className={`w-full md:w-[50%] group ${
                           isSubmitting
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-gradient-to-r from-[#E60023] to-[#B8001B] hover:shadow-xl hover:shadow-red-200"
@@ -565,6 +618,24 @@ const ContactPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Animation Styles */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
