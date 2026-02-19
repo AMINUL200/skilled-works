@@ -801,13 +801,13 @@ const HandleAbout = () => {
                     >
                       <Edit2 size={18} />
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => handleDelete(item.id)}
                       className="p-2 text-[#4B5563] hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                       title="Delete"
                     >
                       <Trash2 size={18} />
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => toggleExpand(item.id)}
                       className="p-2 text-[#4B5563] hover:text-[#0A0A0A] hover:bg-[#F3F4F6] rounded-lg transition"

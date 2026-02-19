@@ -22,7 +22,6 @@ import {
   Settings,
   RefreshCw,
   Eye,
-  Download,
   Upload,
   Filter,
   Search,
@@ -31,17 +30,257 @@ import {
   LineChart,
   Activity,
   Award,
-  Star,
   Heart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MagneticButton from "../common/MagneticButtonProps";
 
-const HRMSFeatures = () => {
-  const [activeCategory, setActiveCategory] = useState("core");
+// Helper function to extract plain text from HTML
+const extractPlainText = (htmlString) => {
+  if (!htmlString) return "";
+  const doc = new DOMParser().parseFromString(htmlString, "text/html");
+  return doc.body.textContent || "";
+};
+
+// Helper function to parse feature cards from long_desc HTML
+const parseFeatureCards = (htmlString) => {
+  if (!htmlString) return [];
+
+  const features = [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, "text/html");
+
+  // Find all feature card containers
+  const featureCards = doc.querySelectorAll(".group\\/feature");
+
+  featureCards.forEach((card) => {
+    // Extract title
+    const titleElement = card.querySelector("h4");
+    const title = titleElement ? titleElement.textContent : "";
+
+    // Extract stats
+    const statsElement = card.querySelector("span.text-xs");
+    const stats = statsElement ? statsElement.textContent : "";
+
+    // Extract description
+    const descElement = card.querySelector("p.text-gray-600.text-sm");
+    const description = descElement ? descElement.textContent : "";
+
+    // Determine icon based on title or content
+    const getIconForFeature = (title) => {
+      const titleLower = (title || "").toLowerCase();
+      if (titleLower.includes("employee") || titleLower.includes("database"))
+        return <Database className="w-6 h-6" />;
+      if (
+        titleLower.includes("attendance") ||
+        titleLower.includes("time") ||
+        titleLower.includes("clock")
+      )
+        return <Clock className="w-6 h-6" />;
+      if (
+        titleLower.includes("leave") ||
+        titleLower.includes("holiday") ||
+        titleLower.includes("calendar")
+      )
+        return <Calendar className="w-6 h-6" />;
+      if (titleLower.includes("onboard")) return <Upload className="w-6 h-6" />;
+      if (titleLower.includes("report") || titleLower.includes("document"))
+        return <FileText className="w-6 h-6" />;
+      if (titleLower.includes("dashboard") || titleLower.includes("analytics"))
+        return <Activity className="w-6 h-6" />;
+      return <CheckCircle className="w-6 h-6" />;
+    };
+
+    if (title) {
+      features.push({
+        title,
+        description,
+        icon: getIconForFeature(title),
+        stats: stats || "Enhanced feature",
+      });
+    }
+  });
+
+  return features;
+};
+
+// Helper function to extract main description from long_desc
+const extractMainDescription = (htmlString) => {
+  if (!htmlString) return "";
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, "text/html");
+
+  // Find the first paragraph with text-gray-600 class
+  const descElement = doc.querySelector("p.text-gray-600");
+  return descElement ? descElement.textContent : "";
+};
+
+const HRMSFeatures = ({ featureData = [], storageUrl = "" }) => {
+  const [activeCategory, setActiveCategory] = useState("");
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  const featureCategories = [
+  console.log("HRMSFeatures received featureData:", {
+    featureData,
+    storageUrl,
+  });
+
+  // Transform API feature data to match component structure
+  const transformFeatureData = () => {
+    if (!featureData || featureData.length === 0) {
+      return []; // Return empty array, will use fallback
+    }
+
+    return featureData.map((feature, index) => {
+      // Extract feature name and create ID
+      const featureName = feature.feature_name || "Core HR";
+      const featureId = featureName.toLowerCase().replace(/\s+/g, "-");
+
+      // Set first feature as active by default
+      if (index === 0 && activeCategory === "") {
+        setActiveCategory(featureId);
+      }
+
+      // Parse feature cards from long_desc
+      const parsedFeatures = parseFeatureCards(feature.long_desc || "");
+
+      // Get main description
+      const mainDescription =
+        extractMainDescription(feature.long_desc || "") ||
+        extractPlainText(
+          feature.desc || `Comprehensive ${featureName} features`,
+        );
+
+      // Determine icon based on feature name
+      const getIcon = () => {
+        const name = featureName.toLowerCase();
+        if (name.includes("core")) return <Users className="w-8 h-8" />;
+        if (name.includes("dashboard"))
+          return <BarChart3 className="w-8 h-8" />;
+        if (name.includes("analytics"))
+          return <BarChart3 className="w-8 h-8" />;
+        if (name.includes("security")) return <Shield className="w-8 h-8" />;
+        if (name.includes("automation")) return <Zap className="w-8 h-8" />;
+        if (name.includes("mobile")) return <Smartphone className="w-8 h-8" />;
+        if (name.includes("cloud")) return <Cloud className="w-8 h-8" />;
+        return <Target className="w-8 h-8" />;
+      };
+
+      // Determine color scheme based on feature name
+      const getColorScheme = () => {
+        const name = featureName.toLowerCase();
+        if (name.includes("core")) {
+          return {
+            color: "from-[#1F2E9A] to-[#2EC5FF]",
+            gradient: "bg-gradient-to-br from-[#1F2E9A] to-[#2EC5FF]",
+            iconBg: "from-[#1F2E9A]/10 to-[#2EC5FF]/10",
+            textColor: "text-[#1F2E9A]",
+          };
+        }
+        if (name.includes("dashboard") || name.includes("analytics")) {
+          return {
+            color: "from-[#9B3DFF] to-[#E60023]",
+            gradient: "bg-gradient-to-br from-[#9B3DFF] to-[#E60023]",
+            iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
+            textColor: "text-[#9B3DFF]",
+          };
+        }
+        if (name.includes("security")) {
+          return {
+            color: "from-[#2430A3] to-[#9B3DFF]",
+            gradient: "bg-gradient-to-br from-[#2430A3] to-[#9B3DFF]",
+            iconBg: "from-[#2430A3]/10 to-[#9B3DFF]/10",
+            textColor: "text-[#2430A3]",
+          };
+        }
+        if (name.includes("automation")) {
+          return {
+            color: "from-[#00B894] to-[#2EC5FF]",
+            gradient: "bg-gradient-to-br from-[#00B894] to-[#2EC5FF]",
+            iconBg: "from-[#00B894]/10 to-[#2EC5FF]/10",
+            textColor: "text-[#00B894]",
+          };
+        }
+        if (name.includes("mobile")) {
+          return {
+            color: "from-[#FF6B6B] to-[#FFA726]",
+            gradient: "bg-gradient-to-br from-[#FF6B6B] to-[#FFA726]",
+            iconBg: "from-[#FF6B6B]/10 to-[#FFA726]/10",
+            textColor: "text-[#FF6B6B]",
+          };
+        }
+        return {
+          color: "from-[#E60023] to-[#FFA726]",
+          gradient: "bg-gradient-to-br from-[#E60023] to-[#FFA726]",
+          iconBg: "from-[#E60023]/10 to-[#FFA726]/10",
+          textColor: "text-[#E60023]",
+        };
+      };
+
+      const colors = getColorScheme();
+
+      // Generate benefits array from parsed features
+      const generateBenefits = () => {
+        if (parsedFeatures.length > 0) {
+          return parsedFeatures.slice(0, 4).map((f) => f.title);
+        }
+        return [
+          `Streamlined ${featureName} processes`,
+          `Automated workflows and approvals`,
+          `Real-time ${featureName} insights`,
+          `Compliance-ready ${featureName} documentation`,
+        ];
+      };
+
+      return {
+        id: featureId,
+        title: featureName,
+        icon: getIcon(),
+        description: mainDescription,
+        heading: feature.feature_heading || "Powerful Features for",
+        highlighted_text: feature.highlighted_text || "Modern HRMS Software",
+        color: colors.color,
+        gradient: colors.gradient,
+        iconBg: colors.iconBg,
+        textColor: colors.textColor,
+        features:
+          parsedFeatures.length > 0
+            ? parsedFeatures
+            : [
+                {
+                  title: `${featureName} Management`,
+                  description: `Comprehensive ${featureName.toLowerCase()} management tools`,
+                  icon: getIcon(),
+                  stats: "Enterprise-grade",
+                },
+                {
+                  title: `Advanced ${featureName}`,
+                  description: `Advanced ${featureName.toLowerCase()} features for your business`,
+                  icon: getIcon(),
+                  stats: "Enhanced",
+                },
+              ],
+        stats: `Enhanced ${featureName} capabilities`,
+        image: `${storageUrl}${feature.image}`,
+        rightContent: {
+          title: `Advanced ${featureName} Suite`,
+          image: `${storageUrl}${feature.image}`,
+          description:
+            feature.desc ||
+            `Discover comprehensive ${featureName.toLowerCase()} features designed to streamline your operations, boost productivity, and transform your HR department.`,
+          benefits: generateBenefits(),
+          stats: [
+            { value: "80%", label: "Faster Processing" },
+            { value: "95%", label: "Data Accuracy" },
+            { value: "50%", label: "Time Saved" },
+          ],
+          specialFeature: `AI-powered ${featureName.toLowerCase()} insights and automation`,
+        },
+      };
+    });
+  };
+
+  // Fallback feature categories if no API data
+  const fallbackCategories = [
     {
       id: "core",
       title: "Core HR",
@@ -49,6 +288,8 @@ const HRMSFeatures = () => {
       description: "Essential HR management tools for workforce administration",
       color: "from-[#1F2E9A] to-[#2EC5FF]",
       gradient: "bg-gradient-to-br from-[#1F2E9A] to-[#2EC5FF]",
+      iconBg: "from-[#1F2E9A]/10 to-[#2EC5FF]/10",
+      textColor: "text-[#1F2E9A]",
       features: [
         {
           title: "Employee Database",
@@ -76,13 +317,10 @@ const HRMSFeatures = () => {
         },
       ],
       stats: "Used by 10,000+ employees",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600",
-      iconBg: "from-[#1F2E9A]/10 to-[#2EC5FF]/10",
-      textColor: "text-[#1F2E9A]",
       rightContent: {
         title: "Streamlined HR Management",
-        description: "Centralize all employee data and processes in one unified platform",
+        description:
+          "Centralize all employee data and processes in one unified platform",
         benefits: [
           "Single source of truth for employee data",
           "Automated workflows reduce manual work",
@@ -94,286 +332,58 @@ const HRMSFeatures = () => {
           { value: "95%", label: "Data Accuracy" },
           { value: "50%", label: "Time Saved" },
         ],
-        specialFeature: "AI-powered insights for employee engagement"
-      }
+        specialFeature: "AI-powered insights for employee engagement",
+      },
     },
     {
-      id: "analytics",
-      title: "Analytics",
+      id: "dashboard",
+      title: "Dashboard",
       icon: <BarChart3 className="w-8 h-8" />,
-      description: "Data-driven insights for strategic HR decisions",
+      description: "Interactive dashboards for real-time HR insights",
       color: "from-[#9B3DFF] to-[#E60023]",
       gradient: "bg-gradient-to-br from-[#9B3DFF] to-[#E60023]",
+      iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
+      textColor: "text-[#9B3DFF]",
       features: [
         {
-          title: "Real-time Dashboards",
-          description: "Interactive HR metrics and KPIs",
+          title: "Real-time Analytics",
+          description: "Live HR metrics and KPIs",
           icon: <Activity className="w-6 h-6" />,
-          stats: "100+ metrics tracked",
-        },
-        {
-          title: "Predictive Analytics",
-          description: "Forecast trends and identify patterns",
-          icon: <TrendingUp className="w-6 h-6" />,
-          stats: "85% prediction accuracy",
+          stats: "Real-time updates",
         },
         {
           title: "Custom Reports",
-          description: "Create and share detailed HR reports",
+          description: "Personalized report generation",
           icon: <FileText className="w-6 h-6" />,
-          stats: "Unlimited report templates",
-        },
-        {
-          title: "Employee Insights",
-          description: "Deep dive into workforce analytics",
-          icon: <Eye className="w-6 h-6" />,
-          stats: "360° employee view",
+          stats: "Unlimited templates",
         },
       ],
-      stats: "200+ pre-built reports",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600",
-      iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
-      textColor: "text-[#9B3DFF]",
+      stats: "Interactive dashboards",
       rightContent: {
-        title: "Intelligent Analytics Suite",
-        description: "Transform raw data into actionable insights with advanced analytics",
+        title: "Advanced Dashboard Suite",
+        description: "Interactive dashboards for real-time HR insights",
         benefits: [
-          "Predictive workforce planning",
-          "Real-time KPI dashboards",
-          "Customizable reporting engine",
-          "Benchmark against industry standards",
+          "Real-time HR analytics",
+          "Custom report generation",
+          "Data visualization tools",
+          "KPI tracking",
         ],
         stats: [
-          { value: "200+", label: "Pre-built Reports" },
-          { value: "85%", label: "Prediction Accuracy" },
-          { value: "60%", label: "Better Decisions" },
+          { value: "100%", label: "Real-time" },
+          { value: "24/7", label: "Availability" },
+          { value: "50+", label: "Metrics" },
         ],
-        specialFeature: "ML-powered trend analysis and forecasting"
-      }
-    },
-    {
-      id: "security",
-      title: "Security",
-      icon: <Shield className="w-8 h-8" />,
-      description: "Enterprise-grade security and compliance tools",
-      color: "from-[#2430A3] to-[#9B3DFF]",
-      gradient: "bg-gradient-to-br from-[#2430A3] to-[#9B3DFF]",
-      features: [
-        {
-          title: "GDPR Compliance",
-          description: "Full GDPR and data protection compliance",
-          icon: <Lock className="w-6 h-6" />,
-          stats: "100% compliant",
-        },
-        {
-          title: "Access Control",
-          description: "Role-based permissions and access management",
-          icon: <Settings className="w-6 h-6" />,
-          stats: "10+ permission levels",
-        },
-        {
-          title: "Audit Trail",
-          description: "Complete system activity logging",
-          icon: <FileText className="w-6 h-6" />,
-          stats: "Zero data loss",
-        },
-        {
-          title: "Data Encryption",
-          description: "End-to-end encryption for all data",
-          icon: <Shield className="w-6 h-6" />,
-          stats: "Military-grade security",
-        },
-      ],
-      stats: "SOC 2 Type II certified",
-      image:
-        "https://images.unsplash.com/photo-1556075798-4825dfaaf498?auto=format&fit=crop&w=600",
-      iconBg: "from-[#2430A3]/10 to-[#9B3DFF]/10",
-      textColor: "text-[#2430A3]",
-      rightContent: {
-        title: "Enterprise Security Framework",
-        description: "Protect sensitive HR data with military-grade security protocols",
-        benefits: [
-          "End-to-end encryption for all communications",
-          "SOC 2 Type II certified infrastructure",
-          "Granular role-based access controls",
-          "Real-time security monitoring and alerts",
-        ],
-        stats: [
-          { value: "99.99%", label: "Uptime SLA" },
-          { value: "Zero", label: "Security Breaches" },
-          { value: "100%", label: "GDPR Compliant" },
-        ],
-        specialFeature: "Advanced threat detection and prevention system"
-      }
-    },
-    {
-      id: "automation",
-      title: "Automation",
-      icon: <Zap className="w-8 h-8" />,
-      description: "AI-powered automation for repetitive HR tasks",
-      color: "from-[#00B894] to-[#2EC5FF]",
-      gradient: "bg-gradient-to-br from-[#00B894] to-[#2EC5FF]",
-      features: [
-        {
-          title: "Workflow Automation",
-          description: "Automate HR processes and approvals",
-          icon: <RefreshCw className="w-6 h-6" />,
-          stats: "80% time saved",
-        },
-        {
-          title: "AI Recruitment",
-          description: "Smart candidate screening and matching",
-          icon: <Cpu className="w-6 h-6" />,
-          stats: "90% match accuracy",
-        },
-        {
-          title: "Smart Notifications",
-          description: "Automated reminders and alerts",
-          icon: <Bell className="w-6 h-6" />,
-          stats: "Zero missed deadlines",
-        },
-        {
-          title: "Document Generation",
-          description: "Auto-generate HR documents and contracts",
-          icon: <FileText className="w-6 h-6" />,
-          stats: "100+ templates",
-        },
-      ],
-      stats: "500+ workflows automated",
-      image:
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600",
-      iconBg: "from-[#00B894]/10 to-[#2EC5FF]/10",
-      textColor: "text-[#00B894]",
-      rightContent: {
-        title: "Smart Automation Engine",
-        description: "Eliminate manual work with intelligent automation and AI",
-        benefits: [
-          "AI-powered recruitment matching",
-          "Automated onboarding workflows",
-          "Smart document generation and signing",
-          "Predictive scheduling optimization",
-        ],
-        stats: [
-          { value: "80%", label: "Time Saved" },
-          { value: "500+", label: "Workflows" },
-          { value: "90%", label: "Match Accuracy" },
-        ],
-        specialFeature: "Context-aware automation with machine learning"
-      }
-    },
-    {
-      id: "mobile",
-      title: "Mobile",
-      icon: <Smartphone className="w-8 h-8" />,
-      description: "Full-featured HRMS on mobile devices",
-      color: "from-[#FF6B6B] to-[#FFA726]",
-      gradient: "bg-gradient-to-br from-[#FF6B6B] to-[#FFA726]",
-      features: [
-        {
-          title: "Mobile App",
-          description: "Native iOS and Android applications",
-          icon: <Smartphone className="w-6 h-6" />,
-          stats: "4.8/5 app rating",
-        },
-        {
-          title: "Push Notifications",
-          description: "Instant updates and alerts",
-          icon: <Bell className="w-6 h-6" />,
-          stats: "Real-time delivery",
-        },
-        {
-          title: "Offline Mode",
-          description: "Work without internet connection",
-          icon: <Cloud className="w-6 h-6" />,
-          stats: "Full functionality",
-        },
-        {
-          title: "Mobile Approval",
-          description: "Approve requests on the go",
-          icon: <CheckCircle className="w-6 h-6" />,
-          stats: "2-minute approvals",
-        },
-      ],
-      stats: "50,000+ mobile users",
-      image:
-        "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600",
-      iconBg: "from-[#FF6B6B]/10 to-[#FFA726]/10",
-      textColor: "text-[#FF6B6B]",
-      rightContent: {
-        title: "Mobile-First HR Experience",
-        description: "Access all HR features anytime, anywhere with our mobile platform",
-        benefits: [
-          "Native iOS and Android applications",
-          "Offline functionality for remote work",
-          "Biometric authentication for security",
-          "Push notifications for instant updates",
-        ],
-        stats: [
-          { value: "4.8/5", label: "App Rating" },
-          { value: "50K+", label: "Active Users" },
-          { value: "99%", label: "Uptime" },
-        ],
-        specialFeature: "Progressive web app with native performance"
-      }
-    },
-    {
-      id: "cloud",
-      title: "Cloud",
-      icon: <Cloud className="w-8 h-8" />,
-      description: "Scalable cloud infrastructure for global teams",
-      color: "from-[#E60023] to-[#FFA726]",
-      gradient: "bg-gradient-to-br from-[#E60023] to-[#FFA726]",
-      features: [
-        {
-          title: "Global Access",
-          description: "Access from anywhere in the world",
-          icon: <Globe className="w-6 h-6" />,
-          stats: "24/7 availability",
-        },
-        {
-          title: "Auto Scaling",
-          description: "Scale resources based on demand",
-          icon: <TrendingUp className="w-6 h-6" />,
-          stats: "Zero downtime",
-        },
-        {
-          title: "Data Backup",
-          description: "Automatic backups and recovery",
-          icon: <Database className="w-6 h-6" />,
-          stats: "99.99% uptime",
-        },
-        {
-          title: "API Access",
-          description: "Integrate with your existing tools",
-          icon: <Settings className="w-6 h-6" />,
-          stats: "50+ integrations",
-        },
-      ],
-      stats: "99.99% uptime SLA",
-      image:
-        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600",
-      iconBg: "from-[#E60023]/10 to-[#FFA726]/10",
-      textColor: "text-[#E60023]",
-      rightContent: {
-        title: "Enterprise Cloud Infrastructure",
-        description: "Scalable, secure, and reliable cloud platform for global businesses",
-        benefits: [
-          "Multi-region deployment options",
-          "Automatic scaling for peak loads",
-          "Enterprise-grade API ecosystem",
-          "Real-time data synchronization",
-        ],
-        stats: [
-          { value: "99.99%", label: "Uptime" },
-          { value: "50+", label: "Integrations" },
-          { value: "24/7", label: "Global Support" },
-        ],
-        specialFeature: "Multi-cloud architecture for maximum reliability"
-      }
+        specialFeature: "Interactive data visualization",
+      },
     },
   ];
 
+  const featureCategories =
+    transformFeatureData().length > 0
+      ? transformFeatureData()
+      : fallbackCategories;
+
+  // Find active data, default to first category if activeCategory not set
   const activeData =
     featureCategories.find((cat) => cat.id === activeCategory) ||
     featureCategories[0];
@@ -447,147 +457,151 @@ const HRMSFeatures = () => {
           className="text-center mb-20 max-w-4xl mx-auto"
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight">
-            <span className="text-[#2430A3]">Powerful Features for</span>
+            <span className="text-[#2430A3]">
+              {featureCategories[0]?.heading || "Powerful Features for"}
+            </span>
             <span className="block mt-2 bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
-              Modern HRMS  Software
+              {featureCategories[0]?.highlighted_text || "Modern HRMS Software"}
             </span>
           </h2>
 
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Discover comprehensive HRMS features designed to streamline your
-            operations, boost productivity, and transform your HR department.
+            {featureCategories[0]?.description ||
+              "Discover comprehensive HRMS features designed to streamline your operations, boost productivity, and transform your HR department."}
           </p>
         </motion.div>
 
         {/* Feature Categories Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16"
-        >
-          <div className="flex flex-wrap justify-center gap-3">
-            {featureCategories.map((category, index) => (
-              <motion.button
-                key={category.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => setActiveCategory(category.id)}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className={`group relative overflow-hidden rounded-2xl transition-all duration-500 ${
-                  activeCategory === category.id
-                    ? "shadow-xl"
-                    : "shadow-md hover:shadow-lg"
-                }`}
-              >
-                {/* Animated Background */}
-                <div
-                  className={`absolute inset-0 ${category.gradient} transition-opacity duration-500 ${
+        {featureCategories.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16"
+          >
+            <div className="flex flex-wrap justify-center gap-3">
+              {featureCategories.map((category, index) => (
+                <motion.button
+                  key={category.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => setActiveCategory(category.id)}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`group relative overflow-hidden rounded-2xl transition-all duration-500 ${
                     activeCategory === category.id
-                      ? "opacity-100"
-                      : "opacity-0"
+                      ? "shadow-xl"
+                      : "shadow-md hover:shadow-lg"
                   }`}
-                />
-
-                {/* Static Background */}
-                <div
-                  className={`absolute inset-0 bg-white transition-opacity duration-500 ${
-                    activeCategory === category.id
-                      ? "opacity-0"
-                      : "opacity-100"
-                  }`}
-                />
-
-                {/* Border */}
-                <div
-                  className={`absolute inset-0 rounded-2xl border-2 transition-colors duration-500 ${
-                    activeCategory === category.id
-                      ? "border-transparent"
-                      : "border-gray-200 group-hover:border-gray-300"
-                  }`}
-                />
-
-                {/* Content */}
-                <div className="relative flex items-center gap-3 px-6 py-3">
-                  {/* Icon Container */}
-                  <motion.div
-                    animate={
+                >
+                  {/* Animated Background */}
+                  <div
+                    className={`absolute inset-0 ${category.gradient} transition-opacity duration-500 ${
                       activeCategory === category.id
-                        ? {
-                            rotate: [0, 10, -10, 0],
-                          }
-                        : {}
-                    }
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className={`p-2 rounded-xl transition-all duration-500 ${
-                      activeCategory === category.id
-                        ? "bg-white/20"
-                        : `bg-gradient-to-br ${category.iconBg}`
+                        ? "opacity-100"
+                        : "opacity-0"
                     }`}
-                  >
-                    <div
-                      className={`transition-colors duration-500 ${
+                  />
+
+                  {/* Static Background */}
+                  <div
+                    className={`absolute inset-0 bg-white transition-opacity duration-500 ${
+                      activeCategory === category.id
+                        ? "opacity-0"
+                        : "opacity-100"
+                    }`}
+                  />
+
+                  {/* Border */}
+                  <div
+                    className={`absolute inset-0 rounded-2xl border-2 transition-colors duration-500 ${
+                      activeCategory === category.id
+                        ? "border-transparent"
+                        : "border-gray-200 group-hover:border-gray-300"
+                    }`}
+                  />
+
+                  {/* Content */}
+                  <div className="relative flex items-center gap-3 px-6 py-3">
+                    {/* Icon Container */}
+                    <motion.div
+                      animate={
+                        activeCategory === category.id
+                          ? {
+                              rotate: [0, 10, -10, 0],
+                            }
+                          : {}
+                      }
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className={`p-2 rounded-xl transition-all duration-500 ${
+                        activeCategory === category.id
+                          ? "bg-white/20"
+                          : `bg-gradient-to-br ${category.iconBg}`
+                      }`}
+                    >
+                      <div
+                        className={`transition-colors duration-500 ${
+                          activeCategory === category.id
+                            ? "text-white"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {React.cloneElement(category.icon, {
+                          className: "w-5 h-5",
+                        })}
+                      </div>
+                    </motion.div>
+
+                    {/* Title */}
+                    <span
+                      className={`font-semibold whitespace-nowrap transition-colors duration-500 ${
                         activeCategory === category.id
                           ? "text-white"
                           : "text-gray-700"
                       }`}
                     >
-                      {React.cloneElement(category.icon, {
-                        className: "w-5 h-5",
-                      })}
-                    </div>
-                  </motion.div>
+                      {category.title}
+                    </span>
 
-                  {/* Title */}
-                  <span
-                    className={`font-semibold whitespace-nowrap transition-colors duration-500 ${
-                      activeCategory === category.id
-                        ? "text-white"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {category.title}
-                  </span>
+                    {/* Active Indicator */}
+                    <AnimatePresence>
+                      {activeCategory === category.id && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 200 }}
+                        >
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-                  {/* Active Indicator */}
-                  <AnimatePresence>
-                    {activeCategory === category.id && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 180 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                      >
-                        <Sparkles className="w-4 h-4 text-white" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Shine Effect */}
-                {activeCategory === category.id && (
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: ["-200%", "200%"] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear",
-                      repeatDelay: 1,
-                    }}
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
+                  {/* Shine Effect */}
+                  {activeCategory === category.id && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      animate={{ x: ["-200%", "200%"] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                        repeatDelay: 1,
+                      }}
+                    />
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
@@ -771,12 +785,12 @@ const HRMSFeatures = () => {
                               </div>
                             </div>
                           </div>
-                          <motion.div
+                          {/* <motion.div
                             animate={{ x: [0, 5, 0] }}
                             transition={{ duration: 1.5, repeat: Infinity }}
                           >
                             <ArrowRight className="w-5 h-5 text-gray-400 group-hover/btn:text-gray-600 transition-colors" />
-                          </motion.div>
+                          </motion.div> */}
                         </div>
                       </motion.button>
                     </div>
@@ -823,7 +837,9 @@ const HRMSFeatures = () => {
                 {/* Main Showcase Card */}
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   {/* Gradient Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${activeData.color}`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${activeData.color}`}
+                  />
 
                   {/* Animated Mesh Gradient */}
                   <motion.div
@@ -859,9 +875,12 @@ const HRMSFeatures = () => {
                       <h3 className="text-3xl font-bold text-white mb-3">
                         {activeData.rightContent.title}
                       </h3>
-                      <p className="text-white/80 text-lg">
-                        {activeData.rightContent.description}
-                      </p>
+                      <p
+                        className="text-white/80 text-lg"
+                        dangerouslySetInnerHTML={{
+                          __html: activeData.rightContent.description,
+                        }}
+                      ></p>
                     </motion.div>
 
                     {/* Key Benefits Card */}
@@ -872,36 +891,7 @@ const HRMSFeatures = () => {
                       whileHover={{ y: -5 }}
                       className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/20"
                     >
-                      <div className="flex items-center gap-3 mb-5">
-                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                          <Zap className="w-6 h-6 text-white" />
-                        </div>
-                        <h4 className="text-xl font-bold text-white">
-                          Key Benefits
-                        </h4>
-                      </div>
-                      <div className="space-y-3">
-                        {activeData.rightContent.benefits.map((benefit, idx) => (
-                          <motion.div
-                            key={benefit}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + idx * 0.1 }}
-                            whileHover={{ x: 5 }}
-                            className="flex items-center gap-3 group/benefit"
-                          >
-                            <motion.div
-                              whileHover={{ rotate: 360, scale: 1.2 }}
-                              transition={{ duration: 0.5 }}
-                            >
-                              <CheckCircle className="w-5 h-5 text-[#00B894] flex-shrink-0" />
-                            </motion.div>
-                            <span className="text-white/90 group-hover/benefit:text-white transition-colors">
-                              {benefit}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
+                     <img src={activeData.rightContent.image} alt={activeData.rightContent.title} className="w-full h-48 object-cover rounded-lg" />
                     </motion.div>
 
                     {/* Stats Showcase */}
@@ -992,78 +982,7 @@ const HRMSFeatures = () => {
           </div>
         </div>
 
-        {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-24"
-        >
-          <div className="relative max-w-4xl mx-auto">
-            {/* Glow Effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#2EC5FF] rounded-3xl blur-2xl opacity-10" />
-
-            {/* Card */}
-            <div className="relative bg-white rounded-3xl p-10 shadow-2xl border border-gray-100 overflow-hidden">
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-[0.03]">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 2px 2px, #1F2E9A 1px, transparent 0)`,
-                    backgroundSize: "30px 30px",
-                  }}
-                />
-              </div>
-
-              <div className="relative text-center">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#F2EEFF] to-[#E6F7FF] mb-6"
-                >
-                  <Sparkles className="w-4 h-4 text-[#9B3DFF]" />
-                  <span className="text-sm font-semibold text-[#1F2E9A]">
-                    START YOUR FREE TRIAL
-                  </span>
-                </motion.div>
-
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Ready  Your HRMS Software?
-                </h3>
-                <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                  Join thousands of businesses that trust our HRMS platform.
-                  Start your 14-day free trial today.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  {/* <MagneticButton
-                    variant="square"
-                    className="group bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-[#1F2E9A]/20 transition-all duration-300 flex items-center justify-center space-x-3"
-                  >
-                    <span>Start Free Trial</span>
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </motion.div>
-                  </MagneticButton> */}
-                  <MagneticButton
-                    variant="square"
-                    className="group bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-red-200/20 transition-all duration-300 flex items-center justify-center space-x-3"
-                  >
-                    <span>Schedule Demo</span>
-                    <Calendar className="w-5 h-5" />
-                  </MagneticButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        
       </div>
     </section>
   );

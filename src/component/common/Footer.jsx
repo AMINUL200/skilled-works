@@ -61,7 +61,7 @@ const Footer = () => {
     { name: "Pricing", path: "/pricing" },
     { name: "Blog", path: "/blog" },
     { name: "Contacts", path: "/contact" },
-    { name: "Customer Support", path: "/customer-support" }
+    // { name: "Customer Support", path: "/customer-support" }
   ];
 
   // External links

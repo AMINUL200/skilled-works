@@ -23,7 +23,7 @@ import ProductDetailspage from "./pages/product/ProductDetailspage";
 import PrivacyPolicy from "./pages/policy/PrivacyPolicy";
 import TermsOfUse from "./pages/policy/TermsOfUse";
 import PrivacyRights from "./pages/policy/PrivacyRights";
-import ServiceRender from "./pages/service/ServiceRender";
+// import ServiceRender from "./pages/service/ServiceRender";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import ServicePage from "./pages/service/ServicePage";
@@ -40,6 +40,15 @@ import HandleWhyChoseOurPlatform from "./pages/admin/about/HandleWhyChoseOurPlat
 import HandleWhatWeOffer from "./pages/admin/about/HandleWhatWeOffer";
 import HandleAbout from "./pages/admin/about/HandleAbout";
 import HandleContact from "./pages/admin/booking/HandleContact";
+import ServiceRender from "./pages/service/ServiceRender";
+import HandleProduct from "./pages/admin/product/HandleProduct";
+import HandleServicesWhyChose from "./pages/admin/services/HandleServicesWhyChose";
+import HandleServicesCustomerStories from "./pages/admin/services/HandleServicesCustomerStories";
+import HandleRecruitmentPage from "./pages/admin/recruitment/HandleRecruitmentPage";
+import HandleJobs from "./pages/admin/recruitment/HandleJobs";
+import HandleJobsApplication from "./pages/admin/recruitment/HandleJobsApplication";
+import HandleBanner from "./pages/admin/banner/HandleBanner";
+import HandleAllInOnePlatforms from "./pages/admin/banner/HandleAllInOnePlatforms";
 
 const App = () => {
   return (
@@ -64,11 +73,11 @@ const App = () => {
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/recruitment" element={<Recruitment />} />
           <Route
-            path="/recruitment/apply/:id"
+            path="/recruitment/apply/:slug"
             element={<RecruitmentDetails />}
           />
           <Route path="/product" element={<ProductPage />} />
-          <Route path="/product/:id" element={<ProductDetailspage />} />
+          <Route path="/product/:slug" element={<ProductDetailspage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/privacy-rights" element={<PrivacyRights />} />
@@ -100,6 +109,17 @@ const App = () => {
             path="handle-service-type-feature"
             element={<HandleServiceTypeFeature />}
           />
+          <Route path="handle-service-why-choose" element={<HandleServicesWhyChose />} />
+          <Route path="handle-service-customer-stories" element={<HandleServicesCustomerStories />} />
+
+          <Route path="handle-product" element={<HandleProduct />} />
+
+          <Route path="handle-recruitment-page" element={<HandleRecruitmentPage />} />
+          <Route path="handle-jobs" element={<HandleJobs />} />
+          <Route path="handle-jobs-applications" element={<HandleJobsApplication />} />
+
+          <Route path="handle-banner" element={<HandleBanner />} />
+          <Route path="handle-all-in-one-platforms" element={<HandleAllInOnePlatforms />} />
 
           {/* <Route path="profile" element={<AdminProfile />} /> */}
         </Route>

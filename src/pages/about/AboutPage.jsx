@@ -21,12 +21,20 @@ import AboutRight from "./AboutRight";
 import AboutLeft from "./AboutLeft";
 import AboutBusnes from "./AboutBusnes";
 import PageLoader from "../../component/common/PageLoader";
+import { api } from "../../utils/app";
 
 const AboutPage = () => {
   const navigate = useNavigate();
   const section2Ref = useRef(null);
   const isInView2 = useInView(section2Ref, { once: true, amount: 0.3 });
   const controls2 = useAnimation();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [serviceDetails, setServiceDetails] = useState(null);
+  const [faqData, setFaqData] = useState([]);
+  const [section2Data, setSection2Data] = useState(null);
+  const [section3Data, setSection3Data] = useState(null);
+  const [section4Data, setSection4Data] = useState(null);
 
   useEffect(() => {
     if (isInView2) {
@@ -34,161 +42,80 @@ const AboutPage = () => {
     }
   }, [isInView2, controls2]);
 
-  // Section 2 Data - Milestones
-  const milestones = [
-    {
-      year: "2020",
-      title: "Company Founded",
-      description: "Started with vision to revolutionize UK HR technology",
-      icon: <Calendar className="w-5 h-5" />,
-      color: "from-[#E60023] to-[#FF1F1F]",
-    },
-    {
-      year: "2021",
-      title: "First Major Client",
-      description: "Onboarded 50+ UK businesses in first year",
-      icon: <Users className="w-5 h-5" />,
-      color: "from-[#1F2E9A] to-[#2430A3]",
-    },
-    {
-      year: "2022",
-      title: "Platform Launch",
-      description: "Launched comprehensive HRMS platform",
-      icon: <Target className="w-5 h-5" />,
-      color: "from-[#2EC5FF] to-[#9B5CFF]",
-    },
-    {
-      year: "2023",
-      title: "500+ Clients",
-      description: "Reached milestone of 500 UK businesses",
-      icon: <Trophy className="w-5 h-5" />,
-      color: "from-[#00B894] to-[#2EC5FF]",
-    },
-    {
-      year: "2024",
-      title: "Award Recognition",
-      description: "Received UK HR Technology Innovation Award",
-      icon: <Star className="w-5 h-5" />,
-      color: "from-[#FF4D8D] to-[#FF9F1C]",
-    },
-  ];
-
-  // Team Members
-  const team = [
-    {
-      name: "Sarah Johnson",
-      role: "CEO & Founder",
-      expertise: "HR Technology Strategy",
-      image:
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80",
-      color: "from-[#1F2E9A] to-[#2430A3]",
-    },
-    {
-      name: "Michael Chen",
-      role: "CTO",
-      expertise: "Software Architecture",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-      color: "from-[#2EC5FF] to-[#9B5CFF]",
-    },
-    {
-      name: "Emma Wilson",
-      role: "Head of HR Consulting",
-      expertise: "UK Compliance & Strategy",
-      image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80",
-      color: "from-[#E60023] to-[#FF1F1F]",
-    },
-    {
-      name: "David Roberts",
-      role: "Operations Director",
-      expertise: "Business Process Optimization",
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
-      color: "from-[#00B894] to-[#2EC5FF]",
-    },
-  ];
+  const fetchData = async () => {
+    try {
+      const response = await api.get(`/about`);
+      if (response.status) {
+        setServiceDetails(response.data.data.about[0]);
+        // setFaqData(response.data.data.faq);
+        setSection2Data(response.data.data.about[1]);
+        setSection3Data(response.data.data.about[2]);
+        setSection4Data(response.data.data.about[3]);
+        // Map FAQ data to match FAQComponent props
+        const mappedFaqs = response.data.data.faq.map((faq) => ({
+          id: faq.id,
+          question: faq.faq_question,
+          answer: faq.faq_answer,
+          category: faq.faq_type, // Using faq_type as category
+          link: null, // Add link if needed from your data structure
+        }));
+        setFaqData(mappedFaqs);
+      }
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching service data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // FAQ Data
-  const faqData = [
-    {
-      id: 1,
-      question: "What makes your HR solutions unique for UK businesses?",
-      answer:
-        "Our platform is specifically designed for UK compliance requirements, including GDPR, employment law, and industry-specific regulations. We combine local expertise with global best practices to deliver solutions that work seamlessly within the UK business environment.",
-      category: "Expertise",
-    },
-    {
-      id: 2,
-      question: "How do you ensure data security and privacy?",
-      answer:
-        "We use bank-level encryption, UK-based data centers, and comply with all UK GDPR regulations. Regular security audits, penetration testing, and ISO 27001 certification ensure your data is protected according to the highest industry standards.",
-      category: "Security",
-    },
-    {
-      id: 3,
-      question: "What industries do you specialize in?",
-      answer:
-        "We serve a wide range of UK industries including aviation, healthcare, construction, IT, finance, education, and hospitality. Each solution is tailored to meet industry-specific compliance and operational requirements.",
-      category: "Industries",
-    },
-    {
-      id: 4,
-      question: "How do you support clients during implementation?",
-      answer:
-        "Our dedicated implementation team provides end-to-end support including data migration, system configuration, staff training, and ongoing optimization. We assign a dedicated account manager to ensure smooth transition and adoption.",
-      category: "Support",
-    },
-    {
-      id: 5,
-      question: "What is your company's vision for the future?",
-      answer:
-        "We aim to become the leading HR-tech provider in the UK by continuously innovating and adapting to changing workforce dynamics. Our focus is on AI-driven insights, enhanced employee experience, and seamless integration with emerging technologies.",
-      category: "Vision",
-    },
-  ];
+  // const faqData = [
+  //   {
+  //     id: 1,
+  //     question: "What makes your HR solutions unique for UK businesses?",
+  //     answer:
+  //       "Our platform is specifically designed for UK compliance requirements, including GDPR, employment law, and industry-specific regulations. We combine local expertise with global best practices to deliver solutions that work seamlessly within the UK business environment.",
+  //     category: "Expertise",
+  //   },
+  //   {
+  //     id: 2,
+  //     question: "How do you ensure data security and privacy?",
+  //     answer:
+  //       "We use bank-level encryption, UK-based data centers, and comply with all UK GDPR regulations. Regular security audits, penetration testing, and ISO 27001 certification ensure your data is protected according to the highest industry standards.",
+  //     category: "Security",
+  //   },
+  //   {
+  //     id: 3,
+  //     question: "What industries do you specialize in?",
+  //     answer:
+  //       "We serve a wide range of UK industries including aviation, healthcare, construction, IT, finance, education, and hospitality. Each solution is tailored to meet industry-specific compliance and operational requirements.",
+  //     category: "Industries",
+  //   },
+  //   {
+  //     id: 4,
+  //     question: "How do you support clients during implementation?",
+  //     answer:
+  //       "Our dedicated implementation team provides end-to-end support including data migration, system configuration, staff training, and ongoing optimization. We assign a dedicated account manager to ensure smooth transition and adoption.",
+  //     category: "Support",
+  //   },
+  //   {
+  //     id: 5,
+  //     question: "What is your company's vision for the future?",
+  //     answer:
+  //       "We aim to become the leading HR-tech provider in the UK by continuously innovating and adapting to changing workforce dynamics. Our focus is on AI-driven insights, enhanced employee experience, and seamless integration with emerging technologies.",
+  //     category: "Vision",
+  //   },
+  // ];
 
-  const contentVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        staggerChildren: 0.2,
-      },
-    },
-  };
+  // ⏳ 2 second loader
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const featureVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  };
-
-  const handleCTAClick = () => {
-    navigate("/contact");
-  };
-
-    const [loading, setLoading] = useState(true);
-  
-    // ⏳ 2 second loader
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 2000);
-  
-      return () => clearTimeout(timer);
-    }, []);
-  
-    if (loading) {
-      return <PageLoader />;
-    }
+  if (loading) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-45">
@@ -210,16 +137,16 @@ const AboutPage = () => {
       </div>
 
       {/* Section 1: Imported AboutHero Component */}
-      <AboutHero />
+      <AboutHero aboutData={serviceDetails} />
 
       {/* Section 2: Left Content & Right Image */}
-      <AboutRight />
+      <AboutRight aboutData={section2Data} />
 
       {/* Section 3: Right content & Left Image */}
-      <AboutLeft />
+      <AboutLeft aboutData={section3Data} />
 
       {/* Section 4: Business Expertise */}
-      <AboutBusnes />
+      <AboutBusnes aboutData={section4Data} />
 
       {/* Section 3: FAQ Section */}
       <section className="py-20">

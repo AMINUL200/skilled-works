@@ -1,7 +1,9 @@
 import React from "react";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 
-const AboutBusnes = () => {
+const AboutBusnes = ({ aboutData = {} }) => {
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+  console.log("AboutBusnes data:", aboutData); // Debug log to check data structure
   return (
     <section className="relative py-16 lg:py-24 bg-gradient-to-r from-[#F6E9FF] via-[#EEF0FF] to-[#E9F8FF]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -10,43 +12,10 @@ const AboutBusnes = () => {
 
           {/* LEFT CONTENT */}
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1F2E9A] mb-4">
-              Growth in Business 2025
-            </h2>
-
-            <p className="text-gray-700 leading-relaxed max-w-xl mx-auto lg:mx-0 mb-10 text-sm sm:text-base">
-              The Skilled Workers Cloud™ strategy think tank, dedicated to
-              exploring and developing valuable new insights from business,
-              technology & compliances by embracing the powerful technology of
-              ideas. The company engages business leaders in productive
-              discussion and experimentation to expand the boundaries of
-              business theory and practice and to implement the technology to
-              translate innovative ideas from within and beyond business which
-              act as Main Catalyst to the business success.
-            </p>
-
-            {/* STATS */}
-            <div className="grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0">
-              {[
-                { value: "58+", label: "Projects" },
-                { value: "100+", label: "Clients" },
-                { value: "98%", label: "Satisfaction" },
-              ].map((item, i) => (
-                <div key={i} className="text-center">
-                  <h3 className="text-3xl sm:text-4xl font-bold text-black">
-                    {item.value}
-                  </h3>
-                  <p className="text-gray-700 text-sm mt-1">
-                    {item.label}
-                  </p>
-                  {item.label === "Satisfaction" && (
-                    <p className="text-xs text-gray-500">
-                      Rendered Happy Clients!
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+           <p className="text-base sm:text-lg text-[#444444] leading-relaxed" dangerouslySetInnerHTML={{ __html: aboutData?.description }}
+              aria-label={aboutData?.description_meta ? "Business expertise description" : "No description available"}
+            
+           ></p>
           </div>
 
           {/* RIGHT IMAGE */}
@@ -54,8 +23,8 @@ const AboutBusnes = () => {
 
             <div className="w-full max-w-sm sm:max-w-md lg:max-w-md rounded-xl overflow-hidden shadow-2xl">
               <img
-                src="/image/840315605_about_img1.jpg"
-                alt="business growth"
+                src={`${STORAGE_URL}${aboutData?.image}`}
+                alt={aboutData?.image_alt || "business growth"}
                 className="w-full h-auto object-cover"
               />
             </div>

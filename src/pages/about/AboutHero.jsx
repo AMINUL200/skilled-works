@@ -8,21 +8,42 @@ import {
   Award,
   Globe,
   ChevronRight,
+  Target,
+  CheckCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MagneticButton from "../../component/common/MagneticButtonProps";
 
-const AboutHero = () => {
+const AboutHero = ({ aboutData = {} }) => {
   const navigate = useNavigate();
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
   const controls = useAnimation();
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+
+  // console.log("AboutHero data:", aboutData); // Debug log to check data structure
 
   useEffect(() => {
     if (isInView) {
       controls.start("visible");
     }
   }, [isInView, controls]);
+
+  // Extract plain text from HTML description for the inner circle
+  const extractShortText = (htmlString, maxLength = 50) => {
+    if (!htmlString) return "OUR STORY UNFOLDS";
+    const doc = new DOMParser().parseFromString(htmlString, "text/html");
+    const text = doc.body.textContent || "";
+    return text.substring(0, maxLength).split(" ").slice(0, 6).join(" ") + "...";
+  };
+
+  // Get year from created_at or use default
+  const getYear = () => {
+    if (aboutData?.created_at) {
+      return new Date(aboutData.created_at).getFullYear();
+    }
+    return "2020";
+  };
 
   const values = [
     {
@@ -87,10 +108,30 @@ const AboutHero = () => {
     },
   };
 
+  // Split description into paragraphs
+  const getDescriptionParagraphs = () => {
+    if (!aboutData?.description) return [];
+    
+    const doc = new DOMParser().parseFromString(aboutData.description, "text/html");
+    const paragraphs = doc.querySelectorAll('p');
+    const validParagraphs = [];
+    
+    paragraphs.forEach(p => {
+      const text = p.textContent?.trim();
+      if (text && text.length > 0 && text !== ' ') {
+        validParagraphs.push(text);
+      }
+    });
+    
+    return validParagraphs.length > 0 ? validParagraphs : [doc.body.textContent || ''];
+  };
+
+  const descriptionParagraphs = getDescriptionParagraphs();
+
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden py-8  "
+      className="relative w-full overflow-hidden py-8"
       style={{
         background:
           "linear-gradient(135deg, #FAFAFF 0%, #F2EEFF 50%, #FAFAFF 100%)",
@@ -113,7 +154,7 @@ const AboutHero = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-8 lg:gap-16">
-          {/* LEFT — ANIMATED CIRCULAR DESIGN */}
+          {/* LEFT — ANIMATED CIRCULAR DESIGN WITH ACTUAL IMAGE */}
           <div className="order-1 w-full lg:w-1/2 flex justify-center lg:justify-end">
             <motion.div
               variants={circleVariants}
@@ -145,8 +186,8 @@ const AboutHero = () => {
                     className="absolute w-5 h-5 sm:w-6 sm:h-6"
                     style={{
                       transform: `rotate(${degree}deg)`,
-                      left: 'calc(50% - 10px)',
-                      top: '-10px',
+                      left: "calc(50% - 10px)",
+                      top: "-10px",
                     }}
                   >
                     <div
@@ -164,9 +205,18 @@ const AboutHero = () => {
                 ))}
               </motion.div>
 
-              {/* Inner Ring */}
+              {/* Inner Ring with Actual Image */}
               <div className="absolute w-[210px] h-[210px] sm:w-[260px] sm:h-[260px] md:w-[310px] md:h-[310px] lg:w-[360px] lg:h-[360px] rounded-full border-2 sm:border-4 border-white/30 shadow-xl lg:shadow-2xl overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1F2E9A] via-[#2430A3] to-[#1F2E9A] rounded-full flex items-center justify-center">
+                  {/* Background Image if available */}
+                  {aboutData?.image && (
+                    <img
+                      src={`${STORAGE_URL}${aboutData.image}`}
+                      alt={aboutData.image_alt || aboutData.heading || "About Us"}
+                      className="absolute inset-0 w-full h-full object-cover opacity-30"
+                    />
+                  )}
+
                   {/* Animated Background Pattern */}
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 bg-white rounded-full top-1/4 left-1/4 animate-pulse"></div>
@@ -174,21 +224,8 @@ const AboutHero = () => {
                   </div>
 
                   {/* Main Content */}
-                  <div className="relative text-center px-4 sm:px-6 lg:px-8">
-                    <motion.h2
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3 sm:mb-4"
-                    >
-                      OUR
-                      <br />
-                      STORY
-                      <br />
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2EC5FF] to-[#9B5CFF]">
-                        UNFOLDS
-                      </span>
-                    </motion.h2>
+                  <div className="relative text-center px-4 sm:px-6 lg:px-8 z-10">
+              
 
                     {/* Animated Line */}
                     <motion.div
@@ -201,33 +238,7 @@ const AboutHero = () => {
                 </div>
               </div>
 
-              {/* Floating Badge - Top */}
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute top-0 sm:top-2 right-2 sm:right-4 md:right-8 bg-white px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 rounded-full shadow-lg sm:shadow-xl"
-              >
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Award className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#FF9F1C]" />
-                  <span className="text-xs sm:text-sm font-bold text-[#1F2E9A]">
-                    UK BASED
-                  </span>
-                </div>
-              </motion.div>
-
-              {/* Floating Badge - Bottom */}
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                className="absolute bottom-0 sm:bottom-2 left-2 sm:left-4 md:left-8 bg-white px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 rounded-full shadow-lg sm:shadow-xl"
-              >
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-[#2EC5FF]" />
-                  <span className="text-xs sm:text-sm font-bold text-[#1F2E9A]">
-                    SINCE 2020
-                  </span>
-                </div>
-              </motion.div>
+             
             </motion.div>
           </div>
 
@@ -242,10 +253,10 @@ const AboutHero = () => {
             <div className="space-y-3 sm:space-y-4">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center lg:text-left">
                 <span className="block text-[#2430A3]">
-                  About Skilled Workers Cloud
+                  {aboutData?.heading || "About Skilled Workers Cloud"}
                 </span>
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#9B3DFF] to-[#E60023]">
-                  UK HR-Tech Pioneer
+                  {aboutData?.highlighted_text || "UK HR-Tech Pioneer"}
                 </span>
               </h2>
             </div>
@@ -258,34 +269,42 @@ const AboutHero = () => {
               className="h-1.5 bg-gradient-to-r from-[#E60023] to-[#FF1F1F] rounded-full mx-auto lg:mx-0"
             />
 
-            {/* Content */}
+            {/* Content from API */}
             <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
-              <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
-                <strong className="text-[#1F2E9A]">
-                  SKILLED WORKERS CLOUD
-                </strong>{" "}
-                was founded in 2020 with a clear mission: to revolutionize HR
-                technology for UK businesses. We recognized the growing need for
-                comprehensive, cloud-based HR solutions that could adapt to the
-                unique challenges of the UK market.
-              </p>
+              {descriptionParagraphs.length > 0 ? (
+                descriptionParagraphs.map((paragraph, index) => (
+                  <p key={index} className="text-base sm:text-lg text-[#444444] leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))
+              ) : (
+                <>
+                  <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
+                    <strong className="text-[#1F2E9A]">
+                      SKILLED WORKERS CLOUD
+                    </strong>{" "}
+                    was founded in 2020 with a clear mission: to revolutionize HR
+                    technology for UK businesses. We recognized the growing need for
+                    comprehensive, cloud-based HR solutions that could adapt to the
+                    unique challenges of the UK market.
+                  </p>
 
-              <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
-                What started as a vision to simplify HR processes has grown into
-                a leading HR-tech company serving 500+ businesses across the UK.
-                Our journey has been driven by innovation, customer focus, and a
-                deep understanding of UK employment regulations.
-              </p>
+                  <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
+                    What started as a vision to simplify HR processes has grown into
+                    a leading HR-tech company serving 500+ businesses across the UK.
+                    Our journey has been driven by innovation, customer focus, and a
+                    deep understanding of UK employment regulations.
+                  </p>
 
-              <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
-                Today, we're proud to be at the forefront of HR technology,
-                helping businesses transform their HR operations through
-                intelligent software solutions, expert consulting, and
-                unparalleled support.
-              </p>
+                  <p className="text-base sm:text-lg text-[#444444] leading-relaxed">
+                    Today, we're proud to be at the forefront of HR technology,
+                    helping businesses transform their HR operations through
+                    intelligent software solutions, expert consulting, and
+                    unparalleled support.
+                  </p>
+                </>
+              )}
             </div>
-
-          
 
             
           </motion.div>

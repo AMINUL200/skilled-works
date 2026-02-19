@@ -3,6 +3,7 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 
 const FAQComponent = ({ faqs, title = "Frequently Asked Questions", description = "Find quick answers to common questions" }) => {
   const [activeFAQ, setActiveFAQ] = useState(null);
+  // console.log("FAQComponent received FAQs:", faqs);
 
   return (
     <div className="w-full">

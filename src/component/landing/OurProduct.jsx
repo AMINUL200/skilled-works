@@ -25,176 +25,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import MagneticButton from "../common/MagneticButtonProps";
 
-const OurProduct = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
+const OurProduct = ({ productData = [] }) => {
+  const [filteredProducts, setFilteredProducts] = useState(productData);
   const [hoveredProduct, setHoveredProduct] = useState(null);
-
-  const products = [
-    {
-      id: 1,
-      title: "Smart HRMS Suite Pro",
-      description:
-        "Complete human resource management powered by artificial intelligence with real-time analytics and predictive insights.",
-      image:
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
-      category: "HR Tech",
-      stats: "98% Efficiency",
-      views: "2.4k",
-      comments: 42,
-      tags: ["AI", "Automation", "HRMS", "Cloud"],
-      icon: <Users className="w-5 h-5" />,
-      readTime: "5 min setup",
-      date: "2024-01-15",
-      gradient: "from-[#1F2E9A] via-[#1A3CC3] to-[#2430A3]",
-      features: [
-        "Employee Database",
-        "Payroll Integration",
-        "Performance Tracking",
-        "Training Management",
-      ],
-    },
-    {
-      id: 2,
-      title: "Intelligent Recruitment AI",
-      description:
-        "Smart hiring platform with predictive candidate matching and automated interview scheduling.",
-      image:
-        "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80",
-      category: "Recruitment",
-      stats: "60% Faster Hiring",
-      views: "3.1k",
-      comments: 38,
-      tags: ["AI", "Recruitment", "Screening", "Automation"],
-      icon: <Brain className="w-5 h-5" />,
-      readTime: "6 min setup",
-      date: "2024-02-20",
-      gradient: "from-[#9B3DFF] via-[#9B5CFF] to-[#A83DFF]",
-      features: [
-        "AI Screening",
-        "Smart Matching",
-        "Video Interviews",
-        "Offer Management",
-      ],
-    },
-    {
-      id: 3,
-      title: "Document Intelligence Hub",
-      description:
-        "AI-powered document management with automatic categorization, smart search, and secure storage.",
-      image:
-        "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80",
-      category: "Documentation",
-      stats: "100% Organized",
-      views: "4.2k",
-      comments: 56,
-      tags: ["AI", "Document", "Security", "Cloud"],
-      icon: <Shield className="w-5 h-5" />,
-      readTime: "7 min setup",
-      date: "2024-01-30",
-      gradient: "from-[#2EC5FF] via-[#2ED8FF] to-[#00C6FF]",
-      features: [
-        "AI Categorization",
-        "Smart Search",
-        "Version Control",
-        "Secure Cloud",
-      ],
-    },
-    {
-      id: 4,
-      title: "Attendance Pro Max",
-      description:
-        "Advanced tracking with geofencing, biometric integration, and predictive analytics.",
-      image:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-      category: "Attendance",
-      stats: "95% Accuracy",
-      views: "5.6k",
-      comments: 89,
-      tags: ["Tracking", "Biometric", "Analytics", "Mobile"],
-      icon: <Globe className="w-5 h-5" />,
-      readTime: "4 min setup",
-      date: "2024-02-05",
-      gradient: "from-[#00B894] via-[#00D3A9] to-[#00E5B4]",
-      features: [
-        "Geofencing",
-        "Biometric Integration",
-        "Predictive Analytics",
-        "Overtime AI",
-      ],
-    },
-    {
-      id: 5,
-      title: "Insights Dashboard Elite",
-      description:
-        "Interactive analytics platform with predictive insights and automated reporting.",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
-      category: "Analytics",
-      stats: "30+ Report Types",
-      views: "3.4k",
-      comments: 41,
-      tags: ["Analytics", "Dashboard", "Reports", "Insights"],
-      icon: <TrendingUp className="w-5 h-5" />,
-      readTime: "6 min setup",
-      date: "2024-03-01",
-      gradient: "from-[#FF6B6B] via-[#FF8E8E] to-[#FFA8A8]",
-      features: [
-        "Predictive Analytics",
-        "Custom KPIs",
-        "Real-time Insights",
-        "Automated Reports",
-      ],
-    },
-    {
-      id: 6,
-      title: "Remote Work Suite",
-      description:
-        "Complete toolkit for managing distributed teams with collaboration and productivity tools.",
-      image:
-        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
-      category: "Remote Work",
-      stats: "40% Productivity",
-      views: "6.2k",
-      comments: 112,
-      tags: ["Remote", "Collaboration", "Productivity", "Tools"],
-      icon: <Zap className="w-5 h-5" />,
-      readTime: "7 min setup",
-      date: "2024-02-15",
-      gradient: "from-[#8E44AD] via-[#9B59B6] to-[#AF7AC5]",
-      features: [
-        "Team Collaboration",
-        "Task Management",
-        "Virtual Meetings",
-        "Productivity Tracking",
-      ],
-    },
-  ];
+  console.log("Received product data:", productData);
+  const STORAGE_URL = import.meta.env.VITE_APP_STORAGE_URL;
 
   const navigate = useNavigate();
 
-  const categories = [
-    { id: "all", label: "All Products", icon: "📦", count: products.length },
-    { id: "HR Tech", label: "HR Tech", icon: "🤖", count: 1 },
-    { id: "Recruitment", label: "Recruitment", icon: "👥", count: 1 },
-    { id: "Documentation", label: "Documentation", icon: "📄", count: 1 },
-    { id: "Attendance", label: "Attendance", icon: "⏰", count: 1 },
-    { id: "Analytics", label: "Analytics", icon: "📊", count: 1 },
-    { id: "Remote Work", label: "Remote Work", icon: "🏠", count: 1 },
-  ];
-
-  const [filteredProducts, setFilteredProducts] = useState(products);
-
-  // Filter products
+  // Filter products - keeping it simple without category filters
   useEffect(() => {
-    if (activeFilter !== "all") {
-      const filtered = products.filter(
-        (product) => product.category === activeFilter,
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(products);
-    }
-  }, [activeFilter]);
+    setFilteredProducts(productData);
+  }, [productData]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -220,6 +62,48 @@ const OurProduct = () => {
         mass: 0.8,
       },
     },
+  };
+
+  // Function to get gradient based on product id (for visual variety)
+  const getProductGradient = (id) => {
+    const gradients = [
+      "from-[#1F2E9A] via-[#1A3CC3] to-[#2430A3]",
+      "from-[#9B3DFF] via-[#9B5CFF] to-[#A83DFF]",
+      "from-[#2EC5FF] via-[#2ED8FF] to-[#00C6FF]",
+      "from-[#00B894] via-[#00D3A9] to-[#00E5B4]",
+      "from-[#FF6B6B] via-[#FF8E8E] to-[#FFA8A8]",
+      "from-[#8E44AD] via-[#9B59B6] to-[#AF7AC5]",
+    ];
+    return gradients[id % gradients.length];
+  };
+
+  // Function to get icon based on product title or id
+  const getProductIcon = (title, id) => {
+    const icons = [
+      <Users className="w-5 h-5" />,
+      <Brain className="w-5 h-5" />,
+      <Shield className="w-5 h-5" />,
+      <Globe className="w-5 h-5" />,
+      <TrendingUp className="w-5 h-5" />,
+      <Zap className="w-5 h-5" />,
+    ];
+    
+    // You can customize this logic based on title keywords
+    if (title.toLowerCase().includes("hrms") || title.toLowerCase().includes("hr")) {
+      return <Users className="w-5 h-5" />;
+    } else if (title.toLowerCase().includes("recruitment") || title.toLowerCase().includes("ai")) {
+      return <Brain className="w-5 h-5" />;
+    } else if (title.toLowerCase().includes("document")) {
+      return <Shield className="w-5 h-5" />;
+    } else if (title.toLowerCase().includes("attendance")) {
+      return <Globe className="w-5 h-5" />;
+    } else if (title.toLowerCase().includes("insight") || title.toLowerCase().includes("analytic")) {
+      return <TrendingUp className="w-5 h-5" />;
+    } else if (title.toLowerCase().includes("remote") || title.toLowerCase().includes("work")) {
+      return <Zap className="w-5 h-5" />;
+    }
+    
+    return icons[id % icons.length];
   };
 
   return (
@@ -323,54 +207,6 @@ const OurProduct = () => {
             A seamlessly integrated platform where every module works in perfect
             harmony to transform your HR operations.
           </p>
-
-          {/* Premium Category Filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap justify-center gap-3 mb-12"
-          >
-            {categories.map((category, index) => (
-              <motion.button
-                key={category.id}
-                onClick={() => setActiveFilter(category.id)}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                className={`group relative px-6 py-3 rounded-2xl border-2 transition-all duration-300 flex items-center gap-3 overflow-hidden ${
-                  activeFilter === category.id
-                    ? "bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-white border-transparent shadow-xl shadow-[#1F2E9A]/30"
-                    : "bg-white/80 backdrop-blur-sm border-gray-200/80 text-gray-700 hover:border-[#1F2E9A]/50 hover:shadow-lg hover:bg-white"
-                }`}
-              >
-                {/* Hover Gradient Effect */}
-                {activeFilter !== category.id && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#1F2E9A]/5 to-[#9B3DFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                )}
-
-                <span className="relative text-lg">{category.icon}</span>
-                <span className="relative font-semibold text-sm">
-                  {category.label}
-                </span>
-
-                {/* Count Badge */}
-                <span
-                  className={`relative ml-1 px-2 py-0.5 rounded-lg text-xs font-bold ${
-                    activeFilter === category.id
-                      ? "bg-white/20 text-white"
-                      : "bg-gray-100 text-gray-600 group-hover:bg-[#1F2E9A]/10 group-hover:text-[#1F2E9A]"
-                  }`}
-                >
-                  {category.count}
-                </span>
-              </motion.button>
-            ))}
-          </motion.div>
-
-        
         </motion.div>
 
         {/* Premium Products Grid */}
@@ -388,20 +224,14 @@ const OurProduct = () => {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="text-7xl mb-6"
               >
-                🔍
+                📦
               </motion.div>
               <h4 className="text-3xl font-bold bg-gradient-to-r from-[#1F2E9A] to-[#9B3DFF] bg-clip-text text-transparent mb-3">
                 No products found
               </h4>
               <p className="text-lg text-gray-500 mb-8">
-                Try selecting a different category
+                Please check back later for our product listings
               </p>
-              <button
-                onClick={() => setActiveFilter("all")}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-white font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                Show All Products
-              </button>
             </motion.div>
           ) : (
             <motion.div
@@ -419,18 +249,17 @@ const OurProduct = () => {
                   className="group relative bg-white rounded-3xl overflow-hidden shadow-xl shadow-gray-200/60 hover:shadow-2xl hover:shadow-gray-300/80 transition-all duration-500 hover:-translate-y-3 cursor-pointer border border-gray-200/60"
                   onMouseEnter={() => setHoveredProduct(product.id)}
                   onMouseLeave={() => setHoveredProduct(null)}
-                  onClick={() => navigate(`/product/${product.id}`)}
+                  onClick={() => navigate(`/product/${product.slug || product.id}`)}
                 >
                   {/* Premium Image Container */}
-                  <div className="relative h-64 overflow-hidden">
-                    {/* Background Image */}
-                    <motion.div
+                  <div className="relative h-64 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                    {/* If you have actual images in your product data, use them here */}
+                    {/* For now, using placeholder based on product title */}
+                    <div 
                       className="absolute inset-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${product.image})` }}
-                      animate={{
-                        scale: hoveredProduct === product.id ? 1.08 : 1,
+                      style={{ 
+                        backgroundImage: `url(${product.images[0]?.image_url || 'https://via.placeholder.com/400x300?text=Product+Image'})` 
                       }}
-                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                     />
 
                     {/* Sophisticated Gradient Overlay */}
@@ -441,39 +270,20 @@ const OurProduct = () => {
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                       style={{
                         background: `linear-gradient(135deg, ${
-                          product.gradient.includes("1F2E9A")
+                          getProductGradient(product.id).includes("1F2E9A")
                             ? "#1F2E9A"
-                            : product.gradient.includes("9B3DFF")
+                            : getProductGradient(product.id).includes("9B3DFF")
                               ? "#9B3DFF"
-                              : product.gradient.includes("2EC5FF")
+                              : getProductGradient(product.id).includes("2EC5FF")
                                 ? "#2EC5FF"
-                                : product.gradient.includes("00B894")
+                                : getProductGradient(product.id).includes("00B894")
                                   ? "#00B894"
-                                  : product.gradient.includes("FF6B6B")
+                                  : getProductGradient(product.id).includes("FF6B6B")
                                     ? "#FF6B6B"
                                     : "#8E44AD"
                         }15, transparent)`,
                       }}
                     />
-
-                    {/* Category Badge - Top Right */}
-                    <motion.div
-                      className="absolute top-5 right-5 z-20"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-md shadow-lg border border-white/40">
-                        <div
-                          className={`p-1.5 rounded-xl bg-gradient-to-br ${product.gradient}`}
-                        >
-                          <div className="text-white">{product.icon}</div>
-                        </div>
-                        <span className="text-sm font-bold text-gray-900">
-                          {product.category}
-                        </span>
-                      </div>
-                    </motion.div>
 
                     {/* Stats Badge - Top Left */}
                     <motion.div
@@ -484,15 +294,15 @@ const OurProduct = () => {
                     >
                       <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/95 backdrop-blur-md shadow-lg border border-white/40">
                         <div
-                          className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${product.gradient} animate-pulse`}
+                          className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${getProductGradient(product.id)} animate-pulse`}
                         />
                         <span className="text-xs font-bold text-gray-900">
-                          {product.stats}
+                          {product.rating ? `${product.rating} ★` : 'New'}
                         </span>
                       </div>
                     </motion.div>
 
-                    {/* Views & Comments - Hover State */}
+                    {/* Views & Comments - Hover State (using happy_customer as views) */}
                     <motion.div
                       className="absolute top-20 right-5 z-20"
                       initial={{ opacity: 0, y: 10 }}
@@ -506,13 +316,7 @@ const OurProduct = () => {
                         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white">
                           <Eye className="w-4 h-4" />
                           <span className="text-sm font-semibold">
-                            {product.views}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white">
-                          <MessageCircle className="w-4 h-4" />
-                          <span className="text-sm font-semibold">
-                            {product.comments}
+                            {product.happy_customer || 0}k
                           </span>
                         </div>
                       </div>
@@ -543,35 +347,34 @@ const OurProduct = () => {
 
                   {/* Premium Content Section */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-[#1F2E9A] transition-colors duration-300">
-                      {product.title}
-                    </h3>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className={`p-2 rounded-xl bg-gradient-to-br ${getProductGradient(product.id)}`}>
+                        {getProductIcon(product.title, product.id)}
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 leading-tight group-hover:text-[#1F2E9A] transition-colors duration-300">
+                        {product.title}
+                      </h3>
+                    </div>
 
                     <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-2">
-                      {product.description}
+                      {product.short_desc || product.title_meta || "Comprehensive HR solution for modern businesses"}
                     </p>
-
-                   
 
                     {/* Meta Information */}
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-3 h-3 text-gray-400" />
-                          <span className="font-medium">
-                            {new Date(product.date).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-3 h-3 text-gray-400" />
-                          <span className="font-medium">{product.readTime}</span>
-                        </div>
+                        {product.accuricy && (
+                          <div className="flex items-center gap-2">
+                            <Target className="w-3 h-3 text-gray-400" />
+                            <span className="font-medium">{product.accuricy}</span>
+                          </div>
+                        )}
+                        {product.support_time && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-3 h-3 text-gray-400" />
+                            <span className="font-medium">{product.support_time}</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Explore Button */}
@@ -581,7 +384,7 @@ const OurProduct = () => {
                         className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 hover:from-gray-100 hover:to-gray-200 transition-all duration-300 flex items-center gap-1"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/product/${product.id}`);
+                          navigate(`/product/${product.slug || product.id}`);
                         }}
                       >
                         <span>Explore</span>
@@ -615,20 +418,14 @@ const OurProduct = () => {
           transition={{ duration: 0.6 }}
           className="text-center mt-16"
         >
-        
-
           <MagneticButton
             onClick={() => navigate("/product")}
             variant="square"
             className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-white font-bold text-lg hover:shadow-2xl hover:shadow-[#1F2E9A]/30 transition-all duration-500 hover:-translate-y-1 mt-5"
           >
-          
             <span>View All Products</span>
             <ExternalLink className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-
           </MagneticButton>
-
-
         </motion.div>
       </div>
 

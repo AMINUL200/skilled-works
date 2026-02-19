@@ -34,6 +34,8 @@ const LandingPage = () => {
   const [landingData, setLandingData] = useState({
     popup: null,
     about: null,
+    whyChoose :null,
+    product : null,
   });
 
   useEffect(() => {
@@ -41,14 +43,18 @@ const LandingPage = () => {
       try {
         setLoading(true);
 
-        const [popupRes, aboutRes] = await Promise.all([
+        const [popupRes, aboutRes, whyChooseRes, productRes] = await Promise.all([
           api.get("/popup"),
           api.get("/about"),
+          api.get("/why-choose"),
+          api.get("/product"),
         ]);
 
         setLandingData({
           popup: popupRes.data.data,
-          about: aboutRes.data.data,
+          about: aboutRes.data.data.about[0],
+          whyChoose: whyChooseRes.data.data,
+          product: productRes.data.data,
         });
       } catch (error) {
         console.error("Landing API error:", error);
@@ -76,10 +82,10 @@ const LandingPage = () => {
       <FeaturesSection />
 
       {/* Our Product Section */}
-      <OurProduct />
+      <OurProduct productData={landingData.product} />
 
       {/* Why Choose Us Section */}
-      <WhyChooseUs />
+      <WhyChooseUs whyChooseData={landingData.whyChoose} />
 
       {/* We Serve Section */}
       <WeServeSection />

@@ -13,6 +13,7 @@ const AppLayout = () => {
 
   const [globalData, setGlobalData] = useState({
     note: null,
+    service: [],
   });
 
   const [loading, setLoading] = useState(true);
@@ -22,16 +23,18 @@ const AppLayout = () => {
       try {
         setLoading(true);
 
-        const [noteRes] = await Promise.all([
-          api.get("/notes")
-         
+        const [noteRes, serviceRes] = await Promise.all([
+          api.get("/notes"),
+          api.get("/service-type")
         ]);
 
         console.log("Global API responses:", {
           note: noteRes,
+          service: serviceRes
         });
         setGlobalData({
           note: noteRes.data.data,
+          service: serviceRes.data.data
         });
       } catch (error) {
         console.error("Global API error:", error);
@@ -50,7 +53,7 @@ const AppLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar toggleMenu={toggleSidebar} noteData={globalData.note} />
+      <Navbar toggleMenu={toggleSidebar} noteData={globalData.note} serviceData={globalData.service} />
       <SideBar toggleMenu={toggleSidebar} isOpen={sidebarOpen} />
       <Outlet />
       <Footer />

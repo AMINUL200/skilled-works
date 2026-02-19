@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Cloud,
@@ -19,89 +19,124 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
-const WhyChooseUs = () => {
+const WhyChooseUs = ({ whyChooseData = [] }) => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.2 });
   const [hoveredCard, setHoveredCard] = useState(null);
   const [activeTab, setActiveTab] = useState("cloud");
+  
+  console.log("Why Choose Us Data:", whyChooseData);
 
-  const features = [
-    {
-      id: "cloud",
-      icon: <Cloud className="w-8 h-8" />,
-      title: "Cloud-based",
-      description:
-        "Access your HR platform anytime, anywhere with our secure cloud infrastructure. Scale effortlessly as your business grows.",
-      gradient: "from-[#2EC5FF] via-[#00C6FF] to-[#1F2E9A]",
-      iconBg: "from-[#2EC5FF]/10 to-[#1F2E9A]/10",
-      benefits: [
-        "99.9% Uptime",
-        "Auto-scaling",
-        "Global Access",
-        "Real-time Sync",
-      ],
-      color: "#2EC5FF",
-      delay: 0,
-      number: "01",
-    },
-    {
-      id: "compliant",
-      icon: <Shield className="w-8 h-8" />,
-      title: "UK-compliant",
-      description:
-        "Fully compliant with UK employment laws, GDPR, and industry regulations. Stay audit-ready with automated compliance tracking.",
-      gradient: "from-[#00B894] via-[#00D3A9] to-[#2EC5FF]",
-      iconBg: "from-[#00B894]/10 to-[#2EC5FF]/10",
-      benefits: ["GDPR Ready", "RTW Checks", "Legal Updates", "Audit Trails"],
-      color: "#00B894",
-      delay: 100,
-      number: "02",
-    },
-    {
-      id: "secure",
-      icon: <Lock className="w-8 h-8" />,
-      title: "Secure",
-      description:
-        "Enterprise-grade security with end-to-end encryption, multi-factor authentication, and regular security audits.",
-      gradient: "from-[#9B3DFF] via-[#A83DFF] to-[#E60023]",
-      iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
-      benefits: ["256-bit Encryption", "MFA", "ISO Certified", "Data Backup"],
-      color: "#9B3DFF",
-      delay: 200,
-      number: "03",
-    },
-    {
-      id: "easy",
-      icon: <Zap className="w-8 h-8" />,
-      title: "Easy to use",
-      description:
-        "Intuitive interface designed for everyone. Get started in minutes with our user-friendly platform and guided onboarding.",
-      gradient: "from-[#FFA726] via-[#FF8E53] to-[#FF6B6B]",
-      iconBg: "from-[#FFA726]/10 to-[#FF6B6B]/10",
-      benefits: [
-        "No Training Needed",
-        "Quick Setup",
-        "Mobile Ready",
-        "Smart Search",
-      ],
-      color: "#FFA726",
-      delay: 300,
-      number: "04",
-    },
-    {
-      id: "support",
-      icon: <HeadphonesIcon className="w-8 h-8" />,
-      title: "Dedicated support",
-      description:
-        "Expert support team available 24/7 to help you succeed. Get personalized assistance whenever you need it.",
-      gradient: "from-[#E60023] via-[#FF1F1F] to-[#FF6B6B]",
-      iconBg: "from-[#E60023]/10 to-[#FF6B6B]/10",
-      benefits: ["24/7 Available", "UK-based Team", "Live Chat", "Video Calls"],
-      color: "#E60023",
-      delay: 400,
-      number: "05",
-    },
-  ];
+  // Map icons based on heading or index
+  const getIconForFeature = (heading, index) => {
+    const iconMap = {
+      'Cloud-based': <Cloud className="w-8 h-8" />,
+      'UK-compliant': <Shield className="w-8 h-8" />,
+      'Secure': <Lock className="w-8 h-8" />,
+      'Easy to use': <Zap className="w-8 h-8" />,
+      'Dedicated support': <HeadphonesIcon className="w-8 h-8" />,
+    };
+    
+    // Try to match by heading, fallback to index-based mapping
+    return iconMap[heading] || [
+      <Cloud className="w-8 h-8" />,
+      <Shield className="w-8 h-8" />,
+      <Lock className="w-8 h-8" />,
+      <Zap className="w-8 h-8" />,
+      <HeadphonesIcon className="w-8 h-8" />,
+    ][index % 5];
+  };
+
+  // Map gradients based on heading or index
+  const getGradientForFeature = (heading, index) => {
+    const gradientMap = {
+      'Cloud-based': "from-[#2EC5FF] via-[#00C6FF] to-[#1F2E9A]",
+      'UK-compliant': "from-[#00B894] via-[#00D3A9] to-[#2EC5FF]",
+      'Secure': "from-[#9B3DFF] via-[#A83DFF] to-[#E60023]",
+      'Easy to use': "from-[#FFA726] via-[#FF8E53] to-[#FF6B6B]",
+      'Dedicated support': "from-[#E60023] via-[#FF1F1F] to-[#FF6B6B]",
+    };
+    
+    return gradientMap[heading] || [
+      "from-[#2EC5FF] via-[#00C6FF] to-[#1F2E9A]",
+      "from-[#00B894] via-[#00D3A9] to-[#2EC5FF]",
+      "from-[#9B3DFF] via-[#A83DFF] to-[#E60023]",
+      "from-[#FFA726] via-[#FF8E53] to-[#FF6B6B]",
+      "from-[#E60023] via-[#FF1F1F] to-[#FF6B6B]",
+    ][index % 5];
+  };
+
+  // Map colors based on heading or index
+  const getColorForFeature = (heading, index) => {
+    const colorMap = {
+      'Cloud-based': "#2EC5FF",
+      'UK-compliant': "#00B894",
+      'Secure': "#9B3DFF",
+      'Easy to use': "#FFA726",
+      'Dedicated support': "#E60023",
+    };
+    
+    return colorMap[heading] || [
+      "#2EC5FF",
+      "#00B894",
+      "#9B3DFF",
+      "#FFA726",
+      "#E60023",
+    ][index % 5];
+  };
+
+  // Parse benefits from description HTML
+  const parseBenefitsFromDescription = (description) => {
+    if (!description) return [];
+    
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = description;
+    
+    // Find all benefit items (looking for the pattern in your data)
+    const benefitElements = tempDiv.querySelectorAll('.flex.items-center.gap-2');
+    const benefits = [];
+    
+    benefitElements.forEach(el => {
+      const span = el.querySelector('span');
+      if (span && span.textContent) {
+        benefits.push(span.textContent.trim());
+      }
+    });
+    
+    return benefits;
+  };
+
+  // Extract main description from HTML
+  const extractDescription = (description) => {
+    if (!description) return '';
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = description;
+    
+    // Look for paragraph with description
+    const p = tempDiv.querySelector('p.font-body');
+    return p ? p.textContent?.trim() || '' : '';
+  };
+
+  // Process the data to match our feature structure
+  const processedFeatures = whyChooseData && whyChooseData.length > 0 
+    ? whyChooseData.map((item, index) => ({
+        id: item.id.toString(),
+        icon: getIconForFeature(item.heading, index),
+        title: item.heading,
+        description: extractDescription(item.description),
+        gradient: getGradientForFeature(item.heading, index),
+        iconBg: `${getGradientForFeature(item.heading, index).replace('from-', 'from-').replace('via-', 'via-').replace('to-', 'to-')}/10`,
+        benefits: parseBenefitsFromDescription(item.description),
+        color: getColorForFeature(item.heading, index),
+        delay: index * 100,
+        number: item.number?.toString().padStart(2, '0') || (index + 1).toString().padStart(2, '0'),
+        buttonName: item.button_name || "Learn More",
+        buttonUrl: item.button_url || "#",
+        image: item.image_url,
+      }))
+    : []; // Empty array if no data
 
   const stats = [
     {
@@ -200,109 +235,191 @@ const WhyChooseUs = () => {
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="mb-20 max-w-6xl mx-auto"
         >
-         
-
           {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20 max-w-4xl mx-auto"
-        >
-          <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight">
-            <span className="text-[#2430A3]">Why Choose </span>
-            <span className="block mt-2 bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
-              Our Platform?
-            </span>
-          </h2>
-          
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Experience the perfect combination of power, security, and simplicity. 
-            Built for modern businesses that demand excellence.
-          </p>
-        </motion.div>
-
-        
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-20 max-w-4xl mx-auto"
+          >
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight">
+              <span className="text-[#2430A3]">Why Choose </span>
+              <span className="block mt-2 bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
+                Our Platform?
+              </span>
+            </h2>
+            
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Experience the perfect combination of power, security, and simplicity. 
+              Built for modern businesses that demand excellence.
+            </p>
+          </motion.div>
         </motion.div>
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-12 gap-4 md:gap-6 mb-16 max-w-7xl mx-auto">
-          {/* Feature 1 - Large Card (Spans 6 columns) */}
-         
+          {/* Render features dynamically based on processed data */}
+          {processedFeatures.length > 0 ? (
+            <>
+              {/* First feature - Large Card */}
+              {processedFeatures[0] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="col-span-12 lg:col-span-6"
+                >
+                  <FeatureCard
+                    feature={processedFeatures[0]}
+                    hoveredCard={hoveredCard}
+                    setHoveredCard={setHoveredCard}
+                    variant="medium"
+                  />
+                </motion.div>
+              )}
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="col-span-12 lg:col-span-6"
-          >
-            <FeatureCard
-              feature={features[0]}
-              hoveredCard={hoveredCard}
-              setHoveredCard={setHoveredCard}
-              variant="medium"
-            />
-          </motion.div>
+              {/* Second feature - Medium Card */}
+              {processedFeatures[1] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="col-span-12 lg:col-span-6"
+                >
+                  <FeatureCard
+                    feature={processedFeatures[1]}
+                    hoveredCard={hoveredCard}
+                    setHoveredCard={setHoveredCard}
+                    variant="medium"
+                  />
+                </motion.div>
+              )}
 
-          {/* Feature 2 - Medium Card (Spans 6 columns) */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="col-span-12 lg:col-span-6"
-          >
-            <FeatureCard
-              feature={features[1]}
-              hoveredCard={hoveredCard}
-              setHoveredCard={setHoveredCard}
-              variant="medium"
-            />
-          </motion.div>
+              {/* Third feature - Medium Card */}
+              {processedFeatures[2] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="col-span-12 lg:col-span-4"
+                >
+                  <FeatureCard
+                    feature={processedFeatures[2]}
+                    hoveredCard={hoveredCard}
+                    setHoveredCard={setHoveredCard}
+                    variant="medium"
+                  />
+                </motion.div>
+              )}
 
-          {/* Feature 3 - Medium Card (Spans 5 columns) */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="col-span-12 lg:col-span-4"
-          >
-            <FeatureCard
-              feature={features[2]}
-              hoveredCard={hoveredCard}
-              setHoveredCard={setHoveredCard}
-              variant="medium"
-            />
-          </motion.div>
+              {/* Fourth feature - Compact Card */}
+              {processedFeatures[3] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="col-span-12 md:col-span-6 lg:col-span-4"
+                >
+                  <FeatureCard
+                    feature={processedFeatures[3]}
+                    hoveredCard={hoveredCard}
+                    setHoveredCard={setHoveredCard}
+                    variant="compact"
+                  />
+                </motion.div>
+              )}
 
-          {/* Feature 4 - Medium Card (Spans 4 columns) */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="col-span-12 md:col-span-6 lg:col-span-4"
-          >
-            <FeatureCard
-              feature={features[3]}
-              hoveredCard={hoveredCard}
-              setHoveredCard={setHoveredCard}
-              variant="compact"
-            />
-          </motion.div>
+              {/* Fifth feature - Compact Card */}
+              {processedFeatures[4] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="col-span-12 md:col-span-6 lg:col-span-4"
+                >
+                  <FeatureCard
+                    feature={processedFeatures[4]}
+                    hoveredCard={hoveredCard}
+                    setHoveredCard={setHoveredCard}
+                    variant="compact"
+                  />
+                </motion.div>
+              )}
+            </>
+          ) : (
+            // Fallback to default features if no data
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="col-span-12 lg:col-span-6"
+              >
+                <FeatureCard
+                  feature={defaultFeatures[0]}
+                  hoveredCard={hoveredCard}
+                  setHoveredCard={setHoveredCard}
+                  variant="medium"
+                />
+              </motion.div>
 
-          {/* Feature 5 - Medium Card (Spans 3 columns) */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="col-span-12 md:col-span-6 lg:col-span-4"
-          >
-            <FeatureCard
-              feature={features[4]}
-              hoveredCard={hoveredCard}
-              setHoveredCard={setHoveredCard}
-              variant="compact"
-            />
-          </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="col-span-12 lg:col-span-6"
+              >
+                <FeatureCard
+                  feature={defaultFeatures[1]}
+                  hoveredCard={hoveredCard}
+                  setHoveredCard={setHoveredCard}
+                  variant="medium"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="col-span-12 lg:col-span-4"
+              >
+                <FeatureCard
+                  feature={defaultFeatures[2]}
+                  hoveredCard={hoveredCard}
+                  setHoveredCard={setHoveredCard}
+                  variant="medium"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="col-span-12 md:col-span-6 lg:col-span-4"
+              >
+                <FeatureCard
+                  feature={defaultFeatures[3]}
+                  hoveredCard={hoveredCard}
+                  setHoveredCard={setHoveredCard}
+                  variant="compact"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="col-span-12 md:col-span-6 lg:col-span-4"
+              >
+                <FeatureCard
+                  feature={defaultFeatures[4]}
+                  hoveredCard={hoveredCard}
+                  setHoveredCard={setHoveredCard}
+                  variant="compact"
+                />
+              </motion.div>
+            </>
+          )}
         </div>
       </div>
     </section>
@@ -350,7 +467,7 @@ const FeatureCard = ({ feature, hoveredCard, setHoveredCard, variant }) => {
           {/* Left Section - Icon and Number */}
           <div className={`${isLarge ? "lg:w-1/3" : ""} mb-6 lg:mb-0`}>
             {/* Feature Number */}
-            <div className="font-display text-7xl md:text-8xl font-bold mb-6 leading-none relative">
+            {/* <div className="font-display text-7xl md:text-8xl font-bold mb-6 leading-none relative">
               <span className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-50 bg-clip-text text-transparent blur-sm">
                 {feature.number}
               </span>
@@ -359,7 +476,7 @@ const FeatureCard = ({ feature, hoveredCard, setHoveredCard, variant }) => {
               >
                 {feature.number}
               </span>
-            </div>
+            </div> */}
 
             {/* Icon Container */}
             <motion.div
@@ -428,7 +545,7 @@ const FeatureCard = ({ feature, hoveredCard, setHoveredCard, variant }) => {
             </p>
 
             {/* Benefits Grid */}
-            {!isCompact && (
+            {!isCompact && feature.benefits && feature.benefits.length > 0 && (
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {feature.benefits.map((benefit, idx) => (
                   <motion.div
@@ -450,7 +567,7 @@ const FeatureCard = ({ feature, hoveredCard, setHoveredCard, variant }) => {
             )}
 
             {/* Compact Benefits */}
-            {isCompact && (
+            {isCompact && feature.benefits && feature.benefits.length > 0 && (
               <div className="space-y-2 mb-6">
                 {feature.benefits.slice(0, 2).map((benefit, idx) => (
                   <motion.div
@@ -476,9 +593,10 @@ const FeatureCard = ({ feature, hoveredCard, setHoveredCard, variant }) => {
               className="font-body inline-flex items-center gap-2 text-[#1F2E9A] font-semibold group/btn relative"
               whileHover={{ x: 5 }}
               transition={{ duration: 0.2 }}
+              onClick={() => feature.buttonUrl && window.open(feature.buttonUrl, '_blank')}
             >
               <span className="relative">
-                Learn more
+                {feature.buttonName || "Learn more"}
                 <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-[#1F2E9A] to-[#9B3DFF] group-hover/btn:w-full transition-all duration-300" />
               </span>
               <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
@@ -496,5 +614,94 @@ const FeatureCard = ({ feature, hoveredCard, setHoveredCard, variant }) => {
     </motion.div>
   );
 };
+
+// Default features as fallback
+const defaultFeatures = [
+  {
+    id: "cloud",
+    icon: <Cloud className="w-8 h-8" />,
+    title: "Cloud-based",
+    description:
+      "Access your HR platform anytime, anywhere with our secure cloud infrastructure. Scale effortlessly as your business grows.",
+    gradient: "from-[#2EC5FF] via-[#00C6FF] to-[#1F2E9A]",
+    iconBg: "from-[#2EC5FF]/10 to-[#1F2E9A]/10",
+    benefits: [
+      "99.9% Uptime",
+      "Auto-scaling",
+      "Global Access",
+      "Real-time Sync",
+    ],
+    color: "#2EC5FF",
+    delay: 0,
+    number: "01",
+    buttonName: "Learn More",
+    buttonUrl: "#",
+  },
+  {
+    id: "compliant",
+    icon: <Shield className="w-8 h-8" />,
+    title: "UK-compliant",
+    description:
+      "Fully compliant with UK employment laws, GDPR, and industry regulations. Stay audit-ready with automated compliance tracking.",
+    gradient: "from-[#00B894] via-[#00D3A9] to-[#2EC5FF]",
+    iconBg: "from-[#00B894]/10 to-[#2EC5FF]/10",
+    benefits: ["GDPR Ready", "RTW Checks", "Legal Updates", "Audit Trails"],
+    color: "#00B894",
+    delay: 100,
+    number: "02",
+    buttonName: "Learn More",
+    buttonUrl: "#",
+  },
+  {
+    id: "secure",
+    icon: <Lock className="w-8 h-8" />,
+    title: "Secure",
+    description:
+      "Enterprise-grade security with end-to-end encryption, multi-factor authentication, and regular security audits.",
+    gradient: "from-[#9B3DFF] via-[#A83DFF] to-[#E60023]",
+    iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
+    benefits: ["256-bit Encryption", "MFA", "ISO Certified", "Data Backup"],
+    color: "#9B3DFF",
+    delay: 200,
+    number: "03",
+    buttonName: "Learn More",
+    buttonUrl: "#",
+  },
+  {
+    id: "easy",
+    icon: <Zap className="w-8 h-8" />,
+    title: "Easy to use",
+    description:
+      "Intuitive interface designed for everyone. Get started in minutes with our user-friendly platform and guided onboarding.",
+    gradient: "from-[#FFA726] via-[#FF8E53] to-[#FF6B6B]",
+    iconBg: "from-[#FFA726]/10 to-[#FF6B6B]/10",
+    benefits: [
+      "No Training Needed",
+      "Quick Setup",
+      "Mobile Ready",
+      "Smart Search",
+    ],
+    color: "#FFA726",
+    delay: 300,
+    number: "04",
+    buttonName: "Learn More",
+    buttonUrl: "#",
+  },
+  {
+    id: "support",
+    icon: <HeadphonesIcon className="w-8 h-8" />,
+    title: "Dedicated support",
+    description:
+      "Expert support team available 24/7 to help you succeed. Get personalized assistance whenever you need it.",
+    gradient: "from-[#E60023] via-[#FF1F1F] to-[#FF6B6B]",
+    iconBg: "from-[#E60023]/10 to-[#FF6B6B]/10",
+    benefits: ["24/7 Available", "UK-based Team", "Live Chat", "Video Calls"],
+    color: "#E60023",
+    delay: 400,
+    number: "05",
+    buttonName: "Learn More",
+    buttonUrl: "#",
+  },
+];
 
 export default WhyChooseUs;

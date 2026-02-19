@@ -115,3 +115,7 @@ Text: #FFFFFF
 
  <!-- <div className="max-w-[400px] md:max-w-[700px] lg:max-w-[1140px] overflow-x-auto">
               <table className="w-full min-w-[700px]"> -->
+
+
+          <!-- <div className="max-w-[450px] md:max-w-[800px] lg:max-w-[1240px] overflow-x-auto">
+            <div className="w-full min-w-[1240px] lg:min-w-[800px]"> -->

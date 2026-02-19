@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  MapPin, 
-  DollarSign, 
-  Clock, 
-  Briefcase, 
-  Building, 
-  Users, 
+import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import {
+  MapPin,
+  DollarSign,
+  Clock,
+  Briefcase,
+  Building,
+  Users,
   Calendar,
   FileText,
   Upload,
@@ -20,176 +20,228 @@ import {
   CheckCircle,
   Paperclip,
   X,
-  ExternalLink
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+  ExternalLink,
+  Loader,
+} from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { api } from "../../utils/app";
+import { toast } from "react-toastify";
+import PageLoader from "../../component/common/PageLoader";
 
 const RecruitmentDetails = () => {
   const navigate = useNavigate();
+  const { slug } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [attachments, setAttachments] = useState([]);
+  const [jobDetails, setJobDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const topRef = useRef(null);
+
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    coverLetter: '',
-    currentSalary: '',
-    expectedSalary: '',
-    noticePeriod: 'immediate'
+    fullName: "",
+    email: "",
+    phone: "",
+    coverLetter: "",
+    currentSalary: "",
+    expectedSalary: "",
+    noticePeriod: "immediate",
   });
 
-  // Job details data
-  const jobDetails = {
-    id: 1,
-    title: "Senior Software Engineer",
-    company: "TechVision Ltd",
-    location: "London, UK",
-    type: "Full-time",
-    salary: "£70,000 - £90,000 per year",
-    posted: "2 days ago",
-    category: "Technology",
-    remote: true,
-    visaSponsorship: true,
-    urgent: true,
-    experience: "5+ years",
-    
-    // Company details
-    companyInfo: {
-      name: "TechVision Ltd",
-      description: "A leading technology company specializing in cloud solutions and enterprise software development. We work with Fortune 500 companies to transform their digital infrastructure.",
-      size: "200-500 employees",
-      industry: "Information Technology & Services",
-      founded: "2015",
-      website: "https://techvision.com"
-    },
+  // Fetch job details on component mount
+  useEffect(() => {
+    fetchJobDetails();
+  }, [slug]);
 
-    // Job description
-    description: "We're looking for a Senior Software Engineer to join our growing team and help build the next generation of our cloud-based HR platform. You'll be working on cutting-edge technologies and collaborating with a team of passionate engineers.",
-    
-    // Responsibilities
-    responsibilities: [
-      "Design, develop, and maintain scalable software solutions",
-      "Collaborate with cross-functional teams to define and implement new features",
-      "Write clean, efficient, and well-documented code",
-      "Participate in code reviews and provide constructive feedback",
-      "Troubleshoot and debug applications",
-      "Stay up-to-date with emerging technologies and industry trends",
-      "Mentor junior developers and contribute to team growth"
-    ],
+  const fetchJobDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    // Requirements
-    requirements: {
-      mandatory: [
-        "5+ years of professional software development experience",
-        "Strong proficiency in JavaScript/TypeScript, React, and Node.js",
-        "Experience with cloud platforms (AWS, Azure, or GCP)",
-        "Knowledge of microservices architecture and RESTful APIs",
-        "Experience with databases (PostgreSQL, MongoDB)",
-        "Understanding of CI/CD pipelines and DevOps practices"
-      ],
-      preferred: [
-        "Experience with Docker and Kubernetes",
-        "Knowledge of GraphQL",
-        "Previous experience in HR-tech or SaaS platforms",
-        "Contributions to open-source projects",
-        "Experience with Agile/Scrum methodologies"
-      ]
-    },
+      // Use id or slug from URL params
 
-    // Benefits
-    benefits: [
-      { icon: <DollarSign className="w-5 h-5" />, title: "Competitive Salary", description: "Attractive package with performance bonuses" },
-      { icon: <Calendar className="w-5 h-5" />, title: "Flexible Hours", description: "Work when you're most productive" },
-      { icon: <Globe className="w-5 h-5" />, title: "Remote Work", description: "Fully remote or hybrid options available" },
-      { icon: <Award className="w-5 h-5" />, title: "Career Growth", description: "Clear promotion paths and skill development" },
-      { icon: <Shield className="w-5 h-5" />, title: "Health Insurance", description: "Comprehensive private healthcare" },
-      { icon: <Users className="w-5 h-5" />, title: "Team Culture", description: "Inclusive and collaborative environment" }
-    ],
+      const response = await api.get(`/available-jobs/${slug}`);
+      const result = response.data;
 
-    // Application process
-    process: [
-      "Submit your application with CV and cover letter",
-      "Initial screening call with HR (30 minutes)",
-      "Technical assessment (take-home or live coding)",
-      "Technical interview with team leads (60 minutes)",
-      "Cultural fit interview with senior management",
-      "Reference checks and background verification",
-      "Job offer and contract signing"
-    ]
+      if (result.status && result.data) {
+        setJobDetails(result.data);
+      } else {
+        setError("Failed to load job details");
+      }
+    } catch (error) {
+      console.error("Error fetching job details:", error);
+      setError("Failed to load job details. Please try again.");
+    } finally {
+      // setTimeout(() => {
+        setLoading(false);
+      // }, 300);
+    } // smooth transition
+  };
+
+  // Format salary with period
+  const formatSalary = () => {
+    if (!jobDetails?.salary_range) return "Competitive";
+    const period = jobDetails.salary_period
+      ? `/${jobDetails.salary_period}`
+      : "";
+    return `${jobDetails.salary_range}${period}`;
+  };
+
+  // Format posted date
+  const formatPostedDate = () => {
+    if (!jobDetails?.date) return "Recently";
+
+    const posted = new Date(jobDetails.date);
+    const now = new Date();
+    const diffTime = Math.abs(now - posted);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30)
+      return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? "s" : ""} ago`;
+    return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? "s" : ""} ago`;
   };
 
   // Handle file upload
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       const fileType = file.type;
       const validTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain'
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
       ];
       return validTypes.includes(fileType) && file.size <= 5 * 1024 * 1024; // 5MB limit
     });
 
-    const newAttachments = validFiles.map(file => ({
+    const newAttachments = validFiles.map((file) => ({
       id: Date.now() + Math.random(),
       file,
       name: file.name,
       type: file.type,
-      size: (file.size / 1024 / 1024).toFixed(2) // MB
+      size: (file.size / 1024 / 1024).toFixed(2), // MB
     }));
 
-    setAttachments(prev => [...prev, ...newAttachments]);
+    setAttachments((prev) => [...prev, ...newAttachments]);
+
+    if (validFiles.length !== files.length) {
+      toast.error(
+        "Some files were rejected. Maximum file size is 5MB and allowed formats are PDF, DOC, DOCX",
+      );
+    }
   };
 
   const removeAttachment = (id) => {
-    setAttachments(prev => prev.filter(attachment => attachment.id !== id));
+    setAttachments((prev) => prev.filter((attachment) => attachment.id !== id));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.fullName || !formData.email || !formData.phone) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    // Validate phone number (basic validation)
+    if (formData.phone.length < 10) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
+    // Validate CV document is uploaded
+    if (attachments.length === 0) {
+      toast.error("Please upload your CV document");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Create FormData for submission
+    // Create FormData for submission with the exact field names required
     const formDataObj = new FormData();
-    Object.keys(formData).forEach(key => {
-      formDataObj.append(key, formData[key]);
-    });
-    
-    attachments.forEach((attachment, index) => {
-      formDataObj.append(`attachment_${index}`, attachment.file);
-    });
 
-    // Add job details
-    formDataObj.append('jobId', jobDetails.id);
-    formDataObj.append('jobTitle', jobDetails.title);
+    // Add all required fields matching the API specification
+    formDataObj.append("available_job_id", jobDetails.id);
+    formDataObj.append("full_name", formData.fullName);
+    formDataObj.append("email", formData.email);
+    formDataObj.append("phone_number", formData.phone);
+    formDataObj.append("current_salary", formData.currentSalary || "");
+    formDataObj.append("expected_salary", formData.expectedSalary || "");
+    formDataObj.append("notice_period", formData.noticePeriod);
+    formDataObj.append("cover_letter", formData.coverLetter || "");
+
+    // Add CV document (only the first attachment as CV)
+    if (attachments.length > 0) {
+      formDataObj.append("cv_document", attachments[0].file);
+    }
+
+    // Add any additional documents if needed
+    // attachments.slice(1).forEach((attachment, index) => {
+    //   formDataObj.append(`additional_documents[${index}]`, attachment.file);
+    // });
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setIsSubmitted(true);
+      // Using your API instance
+      const response = await api.post("/job-applications/apply", formDataObj);
+
+      const result = response.data;
+
+      if (result.status) {
+        toast.success("Application submitted successfully!");
+        setIsSubmitted(true);
+      } else {
+        throw new Error(result.message || "Failed to submit application");
+      }
     } catch (error) {
-      console.error('Error submitting application:', error);
+      console.error("Error submitting application:", error);
+
+      // Handle specific error messages from API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to submit application. Please try again.";
+
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (isSubmitted && topRef.current) {
+      topRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [isSubmitted]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -198,36 +250,70 @@ const RecruitmentDetails = () => {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 0.5
-      }
-    }
+        duration: 0.5,
+      },
+    },
   };
+  console.log("Loading State:", loading);
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  if (error || !jobDetails) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-45 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="text-6xl mb-4">😕</div>
+          <h2 className="text-2xl font-bold text-[#1F2E9A] mb-2">
+            Job Not Found
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {error ||
+              "The job you're looking for doesn't exist or has been removed."}
+          </p>
+          <button
+            onClick={() => navigate("/recruitment")}
+            className="px-6 py-3 bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
+          >
+            Browse All Jobs
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-45">
+    <div
+      ref={topRef}
+      className="min-h-screen bg-gradient-to-b from-[#FAFAFF] to-white pt-45"
+    >
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="text-sm text-gray-600">
             <ol className="flex items-center space-x-2">
               <li>
-                <button 
-                  onClick={() => navigate('/')}
+                <button
+                  onClick={() => navigate("/")}
                   className="hover:text-[#1F2E9A] transition-colors"
                 >
                   Home
                 </button>
               </li>
-              <li><ChevronRight className="w-4 h-4" /></li>
               <li>
-                <button 
-                  onClick={() => navigate('/recruitment')}
+                <ChevronRight className="w-4 h-4" />
+              </li>
+              <li>
+                <button
+                  onClick={() => navigate("/recruitment")}
                   className="hover:text-[#1F2E9A] transition-colors"
                 >
                   Recruitment
                 </button>
               </li>
-              <li><ChevronRight className="w-4 h-4" /></li>
+              <li>
+                <ChevronRight className="w-4 h-4" />
+              </li>
               <li className="text-[#1F2E9A] font-semibold">Job Details</li>
             </ol>
           </nav>
@@ -250,18 +336,19 @@ const RecruitmentDetails = () => {
                 Application Submitted Successfully!
               </h2>
               <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
-                Thank you for applying to the {jobDetails.title} position at {jobDetails.company}. 
-                Our HR team will review your application and contact you within 3-5 business days.
+                Thank you for applying to the {jobDetails.job_title} position.
+                Our HR team will review your application and contact you within
+                3-5 business days.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => navigate('/recruitment')}
+                  onClick={() => navigate("/recruitment")}
                   className="px-6 py-3 bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-white rounded-lg font-medium hover:shadow-lg transition-shadow duration-300"
                 >
                   Browse More Jobs
                 </button>
                 <button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => navigate("/")}
                   className="px-6 py-3 border-2 border-[#1F2E9A] text-[#1F2E9A] rounded-lg font-medium hover:bg-[#1F2E9A] hover:text-white transition-colors duration-300"
                 >
                   Return to Home
@@ -277,7 +364,10 @@ const RecruitmentDetails = () => {
             className="grid lg:grid-cols-2 gap-8"
           >
             {/* Left Column - Job Details */}
-            <motion.div variants={itemVariants} className="lg:col-span-1 space-y-8">
+            <motion.div
+              variants={itemVariants}
+              className="lg:col-span-1 space-y-8"
+            >
               {/* Job Header */}
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
@@ -287,32 +377,28 @@ const RecruitmentDetails = () => {
                         <Briefcase className="w-6 h-6 text-[#1F2E9A]" />
                       </div>
                       <span className="text-sm font-semibold text-[#1F2E9A]">
-                        {jobDetails.category}
+                        {jobDetails.category || "Technology"}
                       </span>
                     </div>
-                    
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                      {jobDetails.title}
+
+                    <h1
+                      className="text-3xl md:text-4xl font-bold text-gray-900 mb-3"
+                      aria-label={jobDetails.title_meta || "Job Title"}
+                    >
+                      {jobDetails.job_title}
                     </h1>
-                    
+
                     <div className="flex items-center gap-3 mb-4">
                       <div className="flex items-center gap-2">
                         <Building className="w-5 h-5 text-gray-400" />
                         <span className="text-lg font-semibold text-[#1F2E9A]">
-                          {jobDetails.company}
+                          {jobDetails.category || "TechVision Ltd"}
                         </span>
                       </div>
-                      <button 
-                        onClick={() => window.open(jobDetails.companyInfo.website, '_blank')}
-                        className="flex items-center gap-1 text-sm text-[#1F2E9A] hover:text-[#9B3DFF] transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Visit Company
-                      </button>
                     </div>
                   </div>
-                  
-                  {jobDetails.urgent && (
+
+                  {jobDetails.urgent_hiring && (
                     <div className="px-4 py-2 bg-gradient-to-r from-[#E60023] to-[#FF1F1F] text-white rounded-full font-bold text-sm">
                       URGENT HIRING
                     </div>
@@ -325,127 +411,93 @@ const RecruitmentDetails = () => {
                     <MapPin className="w-5 h-5 text-gray-600" />
                     <div>
                       <p className="text-sm text-gray-500">Location</p>
-                      <p className="font-semibold">{jobDetails.location}</p>
+                      <p className="font-semibold">
+                        {jobDetails.location || "Remote"}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <DollarSign className="w-5 h-5 text-gray-600" />
                     <div>
                       <p className="text-sm text-gray-500">Salary</p>
-                      <p className="font-semibold">{jobDetails.salary}</p>
+                      <p className="font-semibold">{formatSalary()}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <Briefcase className="w-5 h-5 text-gray-600" />
                     <div>
                       <p className="text-sm text-gray-500">Type</p>
-                      <p className="font-semibold">{jobDetails.type}</p>
+                      <p className="font-semibold">
+                        {jobDetails.job_type || "Full-time"}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <Clock className="w-5 h-5 text-gray-600" />
                     <div>
                       <p className="text-sm text-gray-500">Experience</p>
-                      <p className="font-semibold">{jobDetails.experience}</p>
+                      <p className="font-semibold">
+                        {jobDetails.experience || "Not specified"}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                  {jobDetails.remote && (
+                  {jobDetails.remote_available && (
                     <span className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full font-medium">
                       Remote Available
                     </span>
                   )}
-                  {jobDetails.visaSponsorship && (
+                  {jobDetails.visa_sponsorship && (
                     <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full font-medium">
                       Visa Sponsorship
                     </span>
                   )}
                   <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full font-medium">
-                    Posted {jobDetails.posted}
+                    Posted {formatPostedDate()}
                   </span>
                 </div>
               </div>
 
-              {/* Job Description */}
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FileText className="w-6 h-6 text-[#1F2E9A]" />
-                  Job Description
-                </h2>
-                <p className="text-gray-700 leading-relaxed mb-8">
-                  {jobDetails.description}
-                </p>
-
-                {/* Responsibilities */}
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Key Responsibilities:</h3>
-                  <ul className="space-y-3">
-                    {jobDetails.responsibilities.map((responsibility, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <div className="w-2 h-2 bg-[#1F2E9A] rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-gray-700">{responsibility}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Requirements */}
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Requirements:</h3>
-                  
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-gray-800 mb-3">Mandatory:</h4>
-                    <ul className="space-y-2">
-                      {jobDetails.requirements.mandatory.map((req, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700">{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-3">Preferred (Bonus):</h4>
-                    <ul className="space-y-2">
-                      {jobDetails.requirements.preferred.map((req, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <Award className="w-5 h-5 text-[#FF9F1C] flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700">{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Benefits */}
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Benefits & Perks:</h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {jobDetails.benefits.map((benefit, index) => (
-                      <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                        <div className="p-2 bg-white rounded-lg">
-                          {benefit.icon}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{benefit.title}</h4>
-                          <p className="text-sm text-gray-600">{benefit.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-               
+                {jobDetails?.job_description ? (
+                  <div
+                    className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: jobDetails.job_description,
+                    }}
+                    aria-label={
+                      jobDetails.description_meta || "Job Description"
+                    }
+                  />
+                ) : (
+                  <p className="text-gray-700 leading-relaxed">
+                    No description available for this job.
+                  </p>
+                )}
               </div>
 
-             
+              {/* Job Description */}
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                {/* Render HTML description safely */}
+                {jobDetails.job_desc_long ? (
+                  <div
+                    className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: jobDetails.job_desc_long,
+                    }}
+                  />
+                ) : (
+                  <p className="text-gray-700 leading-relaxed">
+                    {jobDetails.job_description || "No description available"}
+                  </p>
+                )}
+              </div>
             </motion.div>
 
             {/* Right Column - Application Form */}
@@ -458,8 +510,12 @@ const RecruitmentDetails = () => {
                       <Upload className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">Apply for this Position</h3>
-                      <p className="text-white/80 text-sm">Complete the form below</p>
+                      <h3 className="text-xl font-bold text-white">
+                        Apply for this Position
+                      </h3>
+                      <p className="text-white/80 text-sm">
+                        Complete the form below
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -468,8 +524,10 @@ const RecruitmentDetails = () => {
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                   {/* Personal Information */}
                   <div className="space-y-4">
-                    <h4 className="font-bold text-gray-900">Personal Information</h4>
-                    
+                    <h4 className="font-bold text-gray-900">
+                      Personal Information
+                    </h4>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         <div className="flex items-center gap-2">
@@ -527,8 +585,10 @@ const RecruitmentDetails = () => {
 
                   {/* Salary Information */}
                   <div className="space-y-4">
-                    <h4 className="font-bold text-gray-900">Salary Information</h4>
-                    
+                    <h4 className="font-bold text-gray-900">
+                      Salary Information
+                    </h4>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -543,16 +603,17 @@ const RecruitmentDetails = () => {
                           placeholder="£"
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Expected Salary
+                          Expected Salary *
                         </label>
                         <input
                           type="text"
                           name="expectedSalary"
                           value={formData.expectedSalary}
                           onChange={handleInputChange}
+                          required
                           className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1F2E9A] focus:ring-2 focus:ring-[#1F2E9A]/20 outline-none transition-all duration-300"
                           placeholder="£"
                         />
@@ -561,15 +622,19 @@ const RecruitmentDetails = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Notice Period
+                        Notice Period *
                       </label>
                       <select
                         name="noticePeriod"
                         value={formData.noticePeriod}
                         onChange={handleInputChange}
+                        required
                         className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1F2E9A] focus:ring-2 focus:ring-[#1F2E9A]/20 outline-none transition-all duration-300"
                       >
-                        <option value="immediate">Immediate / Currently Available</option>
+                        <option value="">Select notice period</option>
+                        <option value="immediate">
+                          Immediate / Currently Available
+                        </option>
                         <option value="1week">1 Week</option>
                         <option value="2weeks">2 Weeks</option>
                         <option value="1month">1 Month</option>
@@ -602,20 +667,20 @@ const RecruitmentDetails = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
                         <Paperclip className="w-4 h-4 text-gray-400" />
-                        Upload Documents
+                        Upload CV/Resume *
                       </div>
                       <span className="text-xs text-gray-500 mt-1 block">
-                        Upload your CV and supporting documents. Max 5MB per file. PDF, DOC, DOCX only.
+                        Upload your CV. Max 5MB. PDF, DOC, DOCX only.
                       </span>
                     </label>
-                    
+
                     <div className="mt-4">
                       {/* File Input */}
                       <label className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#1F2E9A] hover:bg-gray-50 transition-all duration-300 cursor-pointer">
                         <div className="text-center">
                           <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                           <p className="text-sm font-medium text-gray-600">
-                            Upload CV & Documents
+                            Upload CV
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
                             PDF, DOC, DOCX up to 5MB
@@ -634,7 +699,7 @@ const RecruitmentDetails = () => {
                       {attachments.length > 0 && (
                         <div className="mt-4 space-y-3">
                           <p className="text-sm font-medium text-gray-700">
-                            Attached Files ({attachments.length})
+                            Uploaded Files ({attachments.length})
                           </p>
                           {attachments.map((attachment) => (
                             <div
