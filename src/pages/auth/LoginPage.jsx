@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { LogIn, ArrowLeft } from "lucide-react";
 import CustomInput from "../../component/form/CustomInput";
 import { useAuth } from "../../context/AuthContext";
@@ -14,7 +14,10 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const from = location.state?.from?.pathname || "/admin";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,34 +51,33 @@ const LoginPage = () => {
       // Make API call to login endpoint
       const response = await api.post("/login", formData);
       console.log(response);
-      
-      
+
       // Extract data from response (adjust based on your API response structure)
       const { token, user } = response.data.data;
-      
+
       // Call the login function from AuthContext
       login(user, token);
-      
-      // Redirect to dashboard or home page
-      navigate("/admin"); 
-      
+
+      // after successful login
+      navigate(from, { replace: true });
     } catch (error) {
       console.error("Login error:", error);
-      
+
       // Handle different error cases
       if (error.response?.status === 401) {
         setApiError("Invalid email or password");
       } else if (error.response?.status === 400) {
         // Handle validation errors from backend
-        const backendErrors = error.response.data?.errors || error.response.data;
+        const backendErrors =
+          error.response.data?.errors || error.response.data;
         if (Array.isArray(backendErrors)) {
           // If errors are in array format
           const errorObj = {};
-          backendErrors.forEach(err => {
+          backendErrors.forEach((err) => {
             if (err.field) errorObj[err.field] = err.message;
           });
           setErrors(errorObj);
-        } else if (typeof backendErrors === 'object') {
+        } else if (typeof backendErrors === "object") {
           // If errors are in object format
           setErrors(backendErrors);
         } else {
@@ -97,16 +99,15 @@ const LoginPage = () => {
   const handleDemoLogin = async () => {
     setFormData({
       email: "demo@example.com",
-      password: "demo123"
+      password: "demo123",
     });
-    
+
     // Optional: Auto-submit after setting demo credentials
     // setTimeout(() => handleSubmit(new Event('submit')), 100);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F2EEFF] via-[#E6F7FF] to-white px-4">
-      
       {/* Background blur */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#9B3DFF]/20 rounded-full blur-3xl" />
@@ -114,7 +115,6 @@ const LoginPage = () => {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-
         {/* Back */}
         <button
           onClick={() => navigate("/")}
@@ -126,7 +126,6 @@ const LoginPage = () => {
 
         {/* Card */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-[#E6E0FF] shadow-2xl">
-
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -135,12 +134,8 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <h2 className="text-3xl font-bold text-[#1F2E9A]">
-              Welcome Back
-            </h2>
-            <p className="text-[#666666] mt-1">
-              Login to your dashboard
-            </p>
+            <h2 className="text-3xl font-bold text-[#1F2E9A]">Welcome Back</h2>
+            <p className="text-[#666666] mt-1">Login to your dashboard</p>
           </div>
 
           {/* API Error Message */}
@@ -152,7 +147,6 @@ const LoginPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-
             <CustomInput
               label="Email Address"
               name="email"
@@ -176,10 +170,7 @@ const LoginPage = () => {
             {/* Remember me */}
             <div className="flex justify-between text-sm">
               <label className="flex items-center gap-2 text-gray-600">
-                <input
-                  type="checkbox"
-                  className="accent-[#9B3DFF]"
-                />
+                <input type="checkbox" className="accent-[#9B3DFF]" />
                 Remember me
               </label>
 
@@ -218,19 +209,17 @@ const LoginPage = () => {
               )}
             </button>
 
-           
-
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
-
-         
           </form>
 
           {/* Footer */}
@@ -243,7 +232,6 @@ const LoginPage = () => {
               Create account
             </a>
           </div>
-
         </div>
       </div>
     </div>

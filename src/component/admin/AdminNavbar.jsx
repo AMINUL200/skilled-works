@@ -230,7 +230,7 @@ const AdminNavbar = ({ setSidebarOpen }) => {
 
                   {/* Menu Items */}
                   <div className="py-2">
-                    <button
+                    {/* <button
                       onClick={handleProfileClick}
                       className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors text-left"
                     >
@@ -245,9 +245,9 @@ const AdminNavbar = ({ setSidebarOpen }) => {
                           View and edit profile
                         </p>
                       </div>
-                    </button>
+                    </button> */}
 
-                    <button
+                    {/* <button
                       onClick={handleSettingsClick}
                       className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors text-left"
                     >
@@ -262,9 +262,9 @@ const AdminNavbar = ({ setSidebarOpen }) => {
                           Manage preferences
                         </p>
                       </div>
-                    </button>
+                    </button> */}
 
-                    <button
+                    {/* <button
                       className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors text-left"
                     >
                       <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -278,7 +278,7 @@ const AdminNavbar = ({ setSidebarOpen }) => {
                           View your messages
                         </p>
                       </div>
-                    </button>
+                    </button> */}
                   </div>
 
                   {/* Logout Button */}

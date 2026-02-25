@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
 // import './App.css';
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -52,8 +52,29 @@ import HandleAllInOnePlatforms from "./pages/admin/banner/HandleAllInOnePlatform
 import HandleServicePage from "./pages/admin/services/HandleServicePage";
 import HandlePolicy from "./pages/admin/privacy/HandlePolicy";
 import PolicyCmsPage from "./pages/policy/PolicyCmsPage";
+import { useAuth } from "./context/AuthContext";
+
+const AdminRoute = () => {
+  const { token, user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return <div>Loading...</div>;
+
+  // Not logged in → go login
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Logged but NOT admin
+  if (user?.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+};
 
 const App = () => {
+  const { token, loading } = useAuth();
   return (
     <Router>
       <ToastContainer position="top-right" zIndex={9999} />
@@ -88,6 +109,7 @@ const App = () => {
         </Route>
 
         {/* Admin Layout */}
+        <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           {/* Additional admin routes can be added here */}
@@ -102,33 +124,49 @@ const App = () => {
             path="handle-why-chose-our-platform"
             element={<HandleWhyChoseOurPlatform />}
           />
-          <Route path="handle-what-we-offer" element={<HandleWhatWeOffer/>}/>
+          <Route path="handle-what-we-offer" element={<HandleWhatWeOffer />} />
 
           <Route path="handle-faqs" element={<HandleFaq />} />
 
           <Route path="handle-blogs" element={<HandleBlog />} />
 
           <Route path="handle-service-type" element={<HandleServiceType />} />
-          <Route  path="handle-service" element={<HandleServicePage />} />
+          <Route path="handle-service" element={<HandleServicePage />} />
           <Route
             path="handle-service-type-feature"
             element={<HandleServiceTypeFeature />}
           />
-          <Route path="handle-service-why-choose" element={<HandleServicesWhyChose />} />
-          <Route path="handle-service-customer-stories" element={<HandleServicesCustomerStories />} />
+          <Route
+            path="handle-service-why-choose"
+            element={<HandleServicesWhyChose />}
+          />
+          <Route
+            path="handle-service-customer-stories"
+            element={<HandleServicesCustomerStories />}
+          />
 
           <Route path="handle-product" element={<HandleProduct />} />
 
-          <Route path="handle-recruitment-page" element={<HandleRecruitmentPage />} />
+          <Route
+            path="handle-recruitment-page"
+            element={<HandleRecruitmentPage />}
+          />
           <Route path="handle-jobs" element={<HandleJobs />} />
-          <Route path="handle-jobs-applications" element={<HandleJobsApplication />} />
+          <Route
+            path="handle-jobs-applications"
+            element={<HandleJobsApplication />}
+          />
 
           <Route path="handle-banner" element={<HandleBanner />} />
-          <Route path="handle-all-in-one-platforms" element={<HandleAllInOnePlatforms />} />
+          <Route
+            path="handle-all-in-one-platforms"
+            element={<HandleAllInOnePlatforms />}
+          />
 
           <Route path="handle-policy" element={<HandlePolicy />} />
 
           {/* <Route path="profile" element={<AdminProfile />} /> */}
+        </Route>
         </Route>
       </Routes>
     </Router>
