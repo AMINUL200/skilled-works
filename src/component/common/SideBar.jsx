@@ -13,11 +13,13 @@ import {
   LogOut,
   LayoutDashboard,
 } from "lucide-react";
+import { path } from "framer-motion/client";
 
-const SideBar = ({ toggleMenu, isOpen }) => {
+const SideBar = ({ toggleMenu, isOpen, serviceData = [] }) => {
   const [openDropdowns, setOpenDropdowns] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("Sidebar received serviceData:", serviceData);
 
   // Sidebar navigation links - Updated to match navbar structure
   const sidebarLinks = [
@@ -38,54 +40,19 @@ const SideBar = ({ toggleMenu, isOpen }) => {
       label: "Services",
       icon: <Briefcase className="w-5 h-5" />,
       dropdown: [
-        {
-          id: "hrms_software",
-          label: "HRMS Software",
-          path: "/cms/hrms-software",
-        },
-        {
-          id: "hr_file_preparation",
-          label: "HR File Preparation",
-          path: "/cms/hr-file-preparation",
-        },
-        {
-          id: "file_manager",
-          label: "File Manager",
-          path: "/cms/file-manager",
-        },
-        {
-          id: "software_development",
-          label: "Software Development",
-          path: "/cms/software-development",
-        },
-        {
-          id: "business_consultancy",
-          label: "Business Consultancy",
-          path: "/cms/business-consultancy",
-        },
-        {
-          id: "web_profile_development",
-          label: "Web Profile Development",
-          path: "/cms/web-profile-development",
-        },
-        {
-          id: "skilled_workers_industry",
-          label: "Skilled Workers Industry",
-          path: "/cms/skilled-workers-industry",
-        },
-        {
-          id: "careers",
-          label: "Careers",
-          path: "/cms/careers",
-        },
+        ...serviceData.map((service) => ({
+          id: `service-${service.id}`,
+          label: service.name,
+          path: `/service/${service.slug}`,
+        })),
       ],
     },
-    {
-      id: "pricing",
-      label: "Pricing",
-      path: "/pricing",
-      icon: <DollarSign className="w-5 h-5" />,
-    },
+    // {
+    //   id: "pricing",
+    //   label: "Pricing",
+    //   path: "/pricing",
+    //   icon: <DollarSign className="w-5 h-5" />,
+    // },
     {
       id: "blog",
       label: "Blog",

@@ -49,6 +49,9 @@ import HandleJobs from "./pages/admin/recruitment/HandleJobs";
 import HandleJobsApplication from "./pages/admin/recruitment/HandleJobsApplication";
 import HandleBanner from "./pages/admin/banner/HandleBanner";
 import HandleAllInOnePlatforms from "./pages/admin/banner/HandleAllInOnePlatforms";
+import HandleServicePage from "./pages/admin/services/HandleServicePage";
+import HandlePolicy from "./pages/admin/privacy/HandlePolicy";
+import PolicyCmsPage from "./pages/policy/PolicyCmsPage";
 
 const App = () => {
   return (
@@ -81,6 +84,7 @@ const App = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-use" element={<TermsOfUse />} />
           <Route path="/privacy-rights" element={<PrivacyRights />} />
+          <Route path="/policy/:slug" element={<PolicyCmsPage />} />
         </Route>
 
         {/* Admin Layout */}
@@ -105,6 +109,7 @@ const App = () => {
           <Route path="handle-blogs" element={<HandleBlog />} />
 
           <Route path="handle-service-type" element={<HandleServiceType />} />
+          <Route  path="handle-service" element={<HandleServicePage />} />
           <Route
             path="handle-service-type-feature"
             element={<HandleServiceTypeFeature />}
@@ -120,6 +125,8 @@ const App = () => {
 
           <Route path="handle-banner" element={<HandleBanner />} />
           <Route path="handle-all-in-one-platforms" element={<HandleAllInOnePlatforms />} />
+
+          <Route path="handle-policy" element={<HandlePolicy />} />
 
           {/* <Route path="profile" element={<AdminProfile />} /> */}
         </Route>

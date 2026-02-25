@@ -24,6 +24,7 @@ import PopupSection from "../../component/landing/PopupSection";
 import PageLoader from "../../component/common/PageLoader";
 import OurProduct from "../../component/landing/OurProduct";
 import { api } from "../../utils/app";
+import { all } from "axios";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -36,6 +37,10 @@ const LandingPage = () => {
     about: null,
     whyChoose :null,
     product : null,
+    hero: null,
+    allInOnePlatform: null,
+    contact: null,
+    service: null,
   });
 
   useEffect(() => {
@@ -43,11 +48,15 @@ const LandingPage = () => {
       try {
         setLoading(true);
 
-        const [popupRes, aboutRes, whyChooseRes, productRes] = await Promise.all([
+        const [popupRes, aboutRes, whyChooseRes, productRes, heroRes, allInOnePlatformRes, contactRes, serviceRes] = await Promise.all([
           api.get("/popup"),
           api.get("/about"),
           api.get("/why-choose"),
           api.get("/product"),
+          api.get("/banners"),
+          api.get("/all-in-one-platforms"),
+          api.get("/website-settings"),
+          api.get("/service-type"),
         ]);
 
         setLandingData({
@@ -55,6 +64,10 @@ const LandingPage = () => {
           about: aboutRes.data.data.about[0],
           whyChoose: whyChooseRes.data.data,
           product: productRes.data.data,
+          hero: heroRes.data.data,
+          allInOnePlatform: allInOnePlatformRes.data.data,
+          contact: contactRes.data.data.settings,
+          service: serviceRes.data.data,
         });
       } catch (error) {
         console.error("Landing API error:", error);
@@ -73,13 +86,13 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white pt-50 md:pt-30">
       {/* Hero Section */}
-      <HeroSection />
+      <HeroSection bannerData={landingData.hero} />
 
       {/* About Section */}
       <AboutSection aboutData={landingData.about} />
 
       {/* Features Section */}
-      <FeaturesSection />
+      <FeaturesSection allInOnePlatformData={landingData.allInOnePlatform} />
 
       {/* Our Product Section */}
       <OurProduct productData={landingData.product} />
@@ -88,10 +101,10 @@ const LandingPage = () => {
       <WhyChooseUs whyChooseData={landingData.whyChoose} />
 
       {/* We Serve Section */}
-      <WeServeSection />
+      <WeServeSection serviceData={landingData.service} />
 
       {/* CTA Section */}
-      <CTASection />
+      <CTASection contactData={landingData.contact} />
 
       <PopupSection popupData={landingData.popup} />
     </div>

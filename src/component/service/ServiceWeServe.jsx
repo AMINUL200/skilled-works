@@ -19,8 +19,107 @@ import {
 import { motion } from "framer-motion";
 import MagneticButton from "../common/MagneticButtonProps";
 
-const ServiceWeServe = () => {
-  const industries = [
+// Helper function to extract plain text from HTML
+const extractPlainText = (htmlString) => {
+  if (!htmlString) return "";
+  const doc = new DOMParser().parseFromString(htmlString, "text/html");
+  return doc.body.textContent || "";
+};
+
+// Icon mapping based on industry title
+const getIconForIndustry = (title, index) => {
+  const titleLower = (title || "").toLowerCase();
+  
+  if (titleLower.includes('aviation') || titleLower.includes('plane')) 
+    return <Plane className="w-8 h-8" />;
+  if (titleLower.includes('it') || titleLower.includes('tech') || titleLower.includes('cpu')) 
+    return <Cpu className="w-8 h-8" />;
+  if (titleLower.includes('construction') || titleLower.includes('building')) 
+    return <Building2 className="w-8 h-8" />;
+  if (titleLower.includes('health') || titleLower.includes('medical') || titleLower.includes('heart')) 
+    return <HeartPulse className="w-8 h-8" />;
+  if (titleLower.includes('finance') || titleLower.includes('bank') || titleLower.includes('money')) 
+    return <Banknote className="w-8 h-8" />;
+  if (titleLower.includes('education') || titleLower.includes('school') || titleLower.includes('graduation')) 
+    return <GraduationCap className="w-8 h-8" />;
+  if (titleLower.includes('hospitality') || titleLower.includes('chef') || titleLower.includes('restaurant')) 
+    return <ChefHat className="w-8 h-8" />;
+  if (titleLower.includes('retail') || titleLower.includes('store')) 
+    return <Store className="w-8 h-8" />;
+  if (titleLower.includes('startup') || titleLower.includes('rocket')) 
+    return <Rocket className="w-8 h-8" />;
+  if (titleLower.includes('real estate') || titleLower.includes('home') || titleLower.includes('property')) 
+    return <Home className="w-8 h-8" />;
+  if (titleLower.includes('manufacturing') || titleLower.includes('factory')) 
+    return <Target className="w-8 h-8" />;
+  if (titleLower.includes('government') || titleLower.includes('public')) 
+    return <Building2 className="w-8 h-8" />;
+  
+  // Default cycling through icons based on index
+  const icons = [
+    <Plane className="w-8 h-8" />,
+    <Cpu className="w-8 h-8" />,
+    <Building2 className="w-8 h-8" />,
+    <HeartPulse className="w-8 h-8" />,
+    <Banknote className="w-8 h-8" />,
+    <GraduationCap className="w-8 h-8" />,
+    <ChefHat className="w-8 h-8" />,
+    <Store className="w-8 h-8" />,
+    <Rocket className="w-8 h-8" />,
+    <Home className="w-8 h-8" />,
+    <Target className="w-8 h-8" />
+  ];
+  return icons[index % icons.length];
+};
+
+// Color schemes for different industries
+const colorSchemes = [
+  "from-[#1F2E9A] to-[#2EC5FF]",
+  "from-[#9B3DFF] to-[#E60023]",
+  "from-[#FF6B6B] to-[#FFA726]",
+  "from-[#00B894] to-[#2EC5FF]",
+  "from-[#2430A3] to-[#9B3DFF]",
+  "from-[#FFA726] to-[#FF6B6B]",
+  "from-[#E60023] to-[#FFA726]",
+  "from-[#1F2E9A] to-[#2430A3]",
+  "from-[#9B3DFF] to-[#2EC5FF]",
+  "from-[#00B894] to-[#1F2E9A]",
+  "from-[#E60023] to-[#FF6B6B]",
+  "from-[#2430A3] to-[#2EC5FF]"
+];
+
+const ServiceWeServe = ({ weServeData = [] }) => {
+  console.log("ServiceWeServe received data:", weServeData);
+  
+  // Extract the actual data array from weServeData
+  const dataArray = weServeData|| [];
+  
+  // Transform API data to industries format
+  const transformIndustries = () => {
+    if (!dataArray.length) {
+      return []; // Return empty array, will use fallback
+    }
+
+    return dataArray.map((item, index) => {
+      // Extract heading and description
+      const title = item.heading || `Industry ${index + 1}`;
+      const desc = extractPlainText(item.description || "");
+      
+      // Get color scheme based on index
+      const color = colorSchemes[index % colorSchemes.length];
+      
+      return {
+        title: title,
+        desc: desc || "HR solutions for this industry",
+        icon: getIconForIndustry(title, index),
+        color: color,
+        delay: index * 0.1,
+      };
+    });
+  };
+
+  // Fallback industries if no API data
+  const fallbackIndustries = [
     {
       title: "Aviation",
       desc: "Crew management & compliance systems",
@@ -106,6 +205,14 @@ const ServiceWeServe = () => {
       delay: 1.1,
     },
   ];
+
+  const industries = transformIndustries().length > 0 ? transformIndustries() : fallbackIndustries;
+
+  // Calculate stats based on actual data
+  const industryCount = industries.length;
+  const clientCount = "500+"; // This could come from API if available
+  const complianceRate = "100%";
+  const supportHours = "24/7";
 
   return (
     <section className="relative py-20 px-6 overflow-hidden">
@@ -275,31 +382,7 @@ const ServiceWeServe = () => {
             </div>
           </div>
 
-          {/* Stats Row */}
-          <div className="flex flex-wrap justify-center gap-8 mt-12">
-            {[
-              { value: "12+", label: "Industries", color: "text-[#1F2E9A]" },
-              { value: "500+", label: "UK Clients", color: "text-[#E60023]" },
-              { value: "100%", label: "Compliance", color: "text-[#00B894]" },
-              { value: "24/7", label: "UK Support", color: "text-[#FFA726]" },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.9 + index * 0.1 }}
-                className="text-center"
-              >
-                <div className={`text-2xl font-bold mb-1 ${stat.color}`}>
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+       
         </motion.div>
       </div>
     </section>

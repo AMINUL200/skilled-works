@@ -89,9 +89,9 @@ const HRMSHero = ({ serviceDetails = {} }) => {
             </h1>
 
             {/* Description */}
-            <p className="text-lg md:text-xl text-[#444444] max-w-2xl leading-relaxed">
-              {serviceDetails?.description?.split("\n")[0] ||
-                "Streamline your human resource management with our comprehensive HRMS platform. Automate processes, enhance employee experience, and gain actionable insights to drive business growth."}
+            <p className="text-lg md:text-xl text-[#444444] max-w-2xl leading-relaxed"
+            dangerouslySetInnerHTML={{__html: serviceDetails?.description || "Streamline your human resource management with our comprehensive HRMS platform. Automate processes, enhance employee experience, and gain actionable insights to drive business growth."}}
+            >
             </p>
 
             

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plane,
   Cpu,
@@ -19,28 +19,171 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import MagneticButton from "../common/MagneticButtonProps";
 
-const WeServeSection = () => {
-  const [activeIndustry, setActiveIndustry] = useState("aviation");
-  const [hoveredCard, setHoveredCard] = useState(null);
+// Helper function to extract plain text from HTML
+const extractPlainText = (htmlString) => {
+  if (!htmlString) return "";
+  const doc = new DOMParser().parseFromString(htmlString, "text/html");
+  return doc.body.textContent || "";
+};
 
-  const industries = [
+// Helper function to parse features from description
+const extractFeatures = (description) => {
+  if (!description) return [];
+  
+  // If description contains bullet points or line breaks
+  const lines = description.split('\n').filter(line => line.trim());
+  
+  // Check if lines might be features (short, descriptive)
+  const features = lines.filter(line => 
+    line.trim().length > 0 && 
+    line.trim().length < 50 &&
+    !line.includes('<') // Not HTML
+  );
+  
+  return features.length > 0 ? features.slice(0, 4) : [
+    "Streamlined Operations",
+    "Automated Workflows",
+    "Real-time Analytics",
+    "Compliance Ready"
+  ];
+};
+
+// Icon mapping based on service name or industry
+const getIconForService = (serviceName) => {
+  const name = serviceName.toLowerCase();
+  
+  if (name.includes('hrms') || name.includes('software')) return <Target className="w-8 h-8" />;
+  if (name.includes('payment')) return <Banknote className="w-8 h-8" />;
+  if (name.includes('design')) return <Cpu className="w-8 h-8" />;
+  if (name.includes('power')) return <Zap className="w-8 h-8" />;
+  if (name.includes('client')) return <Users className="w-8 h-8" />;
+  
+  // Default icons based on index or random assignment
+  const icons = [
+    <Plane className="w-8 h-8" />,
+    <Cpu className="w-8 h-8" />,
+    <Building2 className="w-8 h-8" />,
+    <HeartPulse className="w-8 h-8" />,
+    <Banknote className="w-8 h-8" />,
+    <GraduationCap className="w-8 h-8" />,
+    <ChefHat className="w-8 h-8" />,
+  ];
+  
+  return icons[Math.floor(Math.random() * icons.length)];
+};
+
+// Color schemes for different services
+const colorSchemes = [
+  {
+    color: "from-[#1F2E9A] to-[#2EC5FF]",
+    gradient: "bg-gradient-to-br from-[#1F2E9A] to-[#2EC5FF]",
+    iconBg: "from-[#1F2E9A]/10 to-[#2EC5FF]/10",
+    textColor: "text-[#1F2E9A]",
+  },
+  {
+    color: "from-[#9B3DFF] to-[#E60023]",
+    gradient: "bg-gradient-to-br from-[#9B3DFF] to-[#E60023]",
+    iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
+    textColor: "text-[#9B3DFF]",
+  },
+  {
+    color: "from-[#FF6B6B] to-[#FFA726]",
+    gradient: "bg-gradient-to-br from-[#FF6B6B] to-[#FFA726]",
+    iconBg: "from-[#FF6B6B]/10 to-[#FFA726]/10",
+    textColor: "text-[#FF6B6B]",
+  },
+  {
+    color: "from-[#00B894] to-[#2EC5FF]",
+    gradient: "bg-gradient-to-br from-[#00B894] to-[#2EC5FF]",
+    iconBg: "from-[#00B894]/10 to-[#2EC5FF]/10",
+    textColor: "text-[#00B894]",
+  },
+  {
+    color: "from-[#2430A3] to-[#9B3DFF]",
+    gradient: "bg-gradient-to-br from-[#2430A3] to-[#9B3DFF]",
+    iconBg: "from-[#2430A3]/10 to-[#9B3DFF]/10",
+    textColor: "text-[#2430A3]",
+  },
+  {
+    color: "from-[#FFA726] to-[#FF6B6B]",
+    gradient: "bg-gradient-to-br from-[#FFA726] to-[#FF6B6B]",
+    iconBg: "from-[#FFA726]/10 to-[#FF6B6B]/10",
+    textColor: "text-[#FFA726]",
+  },
+  {
+    color: "from-[#E60023] to-[#FFA726]",
+    gradient: "bg-gradient-to-br from-[#E60023] to-[#FFA726]",
+    iconBg: "from-[#E60023]/10 to-[#FFA726]/10",
+    textColor: "text-[#E60023]",
+  },
+];
+
+const WeServeSection = ({ serviceData = [] }) => {
+  const [activeService, setActiveService] = useState("");
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL ;
+  console.log("Received serviceData in WeServeSection:", serviceData);
+
+  // Transform API data to component format
+  const transformServiceData = () => {
+    if (!serviceData || serviceData.length === 0) {
+      return []; // Return empty array, will use fallback
+    }
+
+    return serviceData.map((service, index) => {
+      const serviceId = service.slug || `service-${service.id}`;
+      const serviceName = service.name || "Service";
+      
+      // Set first service as active by default
+      if (index === 0 && activeService === "") {
+        setActiveService(serviceId);
+      }
+
+      // Get color scheme based on index (cycle through available schemes)
+      const colorScheme = colorSchemes[index % colorSchemes.length];
+
+      // Extract features from description
+      const plainDescription = extractPlainText(service.description);
+      const features = extractFeatures(plainDescription);
+
+      // Create stats text from badge or generate
+      const statsText = service.badge_text || `${serviceName} Solution`;
+
+      return {
+        id: serviceId,
+        title: serviceName,
+        icon: getIconForService(serviceName),
+        description: service.description 
+          ? extractPlainText(service.description).substring(0, 120) + '...'
+          : `Comprehensive ${serviceName} solution for your business needs.`,
+        heading: service.heading || "Transform Your Operations",
+        highlightedText: service.highlighted_text || "With Our Solutions",
+        color: colorScheme.color,
+        gradient: colorScheme.gradient,
+        iconBg: colorScheme.iconBg,
+        textColor: colorScheme.textColor,
+        features: features,
+        stats: statsText,
+        image: service.image ? `${STORAGE_URL}${service.image}` : "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600",
+        image_alt: service.image_alt || serviceName,
+        badgeText: service.badge_text || "",
+        buttonName: service.button_name || "Explore Solutions",
+      };
+    });
+  };
+
+  // Fallback service data if no API data
+  const fallbackServices = [
     {
       id: "aviation",
       title: "Aviation",
       icon: <Plane className="w-8 h-8" />,
-      description:
-        "Streamline crew management, compliance, and safety protocols for airlines and aviation services.",
+      description: "Streamline crew management, compliance, and safety protocols for airlines and aviation services.",
       color: "from-[#1F2E9A] to-[#2EC5FF]",
       gradient: "bg-gradient-to-br from-[#1F2E9A] to-[#2EC5FF]",
-      features: [
-        "Crew Scheduling",
-        "Safety Compliance",
-        "Training Management",
-        "Regulatory Reporting",
-      ],
+      features: ["Crew Scheduling", "Safety Compliance", "Training Management", "Regulatory Reporting"],
       stats: "40+ aviation partners",
-      image:
-        "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600",
+      image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600",
       iconBg: "from-[#1F2E9A]/10 to-[#2EC5FF]/10",
       textColor: "text-[#1F2E9A]",
     },
@@ -48,19 +191,12 @@ const WeServeSection = () => {
       id: "it",
       title: "IT",
       icon: <Cpu className="w-8 h-8" />,
-      description:
-        "Manage tech talent, project allocations, and skill development for IT companies and startups.",
+      description: "Manage tech talent, project allocations, and skill development for IT companies and startups.",
       color: "from-[#9B3DFF] to-[#E60023]",
       gradient: "bg-gradient-to-br from-[#9B3DFF] to-[#E60023]",
-      features: [
-        "Talent Management",
-        "Skill Tracking",
-        "Project Allocation",
-        "Performance Analytics",
-      ],
+      features: ["Talent Management", "Skill Tracking", "Project Allocation", "Performance Analytics"],
       stats: "500+ tech teams",
-      image:
-        "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=600",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=600",
       iconBg: "from-[#9B3DFF]/10 to-[#E60023]/10",
       textColor: "text-[#9B3DFF]",
     },
@@ -68,110 +204,26 @@ const WeServeSection = () => {
       id: "construction",
       title: "Construction",
       icon: <Building2 className="w-8 h-8" />,
-      description:
-        "Optimize workforce management, site safety, and contractor compliance for construction projects.",
+      description: "Optimize workforce management, site safety, and contractor compliance for construction projects.",
       color: "from-[#FF6B6B] to-[#FFA726]",
       gradient: "bg-gradient-to-br from-[#FF6B6B] to-[#FFA726]",
-      features: [
-        "Site Workforce",
-        "Safety Compliance",
-        "Contractor Management",
-        "Project Tracking",
-      ],
+      features: ["Site Workforce", "Safety Compliance", "Contractor Management", "Project Tracking"],
       stats: "300+ construction firms",
-      image:
-        "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600",
+      image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600",
       iconBg: "from-[#FF6B6B]/10 to-[#FFA726]/10",
       textColor: "text-[#FF6B6B]",
     },
-    {
-      id: "healthcare",
-      title: "Healthcare",
-      icon: <HeartPulse className="w-8 h-8" />,
-      description:
-        "Efficiently manage healthcare staff, certifications, and shift rotations for medical facilities.",
-      color: "from-[#00B894] to-[#2EC5FF]",
-      gradient: "bg-gradient-to-br from-[#00B894] to-[#2EC5FF]",
-      features: [
-        "Staff Scheduling",
-        "Certification Tracking",
-        "Patient Ratio",
-        "Compliance Management",
-      ],
-      stats: "200+ healthcare providers",
-      image:
-        "https://images.unsplash.com/photo-1516549655669-df565bc5d4c5?auto=format&fit=crop&w=600",
-      iconBg: "from-[#00B894]/10 to-[#2EC5FF]/10",
-      textColor: "text-[#00B894]",
-    },
-    {
-      id: "finance",
-      title: "Finance",
-      icon: <Banknote className="w-8 h-8" />,
-      description:
-        "Secure HR solutions for financial institutions with compliance and performance management.",
-      color: "from-[#2430A3] to-[#9B3DFF]",
-      gradient: "bg-gradient-to-br from-[#2430A3] to-[#9B3DFF]",
-      features: [
-        "Compliance Audits",
-        "Performance Metrics",
-        "Risk Management",
-        "Regulatory Reporting",
-      ],
-      stats: "150+ financial firms",
-      image:
-        "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600",
-      iconBg: "from-[#2430A3]/10 to-[#9B3DFF]/10",
-      textColor: "text-[#2430A3]",
-    },
-    {
-      id: "education",
-      title: "Education",
-      icon: <GraduationCap className="w-8 h-8" />,
-      description:
-        "Manage academic staff, certifications, and training programs for educational institutions.",
-      color: "from-[#FFA726] to-[#FF6B6B]",
-      gradient: "bg-gradient-to-br from-[#FFA726] to-[#FF6B6B]",
-      features: [
-        "Faculty Management",
-        "Certification Tracking",
-        "Training Programs",
-        "Academic Calendar",
-      ],
-      stats: "400+ institutions",
-      image:
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600",
-      iconBg: "from-[#FFA726]/10 to-[#FF6B6B]/10",
-      textColor: "text-[#FFA726]",
-    },
-    {
-      id: "culinary",
-      title: "Culinary",
-      icon: <ChefHat className="w-8 h-8" />,
-      description:
-        "Streamline kitchen staff management, certifications, and shift planning for hospitality businesses.",
-      color: "from-[#E60023] to-[#FFA726]",
-      gradient: "bg-gradient-to-br from-[#E60023] to-[#FFA726]",
-      features: [
-        "Shift Management",
-        "Certification Tracking",
-        "Inventory Staffing",
-        "Hygiene Compliance",
-      ],
-      stats: "250+ restaurants",
-      image:
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=600",
-      iconBg: "from-[#E60023]/10 to-[#FFA726]/10",
-      textColor: "text-[#E60023]",
-    },
   ];
 
-  const activeData =
-    industries.find((ind) => ind.id === activeIndustry) || industries[0];
+  const services = transformServiceData().length > 0 
+    ? transformServiceData() 
+    : fallbackServices;
+
+  const activeData = services.find(s => s.id === activeService) || services[0];
 
   return (
     <section
-      className="relative py-16 overflow-hidden "
+      className="relative py-16 overflow-hidden"
       style={{
         background:
           "linear-gradient(135deg, #FAFAFF 0%, #F2EEFF 50%, #FAFAFF 100%)",
@@ -238,9 +290,11 @@ const WeServeSection = () => {
           className="text-center mb-20 max-w-4xl mx-auto"
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight">
-            <span className="text-[#2430A3]">Tailored HR Solutions for</span>
+            <span className="text-[#2430A3]">
+             Our Services
+            </span>
             <span className="block mt-2 bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
-              Every Industry We Serve
+              {/* {services[0]?.highlightedText || "Every Industry We Serve"} */}
             </span>
           </h2>
 
@@ -251,139 +305,141 @@ const WeServeSection = () => {
           </p>
         </motion.div>
 
-        {/* Industry Pills Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16"
-        >
-          <div className="flex flex-wrap justify-center gap-3">
-            {industries.map((industry, index) => (
-              <motion.button
-                key={industry.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => setActiveIndustry(industry.id)}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className={`group relative overflow-hidden rounded-2xl transition-all duration-500 ${
-                  activeIndustry === industry.id
-                    ? "shadow-xl"
-                    : "shadow-md hover:shadow-lg"
-                }`}
-              >
-                {/* Animated Background */}
-                <div
-                  className={`absolute inset-0 ${industry.gradient} transition-opacity duration-500 ${
-                    activeIndustry === industry.id ? "opacity-100" : "opacity-0"
+        {/* Service Pills Navigation */}
+        {services.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16"
+          >
+            <div className="flex flex-wrap justify-center gap-3">
+              {services.map((service, index) => (
+                <motion.button
+                  key={service.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => setActiveService(service.id)}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`group relative overflow-hidden rounded-2xl transition-all duration-500 ${
+                    activeService === service.id
+                      ? "shadow-xl"
+                      : "shadow-md hover:shadow-lg"
                   }`}
-                />
-
-                {/* Static Background */}
-                <div
-                  className={`absolute inset-0 bg-white transition-opacity duration-500 ${
-                    activeIndustry === industry.id ? "opacity-0" : "opacity-100"
-                  }`}
-                />
-
-                {/* Border */}
-                <div
-                  className={`absolute inset-0 rounded-2xl border-2 transition-colors duration-500 ${
-                    activeIndustry === industry.id
-                      ? "border-transparent"
-                      : "border-gray-200 group-hover:border-gray-300"
-                  }`}
-                />
-
-                {/* Content */}
-                <div className="relative flex items-center gap-3 px-6 py-3">
-                  {/* Icon Container */}
-                  <motion.div
-                    animate={
-                      activeIndustry === industry.id
-                        ? {
-                            rotate: [0, 10, -10, 0],
-                          }
-                        : {}
-                    }
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className={`p-2 rounded-xl transition-all duration-500 ${
-                      activeIndustry === industry.id
-                        ? "bg-white/20"
-                        : `bg-gradient-to-br ${industry.iconBg}`
+                >
+                  {/* Animated Background */}
+                  <div
+                    className={`absolute inset-0 ${service.gradient} transition-opacity duration-500 ${
+                      activeService === service.id ? "opacity-100" : "opacity-0"
                     }`}
-                  >
-                    <div
-                      className={`transition-colors duration-500 ${
-                        activeIndustry === industry.id
+                  />
+
+                  {/* Static Background */}
+                  <div
+                    className={`absolute inset-0 bg-white transition-opacity duration-500 ${
+                      activeService === service.id ? "opacity-0" : "opacity-100"
+                    }`}
+                  />
+
+                  {/* Border */}
+                  <div
+                    className={`absolute inset-0 rounded-2xl border-2 transition-colors duration-500 ${
+                      activeService === service.id
+                        ? "border-transparent"
+                        : "border-gray-200 group-hover:border-gray-300"
+                    }`}
+                  />
+
+                  {/* Content */}
+                  <div className="relative flex items-center gap-3 px-6 py-3">
+                    {/* Icon Container */}
+                    <motion.div
+                      animate={
+                        activeService === service.id
+                          ? {
+                              rotate: [0, 10, -10, 0],
+                            }
+                          : {}
+                      }
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className={`p-2 rounded-xl transition-all duration-500 ${
+                        activeService === service.id
+                          ? "bg-white/20"
+                          : `bg-gradient-to-br ${service.iconBg}`
+                      }`}
+                    >
+                      <div
+                        className={`transition-colors duration-500 ${
+                          activeService === service.id
+                            ? "text-white"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {React.cloneElement(service.icon, {
+                          className: "w-5 h-5",
+                        })}
+                      </div>
+                    </motion.div>
+
+                    {/* Title */}
+                    <span
+                      className={`font-semibold whitespace-nowrap transition-colors duration-500 ${
+                        activeService === service.id
                           ? "text-white"
                           : "text-gray-700"
                       }`}
                     >
-                      {React.cloneElement(industry.icon, {
-                        className: "w-5 h-5",
-                      })}
-                    </div>
-                  </motion.div>
+                      {service.title}
+                    </span>
 
-                  {/* Title */}
-                  <span
-                    className={`font-semibold whitespace-nowrap transition-colors duration-500 ${
-                      activeIndustry === industry.id
-                        ? "text-white"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {industry.title}
-                  </span>
+                    {/* Active Indicator */}
+                    <AnimatePresence>
+                      {activeService === service.id && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 200 }}
+                        >
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-                  {/* Active Indicator */}
-                  <AnimatePresence>
-                    {activeIndustry === industry.id && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 180 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                      >
-                        <Sparkles className="w-4 h-4 text-white" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Shine Effect */}
-                {activeIndustry === industry.id && (
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: ["-200%", "200%"] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear",
-                      repeatDelay: 1,
-                    }}
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
+                  {/* Shine Effect */}
+                  {activeService === service.id && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      animate={{ x: ["-200%", "200%"] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                        repeatDelay: 1,
+                      }}
+                    />
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Left Side - Industry Cards Stack */}
+          {/* Left Side - Service Cards Stack */}
           <div className="relative">
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeIndustry}
+                key={activeService}
                 initial={{ opacity: 0, x: -50, rotateY: -15 }}
                 animate={{ opacity: 1, x: 0, rotateY: 0 }}
                 exit={{ opacity: 0, x: 50, rotateY: 15 }}
@@ -542,7 +598,7 @@ const WeServeSection = () => {
                             </div>
                             <div className="text-left">
                               <div className="font-bold text-gray-900">
-                                Explore Solutions
+                                {activeData.buttonName || "Explore Solutions"}
                               </div>
                               <div className="text-xs text-gray-600">
                                 Learn more about {activeData.title}
@@ -640,7 +696,7 @@ const WeServeSection = () => {
                     </p>
                   </motion.div>
 
-                  {/* Key Benefits Card */}
+                  {/* Key Benefits Card with Image */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -649,6 +705,13 @@ const WeServeSection = () => {
                     whileHover={{ y: -5 }}
                     className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/20"
                   >
+                    {activeData.image && (
+                      <img 
+                        src={activeData.image} 
+                        alt={activeData.image_alt || activeData.title}
+                        className="w-full h-48 object-cover rounded-xl mb-4"
+                      />
+                    )}
                     <div className="flex items-center gap-3 mb-5">
                       <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                         <Zap className="w-6 h-6 text-white" />
@@ -658,12 +721,7 @@ const WeServeSection = () => {
                       </h4>
                     </div>
                     <div className="space-y-3">
-                      {[
-                        "Industry-compliant workflows",
-                        "Custom reporting dashboards",
-                        "Specialized training modules",
-                        "Regulatory compliance tools",
-                      ].map((benefit, idx) => (
+                      {activeData.features.map((benefit, idx) => (
                         <motion.div
                           key={benefit}
                           initial={{ opacity: 0, x: -20 }}
@@ -839,21 +897,5 @@ const WeServeSection = () => {
     </section>
   );
 };
-
-// Calendar Icon Component
-const Calendar = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    viewBox="0 0 20 20"
-    fill="currentColor"
-  >
-    <path
-      fillRule="evenodd"
-      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
 
 export default WeServeSection;

@@ -25,7 +25,7 @@ const WhyChooseUs = ({ whyChooseData = [] }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [activeTab, setActiveTab] = useState("cloud");
   
-  console.log("Why Choose Us Data:", whyChooseData);
+  // console.log("Why Choose Us Data:", whyChooseData);
 
   // Map icons based on heading or index
   const getIconForFeature = (heading, index) => {

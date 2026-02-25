@@ -41,7 +41,7 @@ const countries = [
   },
 ];
 
-const Navbar = ({ toggleMenu, noteData = {}, serviceData = [] }) => {
+const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }) => {
   const [scrolled, setScrolled] = useState(false);
   const [showTopHeader, setShowTopHeader] = useState(true);
   const [openDropdowns, setOpenDropdowns] = useState({});
@@ -51,6 +51,7 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [] }) => {
   const servicesDropdownRef = useRef(null);
   const [servicesHover, setServicesHover] = useState(false);
   const hoverTimeoutRef = useRef(null);
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -474,7 +475,7 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [] }) => {
               onClick={() => navigate("/")}
             >
               <img
-                src="/image/swch_logo.png"
+                src={ siteLogo ? `${STORAGE_URL}${siteLogo}` : "/image/swch_logo.png"}
                 alt="Logo"
                 className="w-30 h-20 object-contain"
               />

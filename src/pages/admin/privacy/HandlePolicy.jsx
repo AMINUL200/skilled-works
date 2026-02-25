@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
   Edit2,
@@ -9,22 +9,23 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Grid,
-  Link as LinkIcon,
+  FileText,
   Search,
   Filter,
   ChevronDown,
   ChevronUp,
-  Globe,
   Calendar,
   Clock,
-} from "lucide-react";
-import { api } from "../../../utils/app";
-import CustomTextEditor from "../../../component/form/CustomTextEditor";
+  Globe,
+  Eye,
+  EyeOff
+} from 'lucide-react';
+import { api } from '../../../utils/app';
+import CustomTextEditor from '../../../component/form/CustomTextEditor';
 
-const HandleAllInOnePlatforms = () => {
+const HandlePolicy = () => {
   // State management
-  const [platforms, setPlatforms] = useState([]);
+  const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -32,47 +33,43 @@ const HandleAllInOnePlatforms = () => {
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
-  const [editingPlatform, setEditingPlatform] = useState(null);
+  const [editingPolicy, setEditingPolicy] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   // Filters and search
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [expandedId, setExpandedId] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
-    badged_text: "",
-    heading: "",
-    heading_meta: "",
-    small_desc: "",
-    small_desc_meta: "",
-    desc: "",
-    desc_meta: "",
-    button_name: "",
-    button_url: "",
-    is_active: true,
+    page_name: '',
+    title: '',
+    title_meta: '',
+    description: '',
+    desc_meta: '',
+    is_active: true
   });
 
   // Form validation errors
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Fetch platforms on component mount
+  // Fetch policies on component mount
   useEffect(() => {
-    fetchPlatforms();
+    fetchPolicies();
   }, []);
 
-  // Fetch platforms from API
-  const fetchPlatforms = async () => {
+  // Fetch policies from API
+  const fetchPolicies = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get("/admin/all-in-one-platforms");
+      const response = await api.get('/admin/privacy-terms');
       if (response.data && response.data.data) {
-        setPlatforms(response.data.data);
+        setPolicies(response.data.data);
       }
     } catch (err) {
-      setError(err.message || "Failed to fetch platforms");
+      setError(err.message || 'Failed to fetch policies');
     } finally {
       setLoading(false);
     }
@@ -95,75 +92,47 @@ const HandleAllInOnePlatforms = () => {
   // Validate form
   const validateForm = () => {
     const errors = {};
-    if (!formData.badged_text?.trim())
-      errors.badged_text = "Badge text is required";
-    if (!formData.heading?.trim()) errors.heading = "Heading is required";
-    if (!formData.small_desc?.trim())
-      errors.small_desc = "Short description is required";
-    if (!formData.desc?.trim()) errors.desc = "Description is required";
-
-    // Validate URL if provided
-    if (formData.button_url && !isValidUrl(formData.button_url)) {
-      errors.button_url = "Please enter a valid URL";
-    }
+    if (!formData.page_name?.trim()) errors.page_name = "Page name is required";
+    if (!formData.title?.trim()) errors.title = "Title is required";
+    if (!formData.description?.trim()) errors.description = "Description is required";
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // URL validation helper
-  const isValidUrl = (string) => {
-    try {
-      new URL(string);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  };
-
   // Reset form to initial state
   const resetForm = () => {
     setFormData({
-      badged_text: "",
-      heading: "",
-      heading_meta: "",
-      small_desc: "",
-      small_desc_meta: "",
-      desc: "",
-      desc_meta: "",
-      button_name: "",
-      button_url: "",
-      is_active: true,
+      page_name: '',
+      title: '',
+      title_meta: '',
+      description: '',
+      desc_meta: '',
+      is_active: true
     });
     setValidationErrors({});
-    setEditingPlatform(null);
+    setEditingPolicy(null);
   };
 
-  // Handle add new platform
+  // Handle add new policy
   const handleAddClick = () => {
     resetForm();
     setShowModal(true);
-    // Prevent body scroll when modal is open
     document.body.style.overflow = "hidden";
   };
 
-  // Handle edit platform
-  const handleEditClick = (platform) => {
+  // Handle edit policy
+  const handleEditClick = (policy) => {
     setFormData({
-      badged_text: platform.badged_text || "",
-      heading: platform.heading || "",
-      heading_meta: platform.heading_meta || "",
-      small_desc: platform.small_desc || "",
-      small_desc_meta: platform.small_desc_meta || "",
-      desc: platform.desc || "",
-      desc_meta: platform.desc_meta || "",
-      button_name: platform.button_name || "",
-      button_url: platform.button_url || "",
-      is_active: platform.is_active !== undefined ? platform.is_active : true,
+      page_name: policy.page_name || '',
+      title: policy.title || '',
+      title_meta: policy.title_meta || '',
+      description: policy.description || '',
+      desc_meta: policy.desc_meta || '',
+      is_active: policy.is_active !== undefined ? policy.is_active : true
     });
-    setEditingPlatform(platform);
+    setEditingPolicy(policy);
     setShowModal(true);
-    // Prevent body scroll when modal is open
     document.body.style.overflow = "hidden";
   };
 
@@ -181,25 +150,32 @@ const HandleAllInOnePlatforms = () => {
     setSuccess(null);
 
     try {
+      // Prepare data for submission
+      const submitData = {
+        page_name: formData.page_name,
+        title: formData.title,
+        title_meta: formData.title_meta || '',
+        description: formData.description,
+        desc_meta: formData.desc_meta || '',
+        is_active: formData.is_active ? 1 : 0
+      };
+
       let response;
 
-      if (editingPlatform) {
-        // Update existing platform
-        response = await api.post(
-          `/admin/all-in-one-platforms/update/${editingPlatform.id}`,
-          formData,
-        );
+      if (editingPolicy) {
+        // Update existing policy
+        response = await api.put(`/admin/privacy-terms/${editingPolicy.id}`, submitData);
       } else {
-        // Add new platform
-        response = await api.post("/admin/all-in-one-platforms", formData);
+        // Add new policy
+        response = await api.post('/admin/privacy-terms', submitData);
       }
 
       if (response.data) {
-        await fetchPlatforms(); // Refresh the list
+        await fetchPolicies(); // Refresh the list
         setSuccess(
-          editingPlatform
-            ? "Platform updated successfully!"
-            : "Platform added successfully!",
+          editingPolicy
+            ? "Policy updated successfully!"
+            : "Policy added successfully!",
         );
         handleCloseModal();
 
@@ -207,26 +183,26 @@ const HandleAllInOnePlatforms = () => {
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (err) {
-      setError(err.message || "Failed to save platform");
-      console.error("Error saving platform:", err);
+      setError(err.message || "Failed to save policy");
+      console.error("Error saving policy:", err);
     } finally {
       setSaving(false);
     }
   };
 
-  // Handle delete platform
-  const handleDelete = async (platformId) => {
+  // Handle delete policy
+  const handleDelete = async (policyId) => {
     setSaving(true);
     setError(null);
 
     try {
-      await api.delete(`/admin/all-in-one-platforms/delete/${platformId}`);
-      await fetchPlatforms(); // Refresh the list
-      setSuccess("Platform deleted successfully!");
+      await api.delete(`/admin/privacy-terms/${policyId}`);
+      await fetchPolicies(); // Refresh the list
+      setSuccess("Policy deleted successfully!");
       setDeleteConfirm(null);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err.message || "Failed to delete platform");
+      setError(err.message || "Failed to delete policy");
     } finally {
       setSaving(false);
     }
@@ -237,24 +213,23 @@ const HandleAllInOnePlatforms = () => {
     setShowModal(false);
     resetForm();
     setError(null);
-    // Restore body scroll
     document.body.style.overflow = "unset";
   };
 
-  // Filter platforms based on search and status
-  const filteredPlatforms = platforms.filter((platform) => {
+  // Filter policies based on search and status
+  const filteredPolicies = policies.filter((policy) => {
     const matchesSearch =
-      platform.heading?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      platform.badged_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      platform.small_desc?.toLowerCase().includes(searchTerm.toLowerCase());
+      policy.page_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      policy.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      policy.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter =
       filterStatus === "all"
         ? true
         : filterStatus === "active"
-          ? platform.is_active
+          ? policy.is_active
           : filterStatus === "inactive"
-            ? !platform.is_active
+            ? !policy.is_active
             : true;
 
     return matchesSearch && matchesFilter;
@@ -276,13 +251,13 @@ const HandleAllInOnePlatforms = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <div className="flex items-center space-x-3">
-              <Grid className="w-8 h-8 text-gray-900" />
+              <FileText className="w-8 h-8 text-gray-900" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  All-in-One Platforms
+                  Policy Management
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  Manage your platform features and descriptions
+                  Manage Privacy Policy, Terms of Use, and other legal pages
                 </p>
               </div>
             </div>
@@ -292,7 +267,7 @@ const HandleAllInOnePlatforms = () => {
               className="px-6 py-2 bg-gray-900 text-white border border-gray-900 rounded-lg hover:bg-white hover:text-gray-900 transition-colors duration-200 flex items-center space-x-2 self-start"
             >
               <Plus className="w-4 h-4" />
-              <span>Add New Platform</span>
+              <span>Add New Policy</span>
             </button>
           </div>
         </div>
@@ -335,12 +310,12 @@ const HandleAllInOnePlatforms = () => {
 
         {/* Filters and Search */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search platforms..."
+                placeholder="Search policies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent w-full md:w-64"
@@ -352,33 +327,33 @@ const HandleAllInOnePlatforms = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             >
-              <option value="all">All Platforms</option>
+              <option value="all">All Status</option>
               <option value="active">Active Only</option>
               <option value="inactive">Inactive Only</option>
             </select>
           </div>
 
           <p className="text-sm text-gray-600">
-            Showing {filteredPlatforms.length} of {platforms.length} platforms
+            Showing {filteredPolicies.length} of {policies.length} policies
           </p>
         </div>
 
-        {/* Platforms List */}
+        {/* Policies List */}
         {loading ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <Loader2 className="w-12 h-12 animate-spin text-gray-900 mx-auto mb-4" />
-            <p className="text-gray-600">Loading platforms...</p>
+            <p className="text-gray-600">Loading policies...</p>
           </div>
-        ) : filteredPlatforms.length === 0 ? (
+        ) : filteredPolicies.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <Grid className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No platforms found
+              No policies found
             </h3>
             <p className="text-gray-600 mb-6">
               {searchTerm || filterStatus !== "all"
                 ? "Try adjusting your search or filters"
-                : "Get started by adding your first platform"}
+                : "Get started by adding your first policy"}
             </p>
             {!searchTerm && filterStatus === "all" && (
               <button
@@ -386,94 +361,88 @@ const HandleAllInOnePlatforms = () => {
                 className="px-6 py-2 bg-gray-900 text-white border border-gray-900 rounded-lg hover:bg-white hover:text-gray-900 transition-colors duration-200 inline-flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add New Platform</span>
+                <span>Add New Policy</span>
               </button>
             )}
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredPlatforms.map((platform) => (
+            {filteredPolicies.map((policy) => (
               <motion.div
-                key={platform.id}
+                key={policy.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
               >
-                {/* Platform Header */}
+                {/* Policy Header */}
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      {/* Badge and Status */}
-                      <div className="flex items-center space-x-3 mb-3">
+                      {/* Badges and Status */}
+                      <div className="flex items-center flex-wrap gap-2 mb-3">
                         <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                          {platform.badged_text}
+                          {policy.page_name}
                         </span>
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            platform.is_active
+                            policy.is_active
                               ? "bg-green-100 text-green-700"
                               : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {platform.is_active ? "Active" : "Inactive"}
+                          {policy.is_active ? "Active" : "Inactive"}
                         </span>
-                        {platform.slug && (
+                        {policy.slug && (
                           <span className="text-xs text-gray-500">
-                            Slug: {platform.slug}
+                            Slug: {policy.slug}
                           </span>
                         )}
                       </div>
 
-                      {/* Heading */}
+                      {/* Title */}
                       <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {platform.heading}
+                        {policy.title}
                       </h3>
 
-                      {/* Heading Meta */}
-                      {platform.heading_meta && (
+                      {/* Title Meta */}
+                      {policy.title_meta && (
                         <p className="text-sm text-gray-500 mb-3">
-                          {platform.heading_meta}
+                          {policy.title_meta}
                         </p>
                       )}
 
-                      {/* Short Description */}
+                      {/* Description Preview */}
                       <p className="text-gray-600 mb-4 line-clamp-2">
-                        {platform.small_desc}
+                        {policy.description}
                       </p>
 
                       {/* Meta Info */}
                       <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
                         <span className="flex items-center">
                           <Calendar className="w-3 h-3 mr-1" />
-                          Created: {formatDate(platform.created_at)}
+                          Created: {formatDate(policy.created_at)}
                         </span>
                         <span className="flex items-center">
                           <Clock className="w-3 h-3 mr-1" />
-                          Updated: {formatDate(platform.updated_at)}
+                          Updated: {formatDate(policy.updated_at)}
                         </span>
-                        {platform.button_name && (
-                          <span className="flex items-center">
-                            <LinkIcon className="w-3 h-3 mr-1" />
-                            Button: {platform.button_name}
-                          </span>
-                        )}
                       </div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex items-center space-x-2 ml-4">
                       <button
-                        onClick={() => handleEditClick(platform)}
+                        onClick={() => handleEditClick(policy)}
                         className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Edit platform"
+                        title="Edit policy"
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
 
-                      {deleteConfirm === platform.id ? (
+                      {deleteConfirm === policy.id ? (
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => handleDelete(platform.id)}
+                            onClick={() => handleDelete(policy.id)}
                             className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
                           >
                             Confirm
@@ -487,9 +456,9 @@ const HandleAllInOnePlatforms = () => {
                         </div>
                       ) : (
                         <button
-                          onClick={() => setDeleteConfirm(platform.id)}
+                          onClick={() => setDeleteConfirm(policy.id)}
                           className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete platform"
+                          title="Delete policy"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
@@ -498,12 +467,12 @@ const HandleAllInOnePlatforms = () => {
                       <button
                         onClick={() =>
                           setExpandedId(
-                            expandedId === platform.id ? null : platform.id,
+                            expandedId === policy.id ? null : policy.id,
                           )
                         }
                         className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                       >
-                        {expandedId === platform.id ? (
+                        {expandedId === policy.id ? (
                           <ChevronUp className="w-5 h-5" />
                         ) : (
                           <ChevronDown className="w-5 h-5" />
@@ -515,7 +484,7 @@ const HandleAllInOnePlatforms = () => {
 
                 {/* Expanded Details */}
                 <AnimatePresence>
-                  {expandedId === platform.id && (
+                  {expandedId === policy.id && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -528,58 +497,41 @@ const HandleAllInOnePlatforms = () => {
                           <h4 className="text-sm font-medium text-gray-700 mb-2">
                             Full Description
                           </h4>
-                          <p className="text-sm text-gray-600">
-                            {platform.desc}
-                          </p>
+                          <div 
+                            className="text-sm text-gray-600 prose max-w-none"
+                            dangerouslySetInnerHTML={{ __html: policy.description }}
+                          />
                         </div>
 
-                        {/* Meta Descriptions */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {platform.small_desc_meta && (
-                            <div>
-                              <h4 className="text-sm font-medium text-gray-700 mb-1">
-                                Short Description Meta
-                              </h4>
-                              <p className="text-sm text-gray-500 italic">
-                                {platform.small_desc_meta}
-                              </p>
-                            </div>
-                          )}
-
-                          {platform.desc_meta && (
-                            <div>
-                              <h4 className="text-sm font-medium text-gray-700 mb-1">
-                                Description Meta
-                              </h4>
-                              <p className="text-sm text-gray-500 italic">
-                                {platform.desc_meta}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Button Info */}
-                        {platform.button_name && platform.button_url && (
+                        {/* Description Meta */}
+                        {policy.desc_meta && (
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 mb-1">
-                              Button Configuration
+                              Meta Description
                             </h4>
-                            <div className="flex items-center space-x-4">
-                              <span className="text-sm text-gray-600">
-                                {platform.button_name}
-                              </span>
-                              <a
-                                href={platform.button_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
-                              >
-                                <Globe className="w-3 h-3 mr-1" />
-                                {platform.button_url}
-                              </a>
-                            </div>
+                            <p className="text-sm text-gray-500 italic">
+                              {policy.desc_meta}
+                            </p>
                           </div>
                         )}
+
+                        {/* Additional Info */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700 mb-1">
+                              Page Name
+                            </h4>
+                            <p className="text-sm text-gray-600">{policy.page_name}</p>
+                          </div>
+                          {policy.slug && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 mb-1">
+                                Slug
+                              </h4>
+                              <p className="text-sm text-gray-600">{policy.slug}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </motion.div>
                   )}
@@ -590,7 +542,7 @@ const HandleAllInOnePlatforms = () => {
         )}
       </div>
 
-      {/* Add/Edit Modal - Fixed with proper z-index and positioning */}
+      {/* Add/Edit Modal */}
       <AnimatePresence>
         {showModal && (
           <>
@@ -617,7 +569,7 @@ const HandleAllInOnePlatforms = () => {
                   {/* Modal Header */}
                   <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {editingPlatform ? "Edit Platform" : "Add New Platform"}
+                      {editingPolicy ? "Edit Policy" : "Add New Policy"}
                     </h3>
                     <button
                       onClick={handleCloseModal}
@@ -627,135 +579,92 @@ const HandleAllInOnePlatforms = () => {
                     </button>
                   </div>
 
-                  {/* Modal Body - Scrollable */}
+                  {/* Modal Body */}
                   <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                    <form onSubmit={handleSubmit} id="platform-form">
+                    <form onSubmit={handleSubmit} id="policy-form">
                       <div className="space-y-4">
-                        {/* Badge Text */}
+                        {/* Page Name */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Badge Text <span className="text-red-500">*</span>
+                            Page Name <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
-                            name="badged_text"
-                            value={formData.badged_text}
+                            name="page_name"
+                            value={formData.page_name}
                             onChange={handleInputChange}
                             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
-                              validationErrors.badged_text
+                              validationErrors.page_name
                                 ? "border-red-500"
                                 : "border-gray-200"
                             }`}
-                            placeholder="e.g., 60% faster hiring"
+                            placeholder="e.g., Terms of Use, Privacy Policy"
                           />
-                          {validationErrors.badged_text && (
+                          {validationErrors.page_name && (
                             <p className="mt-1 text-sm text-red-500">
-                              {validationErrors.badged_text}
+                              {validationErrors.page_name}
                             </p>
                           )}
                         </div>
 
-                        {/* Heading */}
+                        {/* Title */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Heading <span className="text-red-500">*</span>
+                            Title <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
-                            name="heading"
-                            value={formData.heading}
+                            name="title"
+                            value={formData.title}
                             onChange={handleInputChange}
                             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
-                              validationErrors.heading
+                              validationErrors.title
                                 ? "border-red-500"
                                 : "border-gray-200"
                             }`}
-                            placeholder="e.g., Intelligent Recruitment"
+                            placeholder="Enter policy title"
                           />
-                          {validationErrors.heading && (
+                          {validationErrors.title && (
                             <p className="mt-1 text-sm text-red-500">
-                              {validationErrors.heading}
+                              {validationErrors.title}
                             </p>
                           )}
                         </div>
 
-                        {/* Heading Meta */}
+                        {/* Title Meta */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Heading Meta (Subtitle)
+                            Title Meta (Optional)
                           </label>
                           <input
                             type="text"
-                            name="heading_meta"
-                            value={formData.heading_meta || ""}
+                            name="title_meta"
+                            value={formData.title_meta || ""}
                             onChange={handleInputChange}
                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                            placeholder="e.g., Comprehensive HRMS Features"
+                            placeholder="Meta title for SEO"
                           />
                         </div>
 
-                        {/* Short Description */}
+                        {/* Description */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Short Description{" "}
-                            <span className="text-red-500">*</span>
+                            Description <span className="text-red-500">*</span>
                           </label>
-                          <textarea
-                            name="small_desc"
-                            value={formData.small_desc}
-                            onChange={handleInputChange}
-                            rows={3}
-                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
-                              validationErrors.small_desc
-                                ? "border-red-500"
-                                : "border-gray-200"
-                            }`}
-                            placeholder="Brief description of the platform..."
-                          />
-                          {validationErrors.small_desc && (
-                            <p className="mt-1 text-sm text-red-500">
-                              {validationErrors.small_desc}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Short Description Meta */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Short Description Meta (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            name="small_desc_meta"
-                            value={formData.small_desc_meta || ""}
-                            onChange={handleInputChange}
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                            placeholder="Meta description for short description"
-                          />
-                        </div>
-
-                        {/* Full Description */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Full Description{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-
                           <CustomTextEditor
-                            value={formData.desc || ""}
-                            height={350}
-                            placeholder="Detailed description of the platform..."
+                            value={formData.description || ""}
+                            height={400}
+                            placeholder="Enter policy content..."
                             onChange={(content) =>
                               setFormData((prev) => ({
                                 ...prev,
-                                desc: content,
+                                description: content,
                               }))
                             }
                           />
-
-                          {validationErrors.desc && (
+                          {validationErrors.description && (
                             <p className="mt-1 text-sm text-red-500">
-                              {validationErrors.desc}
+                              {validationErrors.description}
                             </p>
                           )}
                         </div>
@@ -765,57 +674,14 @@ const HandleAllInOnePlatforms = () => {
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Description Meta (Optional)
                           </label>
-                          <input
-                            type="text"
+                          <textarea
                             name="desc_meta"
                             value={formData.desc_meta || ""}
                             onChange={handleInputChange}
+                            rows={2}
                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                            placeholder="Meta description for full description"
+                            placeholder="Meta description for SEO"
                           />
-                        </div>
-
-                        {/* Button Configuration */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Button Name
-                            </label>
-                            <input
-                              type="text"
-                              name="button_name"
-                              value={formData.button_name || ""}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                              placeholder="e.g., Explore Feature"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Button URL
-                            </label>
-                            <div className="relative">
-                              <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                              <input
-                                type="url"
-                                name="button_url"
-                                value={formData.button_url || ""}
-                                onChange={handleInputChange}
-                                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent ${
-                                  validationErrors.button_url
-                                    ? "border-red-500"
-                                    : "border-gray-200"
-                                }`}
-                                placeholder="https://example.com"
-                              />
-                            </div>
-                            {validationErrors.button_url && (
-                              <p className="mt-1 text-sm text-red-500">
-                                {validationErrors.button_url}
-                              </p>
-                            )}
-                          </div>
                         </div>
 
                         {/* Active Status */}
@@ -835,8 +701,8 @@ const HandleAllInOnePlatforms = () => {
                           </label>
                           <span className="text-sm text-gray-500">
                             {formData.is_active
-                              ? "Platform is visible on site"
-                              : "Platform is hidden"}
+                              ? "Policy is visible on site"
+                              : "Policy is hidden"}
                           </span>
                         </div>
                       </div>
@@ -854,7 +720,7 @@ const HandleAllInOnePlatforms = () => {
                     </button>
                     <button
                       type="submit"
-                      form="platform-form"
+                      form="policy-form"
                       disabled={saving}
                       className="px-4 py-2 bg-gray-900 text-white border border-gray-900 rounded-lg hover:bg-white hover:text-gray-900 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -867,9 +733,7 @@ const HandleAllInOnePlatforms = () => {
                         <>
                           <Save className="w-4 h-4" />
                           <span>
-                            {editingPlatform
-                              ? "Update Platform"
-                              : "Save Platform"}
+                            {editingPolicy ? "Update Policy" : "Save Policy"}
                           </span>
                         </>
                       )}
@@ -885,4 +749,4 @@ const HandleAllInOnePlatforms = () => {
   );
 };
 
-export default HandleAllInOnePlatforms;
+export default HandlePolicy;

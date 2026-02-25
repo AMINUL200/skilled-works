@@ -21,78 +21,99 @@ import {
 import { useInView } from "framer-motion";
 import { motion } from "framer-motion";
 
-const FeaturesSection = () => {
+// Icon mapping for different feature types
+const iconMap = {
+  "Intelligent Recruitment": <Brain className="w-6 h-6" />,
+  "HRMS Features": <Users className="w-6 h-6" />,
+  "Smart Document Hub": <FileText className="w-6 h-6" />,
+  "Compliance Guardian": <ShieldCheck className="w-6 h-6" />,
+  "Attendance Pro": <Clock className="w-6 h-6" />,
+  "Insights Dashboard": <TrendingUp className="w-6 h-6" />
+};
+
+// Gradient mapping based on feature type
+const gradientMap = {
+  "Intelligent Recruitment": "from-[#9B3DFF] via-[#9B5CFF] to-[#A83DFF]",
+  "HRMS Features": "from-[#1F2E9A] via-[#1A3CC3] to-[#2430A3]",
+  "Smart Document Hub": "from-[#2EC5FF] via-[#2ED8FF] to-[#00C6FF]",
+  "Compliance Guardian": "from-[#E60023] via-[#FF1F1F] to-[#FF5252]",
+  "Attendance Pro": "from-[#00B894] via-[#00D3A9] to-[#00E5B4]",
+  "Insights Dashboard": "from-[#FF6B6B] via-[#FF8E8E] to-[#FFA8A8]"
+};
+
+// Accent color mapping
+const accentColorMap = {
+  "Intelligent Recruitment": "#9B3DFF",
+  "HRMS Features": "#1F2E9A",
+  "Smart Document Hub": "#2EC5FF",
+  "Compliance Guardian": "#E60023",
+  "Attendance Pro": "#00B894",
+  "Insights Dashboard": "#FF6B6B"
+};
+
+// Function to extract list items from HTML description
+const extractListItems = (htmlString) => {
+  if (!htmlString) return [];
+  
+  // Create a temporary div to parse HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlString;
+  
+  // Find all list items
+  const listItems = tempDiv.querySelectorAll('li span:last-child');
+  
+  // Extract text content
+  return Array.from(listItems).map(item => item.textContent);
+};
+
+// Function to extract description text from HTML
+const extractDescription = (htmlString) => {
+  if (!htmlString) return "";
+  
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlString;
+  
+  // Find the first paragraph
+  const paragraph = tempDiv.querySelector('p');
+  return paragraph ? paragraph.textContent : "";
+};
+
+const FeaturesSection = ({ allInOnePlatformData = [] }) => {
+  // console.log("Received allInOnePlatformData in FeaturesSection:", allInOnePlatformData);
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.2 });
 
-  const features = [
-    {
-      id: "hrms",
-      title: "HRMS Features",
-      description: "Comprehensive Human Resource Management System with employee lifecycle management, performance tracking, and automated workflows.",
-      icon: <Users className="w-6 h-6" />,
-      gradient: "from-[#1F2E9A] via-[#1A3CC3] to-[#2430A3]",
-      features: ["Employee Database", "Payroll Integration", "Performance Reviews", "Training Management"],
-      stats: "98% efficiency gain",
-      delay: 0,
-      accentColor: "#1F2E9A"
-    },
-    {
-      id: "recruitment",
-      title: "Intelligent Recruitment",
-      description: "AI-powered hiring process with smart screening, automated scheduling, and candidate matching algorithms.",
-      icon: <Brain className="w-6 h-6" />,
-      gradient: "from-[#9B3DFF] via-[#9B5CFF] to-[#A83DFF]",
-      features: ["AI Screening", "Smart Matching", "Interview Scheduling", "Offer Management"],
-      stats: "60% faster hiring",
-      delay: 100,
-      accentColor: "#9B3DFF"
-    },
-    {
-      id: "hr-file",
-      title: "Smart Document Hub",
-      description: "AI-driven document management with automatic categorization, smart search, and secure cloud storage.",
-      icon: <FileText className="w-6 h-6" />,
-      gradient: "from-[#2EC5FF] via-[#2ED8FF] to-[#00C6FF]",
-      features: ["AI Categorization", "Smart Search", "Version Control", "Secure Cloud"],
-      stats: "100% organized",
-      delay: 200,
-      accentColor: "#2EC5FF"
-    },
-    {
-      id: "compliance",
-      title: "Compliance Guardian",
-      description: "Automated compliance monitoring with real-time regulatory updates and AI-powered risk detection.",
-      icon: <ShieldCheck className="w-6 h-6" />,
-      gradient: "from-[#E60023] via-[#FF1F1F] to-[#FF5252]",
-      features: ["RTW Checks", "Compliance Audits", "Legal Updates", "Risk Detection"],
-      stats: "Zero compliance issues",
-      delay: 300,
-      accentColor: "#E60023"
-    },
-    {
-      id: "attendance",
-      title: "Attendance Pro",
-      description: "Real-time tracking with geofencing, biometric integration, and predictive absence management.",
-      icon: <Clock className="w-6 h-6" />,
-      gradient: "from-[#00B894] via-[#00D3A9] to-[#00E5B4]",
-      features: ["Geofencing", "Biometric Integration", "Predictive Analytics", "Overtime AI"],
-      stats: "95% accuracy",
-      delay: 400,
-      accentColor: "#00B894"
-    },
-    {
-      id: "dashboard",
-      title: "Insights Dashboard",
-      description: "Interactive analytics with predictive insights, custom KPI tracking, and automated reporting.",
-      icon: <TrendingUp className="w-6 h-6" />,
-      gradient: "from-[#FF6B6B] via-[#FF8E8E] to-[#FFA8A8]",
-      features: ["Predictive Analytics", "Custom KPIs", "Real-time Insights", "Automated Reports"],
-      stats: "30+ report types",
-      delay: 500,
-      accentColor: "#FF6B6B"
-    }
-  ];
+  // Transform API data to component format
+  const features = allInOnePlatformData.map((item, index) => {
+    const heading = item.heading || "";
+    
+    return {
+      id: item.slug || `feature-${item.id}`,
+      title: heading,
+      description: item.small_desc || extractDescription(item.desc),
+      icon: iconMap[heading] || <Users className="w-6 h-6" />,
+      gradient: gradientMap[heading] || "from-[#1F2E9A] via-[#1A3CC3] to-[#2430A3]",
+      features: extractListItems(item.desc),
+      stats: item.badged_text || "98% efficiency gain",
+      delay: index * 100,
+      accentColor: accentColorMap[heading] || "#1F2E9A",
+      buttonName: item.button_name || "Explore feature",
+      buttonUrl: item.button_url || "#"
+    };
+  });
+
+  // If no data, show loading or fallback
+  if (!features.length) {
+    return (
+      <section className="relative py-16 overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-20">
+            <p className="text-gray-500">Loading features...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={containerRef} className="relative py-16 overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-white">
@@ -155,8 +176,6 @@ const FeaturesSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-20 max-w-4xl mx-auto"
         >
-        
-          
           <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight">
             <span className="text-[#2430A3]">Everything You Need in </span>
             <span className="block mt-2 bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
@@ -305,55 +324,60 @@ const FeaturesSection = () => {
                   </p>
 
                   {/* Features List with Stagger Animation */}
-                  <ul className="space-y-3 mb-8">
-                    {feature.features.map((item, idx) => (
-                      <motion.li 
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={isInView ? { opacity: 1, x: 0 } : {}}
-                        transition={{ 
-                          delay: (feature.delay + 400 + idx * 80) / 1000,
-                          type: "spring",
-                          stiffness: 100
-                        }}
-                        className="group/item relative"
-                      >
-                        <div className="flex items-center gap-3">
-                          {/* Animated Check Circle */}
-                          <div className="relative flex-shrink-0">
-                            <motion.div
-                              whileHover={{ rotate: 360, scale: 1.2 }}
-                              transition={{ duration: 0.5 }}
-                              className={`w-5 h-5 rounded-full bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-sm`}
-                            >
-                              <CheckCircle className="w-3 h-3 text-white fill-current" />
-                            </motion.div>
+                  {feature.features.length > 0 && (
+                    <ul className="space-y-3 mb-8">
+                      {feature.features.map((item, idx) => (
+                        <motion.li 
+                          key={idx}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={isInView ? { opacity: 1, x: 0 } : {}}
+                          transition={{ 
+                            delay: (feature.delay + 400 + idx * 80) / 1000,
+                            type: "spring",
+                            stiffness: 100
+                          }}
+                          className="group/item relative"
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Animated Check Circle */}
+                            <div className="relative flex-shrink-0">
+                              <motion.div
+                                whileHover={{ rotate: 360, scale: 1.2 }}
+                                transition={{ duration: 0.5 }}
+                                className={`w-5 h-5 rounded-full bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-sm`}
+                              >
+                                <CheckCircle className="w-3 h-3 text-white fill-current" />
+                              </motion.div>
+                              
+                              {/* Expanding Ring on Hover */}
+                              <motion.div
+                                className={`absolute inset-0 rounded-full bg-gradient-to-br ${feature.gradient} opacity-0 group-hover/item:opacity-20`}
+                                animate={{
+                                  scale: [1, 1.5],
+                                  opacity: [0, 0.2, 0],
+                                }}
+                                transition={{
+                                  duration: 1.5,
+                                  repeat: Infinity,
+                                }}
+                              />
+                            </div>
                             
-                            {/* Expanding Ring on Hover */}
-                            <motion.div
-                              className={`absolute inset-0 rounded-full bg-gradient-to-br ${feature.gradient} opacity-0 group-hover/item:opacity-20`}
-                              animate={{
-                                scale: [1, 1.5],
-                                opacity: [0, 0.2, 0],
-                              }}
-                              transition={{
-                                duration: 1.5,
-                                repeat: Infinity,
-                              }}
-                            />
+                            <span className="text-sm font-medium text-gray-700 group-hover/item:text-gray-900 transition-colors">
+                              {item}
+                            </span>
                           </div>
-                          
-                          <span className="text-sm font-medium text-gray-700 group-hover/item:text-gray-900 transition-colors">
-                            {item}
-                          </span>
-                        </div>
-                      </motion.li>
-                    ))}
-                  </ul>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  )}
 
                   {/* Action Button with Magnetic Effect */}
                   <div className="pt-6 border-t border-gray-100">
-                    <motion.button
+                    <motion.a
+                      href={feature.buttonUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       whileHover={{ x: 3 }}
                       className="group/btn relative inline-flex items-center gap-2 overflow-hidden"
                     >
@@ -361,7 +385,7 @@ const FeaturesSection = () => {
                       <div className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} opacity-0 group-hover/btn:opacity-10 transition-opacity duration-300 rounded-lg -inset-x-4 -inset-y-2`} />
                       
                       <span className={`relative font-semibold text-gray-900 group-hover/btn:bg-gradient-to-r group-hover/btn:${feature.gradient} group-hover/btn:bg-clip-text group-hover/btn:text-transparent transition-all duration-300`}>
-                        Explore feature
+                        {feature.buttonName}
                       </span>
                       
                       <motion.div
@@ -377,7 +401,7 @@ const FeaturesSection = () => {
                       >
                         <ArrowUpRight className={`w-5 h-5 text-gray-600 group-hover/btn:text-[${feature.accentColor}] transition-colors duration-300`} />
                       </motion.div>
-                    </motion.button>
+                    </motion.a>
                   </div>
                 </div>
 
@@ -397,8 +421,6 @@ const FeaturesSection = () => {
             </motion.div>
           ))}
         </div>
-
-      
       </div>
 
       {/* Bottom Gradient */}

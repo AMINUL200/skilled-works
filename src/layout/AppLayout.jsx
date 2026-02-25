@@ -14,6 +14,7 @@ const AppLayout = () => {
   const [globalData, setGlobalData] = useState({
     note: null,
     service: [],
+    setting: null,
   });
 
   const [loading, setLoading] = useState(true);
@@ -23,18 +24,21 @@ const AppLayout = () => {
       try {
         setLoading(true);
 
-        const [noteRes, serviceRes] = await Promise.all([
+        const [noteRes, serviceRes, settingRes] = await Promise.all([
           api.get("/notes"),
-          api.get("/service-type")
+          api.get("/service-type"),
+          api.get("/website-settings")
         ]);
 
-        console.log("Global API responses:", {
-          note: noteRes,
-          service: serviceRes
-        });
+        // console.log("Global API responses:", {
+        //   note: noteRes,
+        //   service: serviceRes,
+        //   setting: settingRes
+        // });
         setGlobalData({
           note: noteRes.data.data,
-          service: serviceRes.data.data
+          service: serviceRes.data.data,
+          setting: settingRes.data.data.settings
         });
       } catch (error) {
         console.error("Global API error:", error);
@@ -53,10 +57,10 @@ const AppLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar toggleMenu={toggleSidebar} noteData={globalData.note} serviceData={globalData.service} />
-      <SideBar toggleMenu={toggleSidebar} isOpen={sidebarOpen} />
+      <Navbar toggleMenu={toggleSidebar} noteData={globalData.note} serviceData={globalData.service} siteLogo={globalData.setting?.site_web_logo} />
+      <SideBar toggleMenu={toggleSidebar} isOpen={sidebarOpen} serviceData={globalData.service} />
       <Outlet />
-      <Footer />
+      <Footer settingData={globalData.setting} serviceData={globalData.service} />
       <BackToTop />
     </div>
   );

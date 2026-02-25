@@ -9,37 +9,30 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const ServiceOurCapabilities = () => {
-  const capabilities = [
-    {
-      title: "Custom HR-Tech Solutions",
-      desc: "Tailored HR technology strategies that align perfectly with your unique business needs and goals",
-      icon: <Target className="w-6 h-6" />,
-      color: "from-[#1F2E9A] to-[#2EC5FF]",
-      delay: 0,
-    },
-    {
-      title: "Scalable & Future-Ready",
-      desc: "Build HRMS solutions that grow with your business using modern, adaptable technologies",
-      icon: <TrendingUp className="w-6 h-6" />,
-      color: "from-[#9B3DFF] to-[#E60023]",
-      delay: 0.1,
-    },
-    {
-      title: "Performance-Driven Development",
-      desc: "Fast, efficient, and optimized HR solutions that deliver exceptional user experiences",
-      icon: <Zap className="w-6 h-6" />,
-      color: "from-[#00B894] to-[#2EC5FF]",
-      delay: 0.2,
-    },
-    {
-      title: "Secure & Compliant",
-      desc: "Enterprise-grade security and UK compliance standards you can trust for HR operations",
-      icon: <Shield className="w-6 h-6" />,
-      color: "from-[#2430A3] to-[#9B3DFF]",
-      delay: 0.3,
-    },
-  ];
+
+
+
+
+
+const ServiceOurCapabilities = ({ capabilityData = {} }) => {
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL ;
+  
+  // Extract the actual data (handle both direct and nested structure)
+  const data = capabilityData || {};
+  
+  // Extract heading and highlighted text
+  const heading = data.heading || "Built for Growth,";
+  const highlightedText = data.highalited_text || "Designed for Success";
+
+ 
+  
+  
+  
+  // Stats for floating card
+  const clientNo = data.client_no || "500+";
+  const clientSatisfaction = data.client_satisfaction || "98%";
+  const badge2 = data.badge2 || "UK Trusted HR-Tech Partner";
+  const badge1 = data.badge1 || "Award";
 
   return (
     <section className="relative py-20 px-6 overflow-hidden">
@@ -101,74 +94,16 @@ const ServiceOurCapabilities = () => {
             </div>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl text-gray-900 mb-6 font-bold">
-              <span className="block text-[#2430A3]">Built for Growth,</span>
+              <span className="block text-[#2430A3]">{heading}</span>
               <span className="block bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
-                Designed for Success
+                {highlightedText}
               </span>
             </h2>
 
-            <p className="text-lg text-gray-600 mb-10 leading-relaxed">
-              We combine technical HR expertise with business acumen to deliver solutions that not only meet your current needs but anticipate future workforce challenges.
-            </p>
+            
 
             <div className="space-y-6">
-              {capabilities.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: item.delay }}
-                  whileHover={{ x: 5 }}
-                  className="group relative"
-                >
-                  {/* Hover Glow Effect */}
-                  <div
-                    className={`absolute -inset-2 bg-gradient-to-r ${item.color} rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10`}
-                  />
-
-                  <div className="flex gap-4 p-4 rounded-xl hover:bg-white/50 transition-colors duration-300">
-                    {/* Icon Container */}
-                    <div className="relative flex-shrink-0">
-                      {/* Icon Background Glow */}
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${item.color} rounded-xl blur opacity-20 group-hover:opacity-40 transition-opacity`}
-                      />
-                      
-                      {/* Icon */}
-                      <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                        <div className="text-white">
-                          {React.cloneElement(item.icon, { className: "w-6 h-6" })}
-                        </div>
-                      </div>
-                      
-                      {/* Check Badge */}
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: index * 0.5,
-                        }}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
-                      >
-                        <CheckCircle className="w-3 h-3 text-[#00B894]" />
-                      </motion.div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1">
-                      <h4 className="text-lg text-gray-900 mb-2 font-semibold group-hover:text-[#1F2E9A] transition-colors">
-                        {item.title}
-                      </h4>
-
-                      <p className="text-gray-600 text-sm leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+              <div className="text-lg text-gray-600 mb-10 leading-relaxed" dangerouslySetInnerHTML={{__html:data?.description}}></div>
             </div>
           </motion.div>
 
@@ -188,8 +123,8 @@ const ServiceOurCapabilities = () => {
               {/* Image */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
                 <img
-                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800"
-                  alt="HR Team Collaboration"
+                  src={`${STORAGE_URL}${data.image || "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800"}`}
+                  alt={data.image_alt || "HR Team Collaboration"}
                   className="w-full h-[600px] object-cover transform group-hover:scale-105 transition-transform duration-500"
                 />
 
@@ -210,7 +145,7 @@ const ServiceOurCapabilities = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-transparent bg-clip-text mb-1">
-                    98%
+                    {clientSatisfaction}
                   </div>
                   <p className="text-sm text-gray-600">
                     Client Satisfaction
@@ -219,7 +154,7 @@ const ServiceOurCapabilities = () => {
 
                 <div className="text-center">
                   <div className="text-3xl font-bold bg-gradient-to-r from-[#9B3DFF] to-[#E60023] text-transparent bg-clip-text mb-1">
-                    500+
+                    {clientNo}
                   </div>
                   <p className="text-sm text-gray-600">
                     UK Businesses Served
@@ -230,7 +165,7 @@ const ServiceOurCapabilities = () => {
               {/* Decorative Line */}
               <div className="mt-4 pt-4 border-t border-gray-100 text-center">
                 <p className="text-xs text-gray-500 font-medium">
-                  UK Trusted HR-Tech Partner
+                  {badge2}
                 </p>
               </div>
             </motion.div>
@@ -250,7 +185,7 @@ const ServiceOurCapabilities = () => {
               className="absolute -top-6 -left-6 bg-gradient-to-br from-[#E60023] to-[#B8001B] text-white rounded-2xl shadow-2xl p-4 max-w-[180px] border border-white/20"
             >
               <div className="text-center">
-                <div className="text-xl font-bold mb-1">Award</div>
+                <div className="text-xl font-bold mb-1">{badge1}</div>
                 <div className="text-xs opacity-90">
                   Best HR-Tech 2024
                 </div>

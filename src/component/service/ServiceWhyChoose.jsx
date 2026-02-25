@@ -15,8 +15,83 @@ import {
 import { motion } from "framer-motion";
 import MagneticButton from "../common/MagneticButtonProps";
 
-const ServiceWhyChoose = () => {
-  const features = [
+// Helper function to extract plain text from HTML
+const extractPlainText = (htmlString) => {
+  if (!htmlString) return "";
+  const doc = new DOMParser().parseFromString(htmlString, "text/html");
+  return doc.body.textContent || "";
+};
+
+// Icon mapping based on feature title
+const getIconForFeature = (title, index) => {
+  const titleLower = (title || "").toLowerCase();
+  
+  if (titleLower.includes('expert') || titleLower.includes('team')) 
+    return <Users className="w-7 h-7" />;
+  if (titleLower.includes('custom') || titleLower.includes('solution')) 
+    return <Briefcase className="w-7 h-7" />;
+  if (titleLower.includes('transparent') || titleLower.includes('affordable') || titleLower.includes('pricing')) 
+    return <DollarSign className="w-7 h-7" />;
+  if (titleLower.includes('timely') || titleLower.includes('delivery') || titleLower.includes('deadline')) 
+    return <Clock className="w-7 h-7" />;
+  if (titleLower.includes('support') || titleLower.includes('24/7')) 
+    return <Headphones className="w-7 h-7" />;
+  if (titleLower.includes('compliance') || titleLower.includes('gdpr') || titleLower.includes('security')) 
+    return <Shield className="w-7 h-7" />;
+  
+  // Default cycling through icons based on index
+  const icons = [
+    <Users className="w-7 h-7" />,
+    <Briefcase className="w-7 h-7" />,
+    <DollarSign className="w-7 h-7" />,
+    <Clock className="w-7 h-7" />,
+    <Headphones className="w-7 h-7" />,
+    <Shield className="w-7 h-7" />
+  ];
+  return icons[index % icons.length];
+};
+
+// Color schemes for different features
+const colorSchemes = [
+  "from-[#1F2E9A] to-[#2EC5FF]",
+  "from-[#9B3DFF] to-[#E60023]",
+  "from-[#2430A3] to-[#9B3DFF]",
+  "from-[#00B894] to-[#2EC5FF]",
+  "from-[#FF6B6B] to-[#FFA726]",
+  "from-[#E60023] to-[#B8001B]"
+];
+
+const ServiceWhyChoose = ({ whyChooseData = [] }) => {
+  
+  // Extract the actual data array from whyChooseData
+  const dataArray = whyChooseData || [];
+  
+  // Transform API data to features format
+  const transformFeatures = () => {
+    if (!dataArray.length) {
+      return []; // Return empty array, will use fallback
+    }
+
+    return dataArray.map((item, index) => {
+      // Extract heading and description
+      const title = item.heading || `Feature ${index + 1}`;
+      const desc = extractPlainText(item.description || "");
+      
+      // Get color scheme based on index
+      const color = colorSchemes[index % colorSchemes.length];
+      
+      return {
+        title: title,
+        desc: desc || "Feature description",
+        icon: getIconForFeature(title, index),
+        color: color,
+        delay: index * 0.1,
+      };
+    });
+  };
+
+  // Fallback features if no API data
+  const fallbackFeatures = [
     {
       title: "UK HR-Tech Experts",
       desc: "Team of certified professionals with proven expertise in UK HR regulations and compliance",
@@ -39,7 +114,7 @@ const ServiceWhyChoose = () => {
       delay: 0.2,
     },
     {
-      title: "Guanteed Timely Delivery",
+      title: "Guaranteed Timely Delivery",
       desc: "Committed to deadlines with agile methodologies and UK business hours support",
       icon: <Clock className="w-7 h-7" />,
       color: "from-[#00B894] to-[#2EC5FF]",
@@ -60,6 +135,13 @@ const ServiceWhyChoose = () => {
       delay: 0.5,
     },
   ];
+
+  const features = transformFeatures().length > 0 ? transformFeatures() : fallbackFeatures;
+
+  // Get the main heading from the first item or use fallback
+  const mainHeading = dataArray[0]?.heading ? 
+    dataArray[0].heading.split(" ").slice(0, 2).join(" ") : 
+    "Why Choose Skilled";
 
   return (
     <section className="relative py-20 px-6 overflow-hidden">
@@ -120,7 +202,7 @@ const ServiceWhyChoose = () => {
           </div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            <span className="block text-[#2430A3]">Why Choose Skilled</span>
+            <span className="block text-[#2430A3]">{mainHeading}</span>
             <span className="block bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
               Workers Cloud?
             </span>
@@ -193,43 +275,9 @@ const ServiceWhyChoose = () => {
               </div>
             </motion.div>
           ))}
-
-         
         </div>
 
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.8 }}
-          className="mt-16 pt-12 border-t border-gray-200"
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: "500+", label: "UK Businesses", color: "text-[#1F2E9A]" },
-              { value: "98%", label: "Satisfaction", color: "text-[#E60023]" },
-              { value: "24/7", label: "UK Support", color: "text-[#00B894]" },
-              { value: "4.8/5", label: "Rating", color: "text-[#FFA726]" },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.9 + index * 0.1 }}
-                className="text-center"
-              >
-                <div className={`text-3xl font-bold mb-2 ${stat.color}`}>
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        
       </div>
     </section>
   );

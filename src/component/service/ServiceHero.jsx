@@ -2,7 +2,59 @@ import React from "react";
 import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import MagneticButton from "../common/MagneticButtonProps";
 
-const ServiceHero = () => {
+const ServiceHero = ({ serviceData = {} }) => {
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL ;
+  
+  // Extract the actual service data (assuming it's passed directly or in a data property)
+  const data = serviceData  || {};
+  
+  // Extract description parts from HTML
+  const extractDescriptionParts = (htmlString) => {
+    if (!htmlString) return { subtitle: "", description: "" };
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    
+    // Get subtitle from the first paragraph with class text-2xl
+    const subtitleElement = tempDiv.querySelector('p.text-2xl');
+    const subtitle = subtitleElement ? subtitleElement.textContent : "Smart HR Solutions to Scale Your Business";
+    
+    // Get main description from the second paragraph
+    const descElement = tempDiv.querySelector('p.text-lg');
+    const description = descElement ? descElement.textContent : "At Skilled Workers Cloud, we deliver cutting-edge HR-tech solutions tailored to your business needs. From custom HRMS development to comprehensive digital transformation, we're your trusted partner in workforce management.";
+    
+    return { subtitle, description };
+  };
+  
+  const { subtitle, description } = extractDescriptionParts(data.description || "");
+  
+  // Parse badge text
+  const parseBadge = (badgeText) => {
+    if (!badgeText) return { title: "", subtitle: "" };
+    
+    const lines = badgeText.split('\n').filter(line => line.trim());
+    if (lines.length >= 2) {
+      return {
+        title: lines[0].trim(),
+        subtitle: lines[1].trim()
+      };
+    }
+    return {
+      title: badgeText,
+      subtitle: ""
+    };
+  };
+  
+  const badge1 = parseBadge(data.badge1);
+  const badge2 = data.badge2 || "UK Trusted HR-Tech";
+  
+  // Stats data
+  const stats = [
+    { value: data.client_no || "500+", label: "Clients Served" },
+    { value: data.client_satisfaction || "95%", label: "Satisfaction" },
+    { value: data.support || "24/7", label: "Support" },
+  ];
+
   return (
     <section className="relative bg-gradient-to-br from-[#FAFAFF] via-white to-[#F6D9FF]/30 pt-24 pb-20 px-6 overflow-hidden">
 
@@ -42,20 +94,20 @@ const ServiceHero = () => {
 
             {/* Main Title */}
             <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold">
-              <span className="block text-[#2430A3]">Comprehensive HR-Tech</span>
+              <span className="block text-[#2430A3]">{data.heading || "Comprehensive HR-Tech"}</span>
               <span className="block mt-2 bg-gradient-to-r from-[#9B3DFF] via-[#9B5CFF] to-[#2EC5FF] bg-clip-text text-transparent">
-                Services & Solutions
+                {data.highalited_text || "Services & Solutions"}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-2xl mb-6 text-[#444444]">
-              Smart HR Solutions to Scale Your Business
+              {subtitle}
             </p>
 
             {/* Description */}
             <p className="text-lg text-[#777777] mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              At Skilled Workers Cloud, we deliver cutting-edge HR-tech solutions tailored to your business needs. From custom HRMS development to comprehensive digital transformation, we're your trusted partner in workforce management.
+              {description}
             </p>
 
             {/* CTA Buttons */}
@@ -79,11 +131,7 @@ const ServiceHero = () => {
 
             {/* Stats Row */}
             <div className="flex flex-wrap gap-6 mt-12 justify-center lg:justify-start">
-              {[
-                { value: "500+", label: "Clients Served" },
-                { value: "95%", label: "Satisfaction" },
-                { value: "24/7", label: "Support" },
-              ].map((stat, index) => (
+              {stats.map((stat, index) => (
                 <div key={index} className="text-center">
                   <div className="text-2xl font-bold text-[#1F2E9A] mb-1">{stat.value}</div>
                   <div className="text-sm text-[#777777]">{stat.label}</div>
@@ -102,8 +150,8 @@ const ServiceHero = () => {
               {/* Main Image */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
                 <img
-                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800"
-                  alt="HR-Tech Solutions"
+                  src={`${STORAGE_URL}${data.image || "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800"}`}
+                  alt={data.image_alt || "HR-Tech Solutions"}
                   className="w-full h-[500px] object-cover transform group-hover:scale-105 transition-transform duration-500"
                 />
                 
@@ -113,37 +161,43 @@ const ServiceHero = () => {
             </div>
 
             {/* Floating Experience Card */}
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-6 max-w-xs hidden lg:block animate-float border border-gray-100">
-              <div className="flex items-center gap-4">
-                {/* Icon with Gradient */}
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#9B5CFF] to-[#2EC5FF] rounded-xl blur"></div>
-                  <div className="relative w-12 h-12 bg-gradient-to-br from-[#9B5CFF] to-[#2EC5FF] rounded-xl flex items-center justify-center text-white text-xl font-bold">
-                    5+
+            {badge2 && (
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-6 max-w-xs hidden lg:block animate-float border border-gray-100">
+                <div className="flex items-center gap-4">
+                  {/* Icon with Gradient */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#9B5CFF] to-[#2EC5FF] rounded-xl blur"></div>
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-[#9B5CFF] to-[#2EC5FF] rounded-xl flex items-center justify-center text-white text-xl font-bold">
+                      5+
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div>
+                    <p className="text-gray-600 text-sm">Years of Excellence</p>
+                    <p className="text-gray-900 font-semibold">
+                      {badge2}
+                    </p>
                   </div>
                 </div>
-
-                {/* Content */}
-                <div>
-                  <p className="text-gray-600 text-sm">Years of Excellence</p>
-                  <p className="text-gray-900 font-semibold">
-                    UK Trusted HR-Tech
-                  </p>
-                </div>
               </div>
-            </div>
+            )}
 
             {/* Floating Feature Card */}
-            <div className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-2xl p-4 max-w-[200px] hidden lg:block animate-float-slow border border-gray-100">
-              <div className="text-center">
-                <div className="text-2xl font-bold bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-transparent bg-clip-text mb-1">
-                  Award Winning
-                </div>
-                <div className="text-xs text-gray-600">
-                  Best HR-Tech Solution 2024
+            {badge1.title && (
+              <div className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-2xl p-4 max-w-[200px] hidden lg:block animate-float-slow border border-gray-100">
+                <div className="text-center">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-[#1F2E9A] to-[#2430A3] text-transparent bg-clip-text mb-1">
+                    {badge1.title}
+                  </div>
+                  {badge1.subtitle && (
+                    <div className="text-xs text-gray-600">
+                      {badge1.subtitle}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

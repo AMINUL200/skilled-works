@@ -13,8 +13,13 @@ import {
   Video,
 } from "lucide-react";
 
-const Footer = () => {
+const Footer = ({ settingData = null, serviceData = [] }) => {
+  // console.log("Footer received settingData:", settingData);
   const navigate = useNavigate();
+  const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
+
+  // Extract the actual data object from settingData
+  const siteData = settingData || {};
 
   // Navigation handler for internal routes
   const handleNavigation = (path) => {
@@ -22,49 +27,47 @@ const Footer = () => {
     window.scrollTo(0, 0); // Scroll to top on navigation
   };
 
-  // Social media links
+  // Social media links from API data
   const socialLinks = [
     {
       icon: Facebook,
-      url: "https://facebook.com/skilledworkerscloud",
-      label: "Facebook"
+      url: siteData.facebook || "https://facebook.com/skilledworkerscloud",
+      label: "Facebook",
     },
     {
       icon: Twitter,
-      url: "https://twitter.com/skilledhrcloud",
-      label: "Twitter"
+      url: siteData.twitter || "https://twitter.com/skilledhrcloud",
+      label: "Twitter",
     },
     {
       icon: Linkedin,
-      url: "https://linkedin.com/company/skilled-workers-cloud",
-      label: "LinkedIn"
+      url:
+        siteData.linkedin ||
+        "https://linkedin.com/company/skilled-workers-cloud",
+      label: "LinkedIn",
     },
     {
       icon: Instagram,
-      url: "https://instagram.com/skilledworkerscloud",
-      label: "Instagram"
-    }
+      url: siteData.instagram || "https://instagram.com/skilledworkerscloud",
+      label: "Instagram",
+    },
   ];
 
   // Quick links with paths
   const quickLinks = [
     { name: "Home", path: "/" },
     { name: "About us", path: "/about" },
-    { name: "HRMS Software", path: "/cms/hrms-software" },
-    { name: "HR File Preparation", path: "/cms/hr-file-preparation" },
-    { name: "File Manager", path: "/cms/file-manager" },
-    { name: "Software Development", path: "/cms/software-development" },
-    { name: "Business Consultancy", path: "/cms/business-consultancy" },
-    { name: "Web/Profile Development", path: "/cms/web-development" },
-    { name: "Skilled Workers Industry", path: "cms/industries" },
+    ...serviceData.slice(0, 5).map((service) => ({
+      name: service.name,
+      path: `/service/${service.slug}`,
+    })),
     { name: "Recruitment", path: "/recruitment" },
-    { name: "Pricing", path: "/pricing" },
+    // { name: "Pricing", path: "/pricing" },
     { name: "Blog", path: "/blog" },
     { name: "Contacts", path: "/contact" },
-    // { name: "Customer Support", path: "/customer-support" }
   ];
 
-  // External links
+  // External links (keep as static for now, could be dynamic if API provides them)
   const externalLinks = [
     { name: "Google", url: "https://google.com", icon: ExternalLink },
     { name: "Facebook", url: "https://facebook.com", icon: Facebook },
@@ -73,25 +76,53 @@ const Footer = () => {
     { name: "Instagram", url: "https://instagram.com", icon: Instagram },
     { name: "Google Meet", url: "https://meet.google.com", icon: Video },
     { name: "Zoom", url: "https://zoom.us", icon: Video },
-    { name: "Download Acrobat Reader", url: "https://get.adobe.com/reader/", icon: Download },
-    { name: "Right to Work Check", url: "https://www.gov.uk/check-job-applicant-right-to-work", icon: ExternalLink },
-    { name: "Microsoft Teams", url: "https://teams.microsoft.com", icon: Video },
-    { name: "HO Media Blogs", url: "https://homeofficemedia.blog.gov.uk", icon: ExternalLink }
+    {
+      name: "Download Acrobat Reader",
+      url: "https://get.adobe.com/reader/",
+      icon: Download,
+    },
+    {
+      name: "Right to Work Check",
+      url: "https://www.gov.uk/check-job-applicant-right-to-work",
+      icon: ExternalLink,
+    },
+    {
+      name: "Microsoft Teams",
+      url: "https://teams.microsoft.com",
+      icon: Video,
+    },
+    {
+      name: "HO Media Blogs",
+      url: "https://homeofficemedia.blog.gov.uk",
+      icon: ExternalLink,
+    },
   ];
 
   // Login links
   const loginLinks = [
-    { name: "HRMS Register", url: "https://skilledworkerscloud.co.uk/hrms-v2/register", external: true },
-    { name: "HRMS Organisation Login", url: "https://skilledworkerscloud.co.uk/hrms-v2/", external: true },
-    { name: "Employee Login", url: "https://skilledworkerscloud.co.uk/hrms-v2/", external: true }
+    {
+      name: "HRMS Register",
+      url: "https://skilledworkerscloud.co.uk/hrms-v2/register",
+      external: true,
+    },
+    {
+      name: "HRMS Organisation Login",
+      url: "https://skilledworkerscloud.co.uk/hrms-v2/",
+      external: true,
+    },
+    {
+      name: "Employee Login",
+      url: "https://skilledworkerscloud.co.uk/hrms-v2/",
+      external: true,
+    },
   ];
 
   // Policy links
   const policyLinks = [
-    { name: "Privacy Policy", path: "/privacy-policy" },
-    { name: "My Privacy Rights", path: "/privacy-rights" },
-    { name: "Terms of Use", path: "/terms-of-use" },
-    { name: "Sitemap", path: "/sitemap" }
+    { name: "Privacy Policy", path: "/policy/privacy-policy" },
+    { name: "My Privacy Rights", path: "/policy/my-privacy-rights" },
+    { name: "Terms of Use", path: "/policy/terms-of-use" },
+    { name: "Sitemap", path: "/sitemap" },
   ];
 
   // Newsletter subscription handler
@@ -99,10 +130,10 @@ const Footer = () => {
     e.preventDefault();
     const form = e.target;
     const email = form.email.value;
-    
+
     // TODO: Integrate with newsletter service (Mailchimp, etc.)
     console.log("Subscribing email:", email);
-    
+
     // Show success message
     alert("Thank you for subscribing to our newsletter!");
     form.reset();
@@ -114,75 +145,107 @@ const Footer = () => {
     window.open("https://ico.org.uk/ESDWebPages/Entry/ZB620846", "_blank");
   };
 
+  // Format address from API data
+  const formatAddress = () => {
+    const parts = [
+      siteData.street_address,
+      siteData.city,
+      siteData.state,
+      siteData.zip,
+      siteData.country,
+    ].filter(Boolean);
+
+    return parts.length > 0
+      ? parts.join(", ")
+      : "Suite 602, 6th Floor, 252–262 Romford Road, London, E7 9HZ United Kingdom.";
+  };
+
+  // Get primary email
+  const primaryEmail = siteData.email || "info@skilledworkerscloud.co.uk";
+
+  // Get phone numbers
+  const primaryPhone = siteData.phone || "+44 0208 129 1655";
+  const landline = siteData.landline || "";
+  const fax = siteData.fax || "";
+
   return (
     <footer className="bg-[#0f0f0f] text-white">
       {/* MAIN FOOTER */}
       <div className="max-w-8xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-        
         {/* COMPANY INFO */}
         <div>
-          <div 
+          <div
             onClick={() => handleNavigation("/")}
             className="cursor-pointer hover:opacity-90 transition-opacity"
           >
             <img
-              src="/image/swch_logo.png"
-              alt="Skilled Workers Cloud Logo"
+              src={
+                siteData.site_web_logo
+                  ? `${STORAGE_URL}${siteData.site_web_logo}`
+                  : "/image/swch_logo.png"
+              }
+              alt={siteData.site_logo_alt || "Skilled Workers Cloud Logo"}
               className="w-40 mb-4"
             />
           </div>
 
           <p className="text-sm text-gray-300 leading-relaxed mb-4">
-            SKILLED WORKERS CLOUD is a UK regulated HR-tech company.
-            We specialise in HR systems for businesses in the UK.
-            We combine skilled HR expertise with technology to deliver 
-            superior business results for our clients.
+            {siteData.site_name || "SKILLED WORKERS CLOUD"}
           </p>
 
           {/* CONTACT INFO */}
           <div className="space-y-2 mb-4">
-            <a 
-              href="mailto:info@skilledworkerscloud.co.uk"
+            <a
+              href={`mailto:${primaryEmail}`}
               className="text-red-500 text-sm hover:text-red-400 transition-colors flex items-center gap-2"
             >
               <Mail size={14} />
-              info@skilledworkerscloud.co.uk
+              {primaryEmail}
             </a>
-            
-            <a 
-              href="tel:+442081291655"
+
+            {landline && (
+              <a
+                href={`tel:${landline.replace(/\D/g, "")}`}
+                className="text-gray-300 text-sm hover:text-white transition-colors flex items-center gap-2"
+              >
+                <Phone size={14} />
+                Landline: {landline}
+              </a>
+            )}
+
+            <a
+              href={`tel:${primaryPhone.replace(/\D/g, "")}`}
               className="text-gray-300 text-sm hover:text-white transition-colors flex items-center gap-2"
             >
               <Phone size={14} />
-              Landline: +44 0208 129 1655
+              Phone: {primaryPhone}
             </a>
-            
-            <a 
-              href="https://wa.me/447467284718"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-300 text-sm hover:text-white transition-colors flex items-center gap-2"
-            >
-              <Phone size={14} />
-              Mobile & WhatsApp: +44 0746 728 4718
-            </a>
+
+            {fax && (
+              <p className="text-gray-300 text-sm flex items-center gap-2">
+                <Phone size={14} />
+                Fax: {fax}
+              </p>
+            )}
           </div>
 
           {/* SOCIAL ICONS */}
           <div className="flex gap-3 mt-5">
-            {socialLinks.map((social, i) => (
-              <a
-                key={i}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 border border-gray-500 rounded-full flex items-center justify-center hover:bg-[#E60023] hover:text-white hover:border-[#E60023] transition-all duration-300 cursor-pointer group"
-                aria-label={`Follow us on ${social.label}`}
-                title={`Follow us on ${social.label}`}
-              >
-                <social.icon size={16} />
-              </a>
-            ))}
+            {socialLinks
+              .filter((social) => social.url)
+              .map((social, i) => (
+                <a
+                  key={i}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 border border-gray-500 rounded-full flex items-center justify-center hover:bg-[#E60023] hover:text-white hover:border-[#E60023] transition-all duration-300 cursor-pointer group"
+                  aria-label={`Follow us on ${social.label}`}
+                  title={`Follow us on ${social.label}`}
+                >
+                  <social.icon size={16} />
+                </a>
+              ))}
           </div>
         </div>
 
@@ -216,7 +279,10 @@ const Footer = () => {
                   className="hover:text-[#9B3DFF] cursor-pointer flex items-center gap-1 transition-colors duration-200 group"
                 >
                   › {link.name}
-                  <link.icon size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <link.icon
+                    size={12}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  />
                 </a>
               </li>
             ))}
@@ -228,27 +294,28 @@ const Footer = () => {
           <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
 
           <div className="space-y-3">
-            <a 
-              href="mailto:info@skilledworkerscloud.co.uk"
+            <a
+              href={`mailto:${primaryEmail}`}
               className="text-red-500 text-sm hover:text-red-400 transition-colors block"
             >
-              info@skilledworkerscloud.co.uk
+              {primaryEmail}
             </a>
 
             <p className="text-sm text-gray-300 flex items-start gap-2">
               <MapPin size={16} className="mt-1 flex-shrink-0" />
-              Suite 602, 6th Floor, 252–262 Romford Road,
-              London, E7 9HZ United Kingdom.
+              {formatAddress()}
             </p>
+
+            {landline && (
+              <p className="text-sm text-gray-300 flex items-center gap-2">
+                <Phone size={16} />
+                Landline: {landline}
+              </p>
+            )}
 
             <p className="text-sm text-gray-300 flex items-center gap-2">
               <Phone size={16} />
-              Landline: +44 0208 129 1655
-            </p>
-
-            <p className="text-sm text-gray-300 flex items-center gap-2">
-              <Phone size={16} />
-              Mobile & WhatsApp: +44 0746 728 4718
+              Phone: {primaryPhone}
             </p>
 
             <button
@@ -272,7 +339,7 @@ const Footer = () => {
               required
               className="w-full px-4 py-3 rounded-full bg-white text-black mb-3 outline-none focus:ring-2 focus:ring-[#9B3DFF] transition-all"
             />
-            <button 
+            <button
               type="submit"
               className="w-full py-3 rounded-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 transition-all font-semibold shadow-lg hover:shadow-xl"
             >
@@ -280,9 +347,7 @@ const Footer = () => {
             </button>
           </form>
 
-          <h4 className="text-lg font-semibold mt-8 mb-3">
-            All Login Links
-          </h4>
+          <h4 className="text-lg font-semibold mt-8 mb-3">All Login Links</h4>
 
           <ul className="space-y-2 text-sm text-gray-300">
             {loginLinks.map((link, i) => (
@@ -306,8 +371,9 @@ const Footer = () => {
         <div className="max-w-8xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm text-center md:text-left">
-              Copyright © {new Date().getFullYear()} Skilled Workers Cloud Ltd.
-              All Rights Reserved
+              Copyright © {new Date().getFullYear()}{" "}
+              {siteData.site_name || "Skilled Workers Cloud Ltd"}. All Rights
+              Reserved
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-gray-400 text-sm">
@@ -325,13 +391,14 @@ const Footer = () => {
 
           {/* Company Info */}
           <div className="text-center mt-4 text-gray-500 text-xs">
-            <p>Registered in England and Wales | Company Number: [YOUR_COMPANY_NUMBER]</p>
+            <p>
+              Registered in {siteData.country || "England and Wales"} | Company
+              Number: [YOUR_COMPANY_NUMBER]
+            </p>
             <p className="mt-1">VAT Number: [YOUR_VAT_NUMBER]</p>
           </div>
         </div>
       </div>
-
-      
     </footer>
   );
 };

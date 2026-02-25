@@ -88,6 +88,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       icon: <Settings className="w-5 h-5" />,
       children: [
         {
+          id: "service_page",
+          label: "Handle Service Page",
+          icon: <Settings className="w-4 h-4" />,
+          path: "/admin/handle-service",
+        },
+        {
           id: "service_type",
           label: "Service Type",
           icon: <Settings className="w-4 h-4" />,
@@ -110,7 +116,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           label: "Service Customer Stories",
           icon: <Settings className="w-4 h-4" />,
           path: "/admin/handle-service-customer-stories",
-        }
+        },
       ],
     },
     {
@@ -125,18 +131,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       icon: <FileText className="w-5 h-5" />,
       path: "/admin/handle-about",
     },
-    {
-      id: "why_chose_use",
-      label: "Why Chose Our Platform",
-      icon: <FileText className="w-5 h-5" />,
-      path: "/admin/handle-why-chose-our-platform",
-    },
-    {
-      id: "what_we_offer",
-      label: "What We Offer",
-      icon: <FileText className="w-5 h-5" />,
-      path: "/admin/handle-what-we-offer",
-    },
+
     {
       id: "handle_landing_page",
       label: "Handle Landing Page",
@@ -153,6 +148,18 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           label: "Handle All In One Platforms",
           icon: <FileText className="w-4 h-4" />,
           path: "/admin/handle-all-in-one-platforms",
+        },
+        {
+          id: "what_we_offer",
+          label: "What We Offer",
+          icon: <FileText className="w-5 h-5" />,
+          path: "/admin/handle-what-we-offer",
+        },
+        {
+          id: "why_chose_use",
+          label: "Why Chose Our Platform",
+          icon: <FileText className="w-5 h-5" />,
+          path: "/admin/handle-why-chose-our-platform",
         },
       ],
     },
@@ -182,7 +189,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         {
           id: "handle_jobs",
           label: "Handle Jobs",
-          icon: <FileText className="w-4 h-4" />, 
+          icon: <FileText className="w-4 h-4" />,
           path: "/admin/handle-jobs",
         },
         {
@@ -190,9 +197,15 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           label: "Handle Jobs Applications",
           icon: <FileText className="w-4 h-4" />,
           path: "/admin/handle-jobs-applications",
-        }
+        },
       ],
-    }
+    },
+    {
+      id: "policy_handle",
+      label: "Handle Policy",
+      icon: <FileText className="w-5 h-5" />,
+      path: "/admin/handle-policy",
+    },
   ];
 
   const toggleDropdown = (id) => {

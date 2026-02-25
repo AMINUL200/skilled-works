@@ -10,8 +10,81 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const ServiceDevelopmentProcess = () => {
-  const steps = [
+// Helper function to extract plain text from HTML
+const extractPlainText = (htmlString) => {
+  if (!htmlString) return "";
+  const doc = new DOMParser().parseFromString(htmlString, "text/html");
+  return doc.body.textContent || "";
+};
+
+// Icon mapping based on step title
+const getIconForStep = (title, index) => {
+  const titleLower = (title || "").toLowerCase();
+  
+  if (titleLower.includes('requirement') || titleLower.includes('analysis')) 
+    return <FileText className="w-8 h-8" />;
+  if (titleLower.includes('strategy') || titleLower.includes('planning')) 
+    return <Target className="w-8 h-8" />;
+  if (titleLower.includes('design') || titleLower.includes('development')) 
+    return <Cpu className="w-8 h-8" />;
+  if (titleLower.includes('testing') || titleLower.includes('optimization')) 
+    return <CheckCircle className="w-8 h-8" />;
+  if (titleLower.includes('deployment') || titleLower.includes('support')) 
+    return <CloudUpload className="w-8 h-8" />;
+  
+  // Default cycling through icons based on index
+  const icons = [
+    <FileText className="w-8 h-8" />,
+    <Target className="w-8 h-8" />,
+    <Cpu className="w-8 h-8" />,
+    <CheckCircle className="w-8 h-8" />,
+    <CloudUpload className="w-8 h-8" />
+  ];
+  return icons[index % icons.length];
+};
+
+// Color schemes for different steps
+const colorSchemes = [
+  "from-[#1F2E9A] to-[#2EC5FF]",
+  "from-[#9B3DFF] to-[#E60023]",
+  "from-[#2430A3] to-[#9B3DFF]",
+  "from-[#00B894] to-[#2EC5FF]",
+  "from-[#FF6B6B] to-[#FFA726]"
+];
+
+const ServiceDevelopmentProcess = ({ processData = [] }) => {
+  // console.log("ServiceDevelopmentProcess received data:", processData);
+  
+  // Extract the actual data array from processData
+  const dataArray = processData  || [];
+  
+  // Transform API data to steps format
+  const transformSteps = () => {
+    if (!dataArray.length) {
+      return []; // Return empty array, will use fallback
+    }
+
+    return dataArray.map((item, index) => {
+      // Extract heading and description
+      const title = item.heading || `Step ${index + 1}`;
+      const desc = extractPlainText(item.description || "");
+      
+      // Get color scheme based on index
+      const gradient = colorSchemes[index % colorSchemes.length];
+      
+      return {
+        title: title,
+        desc: desc || "Process step description",
+        gradient: gradient,
+        number: index + 1,
+        icon: getIconForStep(title, index),
+        delay: index * 0.1,
+      };
+    });
+  };
+
+  // Fallback steps if no API data
+  const fallbackSteps = [
     {
       title: "Requirement Analysis",
       desc: "Deep dive into your HR needs and business objectives",
@@ -53,6 +126,16 @@ const ServiceDevelopmentProcess = () => {
       delay: 0.4,
     },
   ];
+
+  const steps = transformSteps().length > 0 ? transformSteps() : fallbackSteps;
+
+  // Get the main heading and description from the first item or use fallback
+  const mainHeading = dataArray[0]?.heading ? 
+    (dataArray[0].heading.includes("&") ? 
+      dataArray[0].heading.split("&") : 
+      ["Our Development", dataArray[0].heading]
+    ) : 
+    ["Our Development", "Delivery Process"];
 
   return (
     <section className="relative py-20 px-6 overflow-hidden">
@@ -102,9 +185,9 @@ const ServiceDevelopmentProcess = () => {
           </div>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            <span className="block text-[#2430A3]">Our Development &</span>
+            <span className="block text-[#2430A3]">{mainHeading[0]}</span>
             <span className="block bg-gradient-to-r from-[#1F2E9A] via-[#9B3DFF] to-[#E60023] bg-clip-text text-transparent">
-              Delivery Process
+              {mainHeading[1] || "Delivery Process"}
             </span>
           </h2>
 
@@ -140,7 +223,7 @@ const ServiceDevelopmentProcess = () => {
                 className="relative group"
               >
                 {/* Step Number Connector */}
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2">
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ duration: 0.6 }}
@@ -263,8 +346,6 @@ const ServiceDevelopmentProcess = () => {
             </div>
           </div>
         </div>
-
-       
       </div>
     </section>
   );

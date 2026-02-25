@@ -37,6 +37,43 @@ const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [activeFAQ, setActiveFAQ] = useState(null);
+  const [contactData, setContactData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+  const [faqData, setFaqData] = useState([])
+
+  // Fetch contact data from API
+  useEffect(() => {
+    const fetchContactData = async () => {
+      try {
+        // Try to fetch from website-settings endpoint
+        const response = await api.get("/website-settings");
+        
+        if (response.data.status && response.data.data) {
+          setContactData(response.data.data.settings);
+          const transformedFaqs = response.data.data.faq.map(faq => ({
+            id: faq.id,
+            question: faq.faq_question,
+            answer: faq.faq_answer,
+            category: faq.faq_type,
+          }));
+          setFaqData(transformedFaqs);
+        } else {
+          setFetchError(true);
+        }
+      } catch (error) {
+        console.error("Error fetching contact data:", error);
+        setFetchError(true);
+      } finally {
+        // Still show loading for 2 seconds as per original design
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000);
+      }
+    };
+
+    fetchContactData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,121 +135,142 @@ const ContactPage = () => {
     }
   };
 
-  const contactDetails = [
-    {
-      icon: <Phone className="w-6 h-6" />,
-      title: "Call Support",
-      content: "+44 20 7123 4567",
-      subtitle: "Mon-Fri, 9am-6pm GMT",
-      color: "from-[#2EC5FF] to-[#1F2E9A]",
-      action: "tel:+442071234567",
-      description: "Speak directly with our HR experts",
-    },
-    {
-      icon: <Mail className="w-6 h-6" />,
-      title: "Email Support",
-      content: "support@skilledworkerscloud.co.uk",
-      subtitle: "Response within 2 hours",
-      color: "from-[#9B3DFF] to-[#E60023]",
-      action: "mailto:support@skilledworkerscloud.co.uk",
-      description: "Send detailed queries and documents",
-    },
-    {
-      icon: <MapPin className="w-6 h-6" />,
-      title: "London Office",
-      content: "123 Business Street, London EC1A 1BB",
-      subtitle: "Central London Office",
-      color: "from-[#00B894] to-[#2430A3]",
-      action: "https://maps.google.com",
-      description: "Schedule an in-person meeting",
-    },
-    {
-      icon: <Clock className="w-6 h-6" />,
-      title: "Emergency Support",
-      content: "+44 20 7123 4568",
-      subtitle: "24/7 Critical HR support",
-      color: "from-[#FF6B6B] to-[#FFA726]",
-      action: "tel:+442071234568",
-      description: "For urgent HR compliance issues",
-    },
-  ];
+  // Build contact details from API data
+  const getContactDetails = () => {
+    if (!contactData) return [];
 
-  const departments = [
-    {
-      name: "Sales & Demos",
-      email: "sales@skilledworkerscloud.co.uk",
-      phone: "+44 20 7123 4569",
-      description: "Product demonstrations and pricing",
-    },
-    {
-      name: "Technical Support",
-      email: "tech@skilledworkerscloud.co.uk",
-      phone: "+44 20 7123 4570",
-      description: "Platform assistance and troubleshooting",
-    },
-    {
-      name: "HR Consulting",
-      email: "consulting@skilledworkerscloud.co.uk",
-      phone: "+44 20 7123 4571",
-      description: "HR strategy and implementation",
-    },
-  ];
+    const phoneNumber = contactData.phone || "+44 20 7123 4567";
+    const email = contactData.email || "support@skilledworkerscloud.co.uk";
+    
+    // Build full address
+    const addressParts = [
+      contactData.street_address,
+      contactData.city,
+      contactData.state,
+      contactData.zip,
+      contactData.country
+    ].filter(Boolean);
+    const fullAddress = addressParts.join(", ") || "123 Business Street, London EC1A 1BB";
+    
+    // Get city for subtitle (or use state)
+    const locationSubtitle = contactData.city || contactData.state || "Central London Office";
 
-  const faqData = [
-    {
-      id: 1,
-      question: "How quickly can I implement your HRMS platform?",
-      answer:
-        "Most clients are fully operational within 2-4 weeks. Our implementation team provides dedicated support throughout the process, including data migration, configuration, and staff training.",
-      category: "Implementation",
-    },
-    {
-      id: 2,
-      question: "Is your platform UK GDPR compliant?",
-      answer:
-        "Yes, our platform is fully compliant with UK GDPR regulations. We provide data processing agreements, regular security audits, and all necessary compliance documentation for UK businesses.",
-      category: "Compliance",
-    },
-    {
-      id: 3,
-      question: "Can I customize the platform for my industry needs?",
-      answer:
-        "Absolutely! We offer industry-specific modules and customization options. Whether you're in aviation, healthcare, or construction, we can tailor the platform to your specific requirements.",
-      category: "Customization",
-    },
-    {
-      id: 4,
-      question: "What kind of support do you offer after implementation?",
-      answer:
-        "We provide 24/7 technical support, dedicated account management, regular software updates, and ongoing HR consulting. All clients get access to our UK-based support team.",
-      category: "Support",
-    },
-    {
-      id: 5,
-      question: "How secure is my data on your platform?",
-      answer:
-        "We use bank-level security with AES-256 encryption, regular penetration testing, and ISO 27001 certification. Your data is stored in UK-based data centers with daily backups.",
-      category: "Security",
-    },
-    {
-      id: 6,
-      question: "Do you offer training for our staff?",
-      answer:
-        "Yes, we provide comprehensive training sessions, online tutorials, and detailed documentation. We also offer train-the-trainer programs for larger organizations.",
-      category: "Training",
-    },
-  ];
+    return [
+      {
+        icon: <Phone className="w-6 h-6" />,
+        title: "Call Support",
+        content: phoneNumber,
+        subtitle: "Mon-Fri, 9am-6pm GMT",
+        color: "from-[#2EC5FF] to-[#1F2E9A]",
+        action: `tel:${phoneNumber.replace(/\s+/g, '')}`,
+        description: "Speak directly with our HR experts",
+      },
+      {
+        icon: <Mail className="w-6 h-6" />,
+        title: "Email Support",
+        content: email,
+        subtitle: "Response within 2 hours",
+        color: "from-[#9B3DFF] to-[#E60023]",
+        action: `mailto:${email}`,
+        description: "Send detailed queries and documents",
+      },
+      {
+        icon: <MapPin className="w-6 h-6" />,
+        title: "Our Office",
+        content: fullAddress,
+        subtitle: locationSubtitle,
+        color: "from-[#00B894] to-[#2430A3]",
+        action: "https://maps.google.com",
+        description: "Schedule an in-person meeting",
+      },
+      {
+        icon: <Clock className="w-6 h-6" />,
+        title: "Landline",
+        content: contactData.landline || "033-12345678",
+        subtitle: "Alternative Contact",
+        color: "from-[#FF6B6B] to-[#FFA726]",
+        action: `tel:${contactData.landline?.replace(/\D/g, '') || '03312345678'}`,
+        description: "For general inquiries",
+      },
+    ];
+  };
 
-  const [loading, setLoading] = useState(true);
+  // Build department contacts (using email and phone from API)
+  const getDepartments = () => {
+    if (!contactData) return [];
 
-  // ⏳ 2 second loader
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    const email = contactData.email || "support@skilledworkerscloud.co.uk";
+    const phone = contactData.phone || "+44 20 7123 4567";
 
-    return () => clearTimeout(timer);
-  }, []);
+    return [
+      {
+        name: "Sales & Demos",
+        email: email,
+        phone: phone,
+        description: "Product demonstrations and pricing",
+      },
+      {
+        name: "Technical Support",
+        email: email,
+        phone: phone,
+        description: "Platform assistance and troubleshooting",
+      },
+      {
+        name: "HR Consulting",
+        email: email,
+        phone: phone,
+        description: "HR strategy and implementation",
+      },
+    ];
+  };
+
+  const contactDetails = getContactDetails();
+  const departments = getDepartments();
+
+  // const faqData = [
+  //   {
+  //     id: 1,
+  //     question: "How quickly can I implement your HRMS platform?",
+  //     answer:
+  //       "Most clients are fully operational within 2-4 weeks. Our implementation team provides dedicated support throughout the process, including data migration, configuration, and staff training.",
+  //     category: "Implementation",
+  //   },
+  //   {
+  //     id: 2,
+  //     question: "Is your platform UK GDPR compliant?",
+  //     answer:
+  //       "Yes, our platform is fully compliant with UK GDPR regulations. We provide data processing agreements, regular security audits, and all necessary compliance documentation for UK businesses.",
+  //     category: "Compliance",
+  //   },
+  //   {
+  //     id: 3,
+  //     question: "Can I customize the platform for my industry needs?",
+  //     answer:
+  //       "Absolutely! We offer industry-specific modules and customization options. Whether you're in aviation, healthcare, or construction, we can tailor the platform to your specific requirements.",
+  //     category: "Customization",
+  //   },
+  //   {
+  //     id: 4,
+  //     question: "What kind of support do you offer after implementation?",
+  //     answer:
+  //       "We provide 24/7 technical support, dedicated account management, regular software updates, and ongoing HR consulting. All clients get access to our UK-based support team.",
+  //     category: "Support",
+  //   },
+  //   {
+  //     id: 5,
+  //     question: "How secure is my data on your platform?",
+  //     answer:
+  //       "We use bank-level security with AES-256 encryption, regular penetration testing, and ISO 27001 certification. Your data is stored in UK-based data centers with daily backups.",
+  //     category: "Security",
+  //   },
+  //   {
+  //     id: 6,
+  //     question: "Do you offer training for our staff?",
+  //     answer:
+  //       "Yes, we provide comprehensive training sessions, online tutorials, and detailed documentation. We also offer train-the-trainer programs for larger organizations.",
+  //     category: "Training",
+  //   },
+  // ];
 
   if (loading) {
     return <PageLoader />;

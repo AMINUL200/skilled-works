@@ -18,7 +18,7 @@ import {
 import MagneticButton from "../common/MagneticButtonProps";
 import { api } from "../../utils/app";
 
-const CTASection = () => {
+const CTASection = ({ contactData = {} }) => {
   const [formData, setFormData] = useState({
     name: "",
     company: "",
@@ -31,6 +31,7 @@ const CTASection = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  // console.log("Contact Data in CTASection:", contactData); // Debugging log
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -123,44 +124,67 @@ const CTASection = () => {
     }
   };
 
-  const contactDetails = [
-    {
-      icon: <Phone className="w-6 h-6" />,
-      title: "Call Us",
-      content: "+44 20 7123 4567",
-      subtitle: "Mon-Fri, 9am-6pm GMT",
-      color: "from-[#2EC5FF] to-[#1F2E9A]",
-      gradient: "bg-gradient-to-br from-[#2EC5FF] to-[#1F2E9A]",
-      action: "tel:+442071234567",
-    },
-    {
-      icon: <Mail className="w-6 h-6" />,
-      title: "Email Us",
-      content: "hello@skilledworkerscloud.co.uk",
-      subtitle: "Response within 2 hours",
-      color: "from-[#9B3DFF] to-[#E60023]",
-      gradient: "bg-gradient-to-br from-[#9B3DFF] to-[#E60023]",
-      action: "mailto:hello@skilledworkerscloud.co.uk",
-    },
-    {
-      icon: <MapPin className="w-6 h-6" />,
-      title: "Visit Us",
-      content: "123 Business Street, London EC1A 1BB",
-      subtitle: "Central London Office",
-      color: "from-[#00B894] to-[#2430A3]",
-      gradient: "bg-gradient-to-br from-[#00B894] to-[#2430A3]",
-      action: "https://maps.google.com",
-    },
-    {
-      icon: <Clock className="w-6 h-6" />,
-      title: "Support Hours",
-      content: "24/7 Technical Support",
-      subtitle: "Emergency HR support available",
-      color: "from-[#FF6B6B] to-[#FFA726]",
-      gradient: "bg-gradient-to-br from-[#FF6B6B] to-[#FFA726]",
-      action: null,
-    },
-  ];
+  // Build contact details from API data
+  const getContactDetails = () => {
+    const apiData = contactData || {};
+    
+    const phoneNumber = apiData.phone || "+44 20 7123 4567";
+    const email = apiData.email || "hello@skilledworkerscloud.co.uk";
+    
+    // Build full address
+    const addressParts = [
+      apiData.street_address,
+      apiData.city,
+      apiData.state,
+      apiData.zip,
+      apiData.country
+    ].filter(Boolean);
+    const fullAddress = addressParts.join(", ") || "123 Business Street, London EC1A 1BB";
+    
+    // Get city for subtitle (or use state)
+    const locationSubtitle = apiData.city || apiData.state || "Central London Office";
+
+    return [
+      {
+        icon: <Phone className="w-6 h-6" />,
+        title: "Call Us",
+        content: phoneNumber,
+        subtitle: "Mon-Fri, 9am-6pm GMT",
+        color: "from-[#2EC5FF] to-[#1F2E9A]",
+        gradient: "bg-gradient-to-br from-[#2EC5FF] to-[#1F2E9A]",
+        action: `tel:${phoneNumber.replace(/\s+/g, '')}`,
+      },
+      {
+        icon: <Mail className="w-6 h-6" />,
+        title: "Email Us",
+        content: email,
+        subtitle: "Response within 2 hours",
+        color: "from-[#9B3DFF] to-[#E60023]",
+        gradient: "bg-gradient-to-br from-[#9B3DFF] to-[#E60023]",
+        action: `mailto:${email}`,
+      },
+      {
+        icon: <MapPin className="w-6 h-6" />,
+        title: "Visit Us",
+        content: fullAddress,
+        subtitle: locationSubtitle,
+        color: "from-[#00B894] to-[#2430A3]",
+        gradient: "bg-gradient-to-br from-[#00B894] to-[#2430A3]",
+        action: "https://maps.google.com",
+      },
+      {
+        icon: <Clock className="w-6 h-6" />,
+        title: "Support Hours",
+        content: "24/7 Technical Support",
+        subtitle: apiData.landline ? `Landline: ${apiData.landline}` : "Emergency HR support available",
+        color: "from-[#FF6B6B] to-[#FFA726]",
+        gradient: "bg-gradient-to-br from-[#FF6B6B] to-[#FFA726]",
+        action: apiData.landline ? `tel:${apiData.landline.replace(/\D/g, '')}` : null,
+      },
+    ];
+  };
+
+  const contactDetails = getContactDetails();
 
   const features = [
     "30-minute personalized demo",
@@ -405,7 +429,7 @@ const CTASection = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         className="w-full px-4 py-3 rounded-xl border border-[#E6E0FF] bg-[#FAFAFF] focus:outline-none focus:ring-2 focus:ring-[#9B3DFF] focus:border-transparent transition-all duration-300"
-                        placeholder="+44 20 7123 4567"
+                        placeholder={contactData?.data?.phone || "+44 20 7123 4567"}
                       />
                     </div>
 
