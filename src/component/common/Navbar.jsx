@@ -24,6 +24,7 @@ const countries = [
     code: "uk",
     name: "United Kingdom",
     flag: "🇬🇧",
+    redirect: "https://skilledworkerscloud.co.uk/",
   },
   // {
   //   code: "in",
@@ -39,6 +40,7 @@ const countries = [
     code: "bd",
     name: "Bangladesh",
     flag: "🇧🇩",
+    redirect: null,
   },
   // {
   //   code: "ae",
@@ -76,6 +78,18 @@ const Navbar = ({
 
   const selectedCountry = getUICountry(country?.country) || countries[0];
   // console.log("Navbar received props:", {  serviceData });
+
+  const handleCountrySelect = (item) => {
+    if (item.redirect) {
+      // 🔥 redirect to external site
+      window.location.href = item.redirect;
+    } else {
+      // 🔥 normal flow (update context)
+      updateCountry(item.name);
+    }
+
+    setCountryOpen(false);
+  };
 
   // Scroll effect
   useEffect(() => {
@@ -546,10 +560,7 @@ const Navbar = ({
                     {countries.map((country) => (
                       <button
                         key={country.code}
-                        onClick={() => {
-                          updateCountry(country.name);
-                          setCountryOpen(false);
-                        }}
+                        onClick={() => handleCountrySelect(country)}
                         className={`
                           w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 text-left
                           ${
@@ -613,10 +624,7 @@ const Navbar = ({
                   {countries.map((country) => (
                     <button
                       key={country.code}
-                      onClick={() => {
-                        updateCountry(country.name);
-                        setCountryOpen(false);
-                      }}
+                      onClick={() => handleCountrySelect(country)}
                       className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition"
                     >
                       <span className="text-lg">{country.flag}</span>
