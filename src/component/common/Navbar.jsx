@@ -15,6 +15,7 @@ import {
   Linkedin,
   Youtube,
   Globe,
+  Contact,
 } from "lucide-react";
 import MagneticButton from "./MagneticButtonProps";
 import { useCountry } from "../../context/CountryContext";
@@ -186,8 +187,8 @@ const Navbar = ({
 
   // Contact info for top header
   const contactInfo = [
-    { icon: <Phone className="w-4 h-4" />, text: "07467284718/02081291655" },
-    // { icon: <Mail className="w-4 h-4" />, text: "info@example.com" },
+    { icon: <Phone className="w-4 h-4" />, text: `${country?.phone}/${country?.landline}` },
+    { icon: <Mail className="w-4 h-4" />, text: `${country?.email}` },
     // { icon: <MapPin className="w-4 h-4" />, text: "123 Business St, City" },
   ];
 
@@ -195,29 +196,29 @@ const Navbar = ({
   const socialIcons = [
     {
       icon: <Facebook className="w-4 h-4" />,
-      url: "#",
+      url: country?.facebook,
       color: "hover:text-[#2EC5FF]",
     },
     {
       icon: <Twitter className="w-4 h-4" />,
-      url: "#",
+      url: country?.twitter,
       color: "hover:text-[#2EC5FF]",
     },
     {
       icon: <Instagram className="w-4 h-4" />,
-      url: "#",
+      url: country?.instagram,
       color: "hover:text-[#FF4D8D]",
     },
     {
       icon: <Linkedin className="w-4 h-4" />,
-      url: "#",
+      url: country?.linkedin,
       color: "hover:text-[#2EC5FF]",
     },
-    {
-      icon: <Youtube className="w-4 h-4" />,
-      url: "#",
-      color: "hover:text-[#FF1F1F]",
-    },
+    // {
+    //   icon: <Youtube className="w-4 h-4" />,
+    //   url: "#",
+    //   color: "hover:text-[#FF1F1F]",
+    // },
   ];
 
   // Helper functions for dropdown management
