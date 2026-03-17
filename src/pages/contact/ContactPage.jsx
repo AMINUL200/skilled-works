@@ -23,8 +23,10 @@ import MagneticButton from "../../component/common/MagneticButtonProps";
 import FAQComponent from "../../component/common/FAQComponent";
 import PageLoader from "../../component/common/PageLoader";
 import { api } from "../../utils/app";
+import { useCountry } from "../../context/CountryContext";
 
 const ContactPage = () => {
+  const { country } = useCountry();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,10 +39,11 @@ const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, type: "", message: "" });
   const [activeFAQ, setActiveFAQ] = useState(null);
-  const [contactData, setContactData] = useState(null);
+  // const [contactData, setContactData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
-  const [faqData, setFaqData] = useState([])
+  const [faqData, setFaqData] = useState([]);
+  const contactData = country;
 
   // Fetch contact data from API
   useEffect(() => {
@@ -48,10 +51,10 @@ const ContactPage = () => {
       try {
         // Try to fetch from website-settings endpoint
         const response = await api.get("/website-settings");
-        
+
         if (response.data.status && response.data.data) {
-          setContactData(response.data.data.settings);
-          const transformedFaqs = response.data.data.faq.map(faq => ({
+          // setContactData(response.data.data.settings);
+          const transformedFaqs = response.data.data.faq.map((faq) => ({
             id: faq.id,
             question: faq.faq_question,
             answer: faq.faq_answer,
@@ -104,8 +107,11 @@ const ContactPage = () => {
       const response = await api.post("/contact", payload);
 
       if (response.data.status) {
-        showToast("success", "Message sent successfully! We'll contact you within 2 business hours.");
-        
+        showToast(
+          "success",
+          "Message sent successfully! We'll contact you within 2 business hours.",
+        );
+
         // Reset form
         setFormData({
           name: "",
@@ -116,11 +122,14 @@ const ContactPage = () => {
           message: "",
         });
       } else {
-        showToast("error", response.data.message || "Failed to send message. Please try again.");
+        showToast(
+          "error",
+          response.data.message || "Failed to send message. Please try again.",
+        );
       }
     } catch (error) {
       console.error("Error sending contact message:", error);
-      
+
       // Handle validation errors
       if (error.response?.data?.errors) {
         const errorMessages = Object.values(error.response.data.errors)
@@ -128,7 +137,11 @@ const ContactPage = () => {
           .join(", ");
         showToast("error", errorMessages);
       } else {
-        showToast("error", error.response?.data?.message || "Failed to send message. Please try again.");
+        showToast(
+          "error",
+          error.response?.data?.message ||
+            "Failed to send message. Please try again.",
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -141,19 +154,21 @@ const ContactPage = () => {
 
     const phoneNumber = contactData.phone || "+44 20 7123 4567";
     const email = contactData.email || "support@skilledworkerscloud.co.uk";
-    
+
     // Build full address
     const addressParts = [
       contactData.street_address,
       contactData.city,
       contactData.state,
       contactData.zip,
-      contactData.country
+      contactData.country,
     ].filter(Boolean);
-    const fullAddress = addressParts.join(", ") || "123 Business Street, London EC1A 1BB";
-    
+    const fullAddress =
+      addressParts.join(", ") || "123 Business Street, London EC1A 1BB";
+
     // Get city for subtitle (or use state)
-    const locationSubtitle = contactData.city || contactData.state || "Central London Office";
+    const locationSubtitle =
+      contactData.city || contactData.state || "Central London Office";
 
     return [
       {
@@ -162,7 +177,7 @@ const ContactPage = () => {
         content: phoneNumber,
         subtitle: "Mon-Fri, 9am-6pm GMT",
         color: "from-[#2EC5FF] to-[#1F2E9A]",
-        action: `tel:${phoneNumber.replace(/\s+/g, '')}`,
+        action: `tel:${phoneNumber.replace(/\s+/g, "")}`,
         description: "Speak directly with our HR experts",
       },
       {
@@ -189,7 +204,7 @@ const ContactPage = () => {
         content: contactData.landline || "033-12345678",
         subtitle: "Alternative Contact",
         color: "from-[#FF6B6B] to-[#FFA726]",
-        action: `tel:${contactData.landline?.replace(/\D/g, '') || '03312345678'}`,
+        action: `tel:${contactData.landline?.replace(/\D/g, "") || "03312345678"}`,
         description: "For general inquiries",
       },
     ];

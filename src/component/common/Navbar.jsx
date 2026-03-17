@@ -17,6 +17,7 @@ import {
   Globe,
 } from "lucide-react";
 import MagneticButton from "./MagneticButtonProps";
+import { useCountry } from "../../context/CountryContext";
 
 const countries = [
   {
@@ -24,24 +25,33 @@ const countries = [
     name: "United Kingdom",
     flag: "🇬🇧",
   },
+  // {
+  //   code: "in",
+  //   name: "India",
+  //   flag: "🇮🇳",
+  // },
+  // {
+  //   code: "us",
+  //   name: "United States",
+  //   flag: "🇺🇸",
+  // },
   {
-    code: "in",
-    name: "India",
-    flag: "🇮🇳",
+    code: "bd",
+    name: "Bangladesh",
+    flag: "🇧🇩",
   },
-  {
-    code: "us",
-    name: "United States",
-    flag: "🇺🇸",
-  },
-  {
-    code: "ae",
-    name: "UAE",
-    flag: "🇦🇪",
-  },
+  // {
+  //   code: "ae",
+  //   name: "UAE",
+  //   flag: "🇦🇪",
+  // },
 ];
-
-const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }) => {
+const Navbar = ({
+  toggleMenu,
+  noteData = {},
+  serviceData = [],
+  siteLogo = null,
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const [showTopHeader, setShowTopHeader] = useState(true);
   const [openDropdowns, setOpenDropdowns] = useState({});
@@ -57,8 +67,14 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }
   const location = useLocation();
 
   const [countryOpen, setCountryOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  // const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const { country, updateCountry } = useCountry();
+  // const selectedCountry = country || countries[0];
+  const getUICountry = (countryName) => {
+    return countries.find((c) => c.name === countryName);
+  };
 
+  const selectedCountry = getUICountry(country?.country) || countries[0];
   // console.log("Navbar received props:", {  serviceData });
 
   // Scroll effect
@@ -147,7 +163,6 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }
           label: service.name,
           path: `/service/${service.slug}`,
         })),
-     
       ],
     },
     // { id: "pricing", label: "Pricing", path: "/pricing" },
@@ -475,7 +490,11 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }
               onClick={() => navigate("/")}
             >
               <img
-                src={ siteLogo ? `${STORAGE_URL}${siteLogo}` : "/image/swch_logo.png"}
+                src={
+                  country?.site_web_logo
+                    ? `${STORAGE_URL}${country?.site_web_logo}`
+                    : "/image/swch_logo.png"
+                }
                 alt="Logo"
                 className="w-30 h-20 object-contain"
               />
@@ -528,7 +547,7 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }
                       <button
                         key={country.code}
                         onClick={() => {
-                          setSelectedCountry(country);
+                          updateCountry(country.name);
                           setCountryOpen(false);
                         }}
                         className={`
@@ -595,7 +614,7 @@ const Navbar = ({ toggleMenu, noteData = {}, serviceData = [], siteLogo = null }
                     <button
                       key={country.code}
                       onClick={() => {
-                        setSelectedCountry(country);
+                        updateCountry(country.name);
                         setCountryOpen(false);
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition"

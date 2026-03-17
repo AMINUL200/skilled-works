@@ -12,14 +12,16 @@ import {
   Download,
   Video,
 } from "lucide-react";
+import { useCountry } from "../../context/CountryContext";
 
 const Footer = ({ settingData = null, serviceData = [] }) => {
   // console.log("Footer received settingData:", settingData);
   const navigate = useNavigate();
+  const { country } = useCountry();
   const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
 
   // Extract the actual data object from settingData
-  const siteData = settingData || {};
+  const siteData = country || {};
 
   // Navigation handler for internal routes
   const handleNavigation = (path) => {
@@ -192,6 +194,34 @@ const Footer = ({ settingData = null, serviceData = [] }) => {
           <p className="text-sm text-gray-300 leading-relaxed mb-4">
             {siteData.site_name || "SKILLED WORKERS CLOUD"}
           </p>
+          {/* ADDRESS */}
+          {(siteData.street_address ||
+            siteData.city ||
+            siteData.state ||
+            siteData.country ||
+            siteData.zip) && (
+            <div className="mt-4">
+              {/* <div className="text-gray-400 text-xs mb-1 uppercase tracking-wide">
+                Address
+              </div> */}
+
+              <div className="text-gray-300 text-sm flex items-start gap-2 leading-relaxed">
+                <MapPin size={14} className="mt-1 flex-shrink-0" />
+
+                <span>
+                  {[
+                    siteData.street_address,
+                    siteData.city,
+                    siteData.state,
+                    siteData.country,
+                    siteData.zip,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* CONTACT INFO */}
           <div className="space-y-2 mb-4">

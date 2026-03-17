@@ -53,6 +53,7 @@ import HandleServicePage from "./pages/admin/services/HandleServicePage";
 import HandlePolicy from "./pages/admin/privacy/HandlePolicy";
 import PolicyCmsPage from "./pages/policy/PolicyCmsPage";
 import { useAuth } from "./context/AuthContext";
+import { useCountry } from "./context/CountryContext";
 
 const AdminRoute = () => {
   const { token, user, loading } = useAuth();
@@ -75,6 +76,9 @@ const AdminRoute = () => {
 
 const App = () => {
   const { token, loading } = useAuth();
+  const { country } = useCountry();
+
+console.log("Special Country",country);
   return (
     <Router>
       <ToastContainer position="top-right" zIndex={9999} />
