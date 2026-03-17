@@ -12,22 +12,26 @@ export const CountryProvider = ({ children }) => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await api.get("/website-settings"); // change endpoint if needed
+        const res = await api.get("/website-settings");
         const settings = res?.data?.data?.settings || [];
 
         setAllSettings(settings);
 
-        // Check localStorage
         const savedCountry = localStorage.getItem("swcglobalcountry");
 
         if (savedCountry) {
           setCountry(JSON.parse(savedCountry));
         } else if (settings.length > 0) {
-          // Default → first country (or India if you want)
-          setCountry(settings[0]);
+          // 🔥 DEFAULT = Bangladesh
+          const defaultCountry =
+            settings.find((item) => item.country === "Bangladesh") ||
+            settings[0];
+
+          setCountry(defaultCountry);
+
           localStorage.setItem(
             "swcglobalcountry",
-            JSON.stringify(settings[0])
+            JSON.stringify(defaultCountry),
           );
         }
       } catch (err) {
@@ -42,9 +46,7 @@ export const CountryProvider = ({ children }) => {
 
   // Update country (IMPORTANT)
   const updateCountry = (countryName) => {
-    const matched = allSettings.find(
-      (item) => item.country === countryName
-    );
+    const matched = allSettings.find((item) => item.country === countryName);
 
     if (matched) {
       setCountry(matched);
