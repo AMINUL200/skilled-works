@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import {
   Menu,
+  X,
   ChevronDown,
   User,
   LogOut,
@@ -16,6 +17,7 @@ import {
   Youtube,
   Globe,
   Contact,
+  ChevronRight,
 } from "lucide-react";
 import MagneticButton from "./MagneticButtonProps";
 import { useCountry } from "../../context/CountryContext";
@@ -27,28 +29,14 @@ const countries = [
     flag: "🇬🇧",
     redirect: "https://skilledworkerscloud.co.uk/",
   },
-  // {
-  //   code: "in",
-  //   name: "India",
-  //   flag: "🇮🇳",
-  // },
-  // {
-  //   code: "us",
-  //   name: "United States",
-  //   flag: "🇺🇸",
-  // },
   {
     code: "bd",
     name: "Bangladesh",
     flag: "🇧🇩",
     redirect: null,
   },
-  // {
-  //   code: "ae",
-  //   name: "UAE",
-  //   flag: "🇦🇪",
-  // },
 ];
+
 const Navbar = ({
   toggleMenu,
   noteData = {},
@@ -57,39 +45,35 @@ const Navbar = ({
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [showTopHeader, setShowTopHeader] = useState(true);
-  const [openDropdowns, setOpenDropdowns] = useState({});
-  const dropdownRefs = useRef({});
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileDropdowns, setMobileDropdowns] = useState({});
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [servicesHover, setServicesHover] = useState(false);
+  
   const desktopCountryRef = useRef(null);
   const mobileCountryRef = useRef(null);
   const servicesDropdownRef = useRef(null);
-  const [servicesHover, setServicesHover] = useState(false);
   const hoverTimeoutRef = useRef(null);
+  
   const STORAGE_URL = import.meta.env.VITE_STORAGE_URL;
-
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [countryOpen, setCountryOpen] = useState(false);
-  // const [selectedCountry, setSelectedCountry] = useState(countries[0]);
   const { country, updateCountry } = useCountry();
-  // const selectedCountry = country || countries[0];
+
   const getUICountry = (countryName) => {
     return countries.find((c) => c.name === countryName);
   };
 
   const selectedCountry = getUICountry(country?.country) || countries[0];
-  // console.log("Navbar received props:", {  serviceData });
 
   const handleCountrySelect = (item) => {
     if (item.redirect) {
-      // 🔥 redirect to external site
       window.location.href = item.redirect;
     } else {
-      // 🔥 normal flow (update context)
       updateCountry(item.name);
     }
-
     setCountryOpen(false);
+    setMobileMenuOpen(false);
   };
 
   // Scroll effect
@@ -97,14 +81,12 @@ const Navbar = ({
     let lastScrollY = window.scrollY;
 
     const handleScroll = () => {
-      // Hide top header when scrolled down
       if (window.scrollY > 50) {
         setShowTopHeader(false);
       } else {
         setShowTopHeader(true);
       }
 
-      // Navbar shadow effect
       if (window.scrollY > 10) {
         setScrolled(true);
       } else {
@@ -121,33 +103,13 @@ const Navbar = ({
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const clickedDesktop =
-        desktopCountryRef.current &&
-        desktopCountryRef.current.contains(event.target);
-
-      const clickedMobile =
-        mobileCountryRef.current &&
-        mobileCountryRef.current.contains(event.target);
-
-      const clickedServices =
-        servicesDropdownRef.current &&
-        servicesDropdownRef.current.contains(event.target);
+      const clickedDesktop = desktopCountryRef.current?.contains(event.target);
+      const clickedMobile = mobileCountryRef.current?.contains(event.target);
+      const clickedServices = servicesDropdownRef.current?.contains(event.target);
 
       if (!clickedDesktop && !clickedMobile && !clickedServices) {
         setCountryOpen(false);
         setServicesHover(false);
-      }
-
-      // other dropdowns
-      let clickedOutside = true;
-      Object.values(dropdownRefs.current).forEach((ref) => {
-        if (ref && ref.contains(event.target)) {
-          clickedOutside = false;
-        }
-      });
-
-      if (clickedOutside) {
-        setOpenDropdowns({});
       }
     };
 
@@ -164,151 +126,84 @@ const Navbar = ({
     };
   }, []);
 
-  // Navigation links with updated colors
+  // Navigation links
   const navLinks = [
     { id: "home", label: "Home", path: "/" },
     { id: "about", label: "About Us", path: "/about" },
     {
       id: "services",
       label: "Services",
-      path: "/services", // Add path for the main services page
-      dropdown: [
-        ...serviceData.map((service) => ({
-          id: service.slug,
-          label: service.name,
-          path: `/service/${service.slug}`,
-        })),
-      ],
+      path: "/services",
+      dropdown: serviceData.map((service) => ({
+        id: service.slug,
+        label: service.name,
+        path: `/service/${service.slug}`,
+      })),
     },
-    // { id: "pricing", label: "Pricing", path: "/pricing" },
     { id: "blog", label: "Blog", path: "/blog" },
-    { id: "contact", label: "Contacts", path: "/contact" },
+    { id: "contact", label: "Contact", path: "/contact" },
   ];
 
   // Contact info for top header
   const contactInfo = [
-    { icon: <Phone className="w-4 h-4" />, text: `${country?.phone}/${country?.landline}` },
-    { icon: <Mail className="w-4 h-4" />, text: `${country?.email}` },
-    // { icon: <MapPin className="w-4 h-4" />, text: "123 Business St, City" },
+    { icon: <Phone className="w-3 h-3 sm:w-4 sm:h-4" />, text: `${country?.phone}/${country?.landline}` },
+    { icon: <Mail className="w-3 h-3 sm:w-4 sm:h-4" />, text: `${country?.email}` },
   ];
 
   // Social icons for top header
   const socialIcons = [
-    {
-      icon: <Facebook className="w-4 h-4" />,
-      url: country?.facebook,
-      color: "hover:text-[#2EC5FF]",
-    },
-    {
-      icon: <Twitter className="w-4 h-4" />,
-      url: country?.twitter,
-      color: "hover:text-[#2EC5FF]",
-    },
-    {
-      icon: <Instagram className="w-4 h-4" />,
-      url: country?.instagram,
-      color: "hover:text-[#FF4D8D]",
-    },
-    {
-      icon: <Linkedin className="w-4 h-4" />,
-      url: country?.linkedin,
-      color: "hover:text-[#2EC5FF]",
-    },
-    // {
-    //   icon: <Youtube className="w-4 h-4" />,
-    //   url: "#",
-    //   color: "hover:text-[#FF1F1F]",
-    // },
+    { icon: <Facebook className="w-3 h-3 sm:w-4 sm:h-4" />, url: country?.facebook, color: "hover:text-[#2EC5FF]" },
+    { icon: <Twitter className="w-3 h-3 sm:w-4 sm:h-4" />, url: country?.twitter, color: "hover:text-[#2EC5FF]" },
+    { icon: <Instagram className="w-3 h-3 sm:w-4 sm:h-4" />, url: country?.instagram, color: "hover:text-[#FF4D8D]" },
+    { icon: <Linkedin className="w-3 h-3 sm:w-4 sm:h-4" />, url: country?.linkedin, color: "hover:text-[#2EC5FF]" },
   ];
 
-  // Helper functions for dropdown management
-  const getParentDropdownId = (dropdownId) => {
-    if (dropdownId.includes("-sub-")) {
-      const parts = dropdownId.split("-sub-");
-      return parts[0];
-    }
-    return null;
+  // Toggle mobile dropdown
+  const toggleMobileDropdown = (id) => {
+    setMobileDropdowns(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
-  const isChildDropdown = (childId, parentId) => {
-    return childId.startsWith(parentId + "-sub-");
-  };
-
-  const toggleDropdown = (dropdownId) => {
-    setOpenDropdowns((prev) => {
-      const newState = { ...prev };
-
-      if (!dropdownId.includes("-sub-")) {
-        Object.keys(newState).forEach((key) => {
-          if (key !== dropdownId && !key.includes("-sub-")) {
-            newState[key] = false;
-            Object.keys(newState).forEach((subKey) => {
-              if (isChildDropdown(subKey, key)) {
-                newState[subKey] = false;
-              }
-            });
-          }
-        });
-      } else {
-        const parentId = getParentDropdownId(dropdownId);
-        Object.keys(newState).forEach((key) => {
-          if (key !== dropdownId && getParentDropdownId(key) === parentId) {
-            newState[key] = false;
-            Object.keys(newState).forEach((nestedKey) => {
-              if (isChildDropdown(nestedKey, key)) {
-                newState[nestedKey] = false;
-              }
-            });
-          }
-        });
-      }
-
-      newState[dropdownId] = !prev[dropdownId];
-      return newState;
-    });
-  };
-
-  const handleNavClick = (path) => {
-    console.log("click::", path);
-
-    navigate(path);
-    setOpenDropdowns({});
-  };
-
-  // Services hover handlers
+  // Services hover handlers for desktop
   const handleServicesMouseEnter = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     setServicesHover(true);
   };
 
   const handleServicesMouseLeave = () => {
     hoverTimeoutRef.current = setTimeout(() => {
       setServicesHover(false);
-    }, 200); // Small delay to allow moving to dropdown
+    }, 200);
   };
 
   const handleServicesClick = () => {
-    // Navigate to the main services page
     navigate("/services");
     setServicesHover(false);
+    setMobileMenuOpen(false);
   };
 
-  // Render dropdown items recursively
-  const renderDropdownItem = (item, level = 1) => {
-    const hasSubDropdown = item.dropdown && item.dropdown.length > 0;
-    const dropdownKey = `${item.id}-sub-${level}`;
-    const isOpen = openDropdowns[dropdownKey];
+  const handleNavClick = (path) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+    setMobileDropdowns({});
+  };
 
-    return (
-      <div key={item.id} className="relative group">
-        {hasSubDropdown ? (
-          <div
-            className={`flex items-center justify-between px-4 py-2 text-sm hover:bg-[#F2EEFF] cursor-pointer transition-colors ${
-              level > 1 ? "pl-8" : ""
-            } ${isOpen ? "text-[#9B3DFF]" : "text-[#333333]"}`}
-            onClick={() => toggleDropdown(dropdownKey)}
+  // Render mobile menu items
+  const renderMobileMenuItem = (item) => {
+    const hasDropdown = item.dropdown && item.dropdown.length > 0;
+    const isOpen = mobileDropdowns[item.id];
+    const isActive = location.pathname === item.path;
+
+    if (hasDropdown) {
+      return (
+        <div key={item.id} className="border-b border-gray-100">
+          <button
+            onClick={() => toggleMobileDropdown(item.id)}
+            className={`w-full flex items-center justify-between px-4 py-3 text-left font-medium transition-colors ${
+              isActive ? "text-[#9B3DFF]" : "text-gray-700"
+            }`}
           >
             <span>{item.label}</span>
             <ChevronDown
@@ -316,136 +211,36 @@ const Navbar = ({
                 isOpen ? "rotate-180" : ""
               }`}
             />
-          </div>
-        ) : (
-          <RouterLink
-            to={item.path}
-            className={`block px-4 py-2 text-sm hover:bg-[#F2EEFF] transition-colors ${
-              level > 1 ? "pl-8" : ""
-            } text-[#333333] hover:text-[#9B3DFF]`}
-            onClick={() => {
-              setOpenDropdowns({});
-              setServicesHover(false);
-            }}
-          >
-            {item.label}
-          </RouterLink>
-        )}
-
-        {hasSubDropdown && isOpen && (
-          <div className="bg-[#FAFAFF] border-l-2 border-[#9B3DFF] ml-2">
-            {item.dropdown.map((subItem) =>
-              renderDropdownItem(subItem, level + 1),
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Render navigation item
-  const renderNavItem = (item) => {
-    const hasDropdown = item.dropdown && item.dropdown.length > 0;
-    const isOpen = openDropdowns[item.id];
-    const isActive = location.pathname === item.path;
-
-    // Special handling for Services menu
-    if (item.id === "services") {
-      return (
-        <div
-          key={item.id}
-          className="relative"
-          ref={servicesDropdownRef}
-          onMouseEnter={handleServicesMouseEnter}
-          onMouseLeave={handleServicesMouseLeave}
-        >
-          {/* Services link that can be clicked */}
-          <div
-            className={`font-semibold hover:text-[#D00EFF] transition-colors px-2 py-1 flex items-center space-x-1 cursor-pointer ${
-              servicesHover || isActive ? "text-[#D00EFF]" : "text-[#333333]"
-            }`}
-            onClick={handleServicesClick}
-          >
-            <span>{item.label}</span>
-            <ChevronDown
-              className={`w-4 h-4 transition-transform duration-200 ${
-                servicesHover ? "rotate-180" : ""
-              }`}
-            />
-          </div>
-
-          {/* Dropdown that appears on hover */}
-          {servicesHover && (
-            <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-[#F2EEFF] rounded-lg shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="py-2">
-                {/* "View All Services" option at the top */}
-                {/* <RouterLink
-                  to={item.path}
-                  className="block px-4 py-2 text-sm font-semibold text-[#9B3DFF] hover:bg-[#F2EEFF] transition-colors border-b border-[#F2EEFF]"
-                  onClick={() => {
-                    setServicesHover(false);
-                    setOpenDropdowns({});
-                  }}
+          </button>
+          {isOpen && (
+            <div className="bg-gray-50">
+              {item.dropdown.map((subItem) => (
+                <RouterLink
+                  key={subItem.id}
+                  to={subItem.path}
+                  className="block px-8 py-2 text-sm text-gray-600 hover:text-[#9B3DFF] hover:bg-gray-100 transition-colors"
+                  onClick={() => handleNavClick(subItem.path)}
                 >
-                  View All Services
-                </RouterLink> */}
-                {item.dropdown.map((dropdownItem) =>
-                  renderDropdownItem(dropdownItem),
-                )}
-              </div>
+                  {subItem.label}
+                </RouterLink>
+              ))}
             </div>
           )}
         </div>
       );
     }
 
-    // Regular menu items (without hover dropdown)
     return (
-      <div
+      <RouterLink
         key={item.id}
-        className="relative"
-        ref={(el) => (dropdownRefs.current[item.id] = el)}
+        to={item.path}
+        className={`block px-4 py-3 border-b border-gray-100 font-medium transition-colors ${
+          isActive ? "text-[#9B3DFF]" : "text-gray-700 hover:text-[#9B3DFF]"
+        }`}
+        onClick={() => handleNavClick(item.path)}
       >
-        {hasDropdown ? (
-          <div
-            className={`font-semibold hover:text-[#D00EFF] cursor-pointer transition-colors px-2 py-1 flex items-center space-x-1 ${
-              isOpen
-                ? "text-[#D00EFF]"
-                : isActive
-                  ? "text-[#D00EFF]"
-                  : "text-[#333333]"
-            }`}
-            onClick={() => toggleDropdown(item.id)}
-          >
-            <span>{item.label}</span>
-            <ChevronDown
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </div>
-        ) : (
-          <RouterLink
-            to={item.path}
-            className={`font-semibold hover:text-[#D00EFF] transition-colors px-2 py-1 flex items-center space-x-1 ${
-              isActive ? "text-[#D00EFF]" : "text-[#333333]"
-            }`}
-            onClick={() => handleNavClick(item.path)}
-          >
-            {item.label}
-          </RouterLink>
-        )}
-
-        {hasDropdown && isOpen && (
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-[#F2EEFF] rounded-lg shadow-lg z-50">
-            <div className="py-2">
-              {item.dropdown.map((dropdownItem) =>
-                renderDropdownItem(dropdownItem),
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+        {item.label}
+      </RouterLink>
     );
   };
 
@@ -454,36 +249,38 @@ const Navbar = ({
       {/* Top Header - Contact Info & Social Icons */}
       <div
         className={`bg-[#111111] text-white transition-all duration-300 ${
-          showTopHeader ? "h-18 opacity-100" : "h-0 opacity-0 overflow-hidden"
+          showTopHeader ? "py-2 sm:py-3" : "h-0 opacity-0 overflow-hidden"
         }`}
       >
-        <div className="container mx-auto px-8 h-full flex justify-between items-center">
-          {/* Contact Info */}
-          <div className="flex items-center space-x-6">
-            {contactInfo.map((info, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-2 text-sm text-white hover:text-white transition-colors cursor-pointer"
-              >
-                {info.icon}
-                <span>{info.text}</span>
-              </div>
-            ))}
-          </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+            {/* Contact Info */}
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
+              {contactInfo.map((info, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-white cursor-pointer"
+                >
+                  {info.icon}
+                  <span className="truncate max-w-[150px] sm:max-w-none">{info.text}</span>
+                </div>
+              ))}
+            </div>
 
-          {/* Social Icons */}
-          <div className="flex items-center space-x-4">
-            {socialIcons.map((social, index) => (
-              <a
-                key={index}
-                href={social.url}
-                className={`text-[#777777] ${social.color} transition-colors duration-200`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {social.icon}
-              </a>
-            ))}
+            {/* Social Icons */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              {socialIcons.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.url}
+                  className={`text-gray-400 ${social.color} transition-colors duration-200`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -491,180 +288,270 @@ const Navbar = ({
       {/* Main Navbar */}
       <div
         className={`transition-all duration-300 ${
-          scrolled ? "shadow-lg " : ""
+          scrolled ? "shadow-lg" : ""
         }`}
         style={{
           backgroundImage: "linear-gradient(to right, #f7dbff, #e4f8fb)",
         }}
       >
-        <div className="container mx-auto px-8 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center">
-            <div
-              className="flex items-center cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              <img
-                src={
-                  country?.site_web_logo
-                    ? `${STORAGE_URL}${country?.site_web_logo}`
-                    : "/image/swch_logo.png"
-                }
-                alt="Logo"
-                className="w-30 h-20 object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((item) => renderNavItem(item))}
-
-            {/* Country Selector - Updated */}
-            <div className="relative" ref={desktopCountryRef}>
-              <button
-                onClick={() => setCountryOpen(!countryOpen)}
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200
-                  ${
-                    countryOpen
-                      ? "bg-white/90 shadow-md border border-[#F2EEFF]"
-                      : "hover:bg-white/80 hover:shadow-sm border border-transparent hover:border-[#E6E0FF]"
-                  }
-                  backdrop-blur-sm
-                `}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-2 sm:py-3">
+            {/* Logo */}
+            <div className="flex items-center">
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={() => navigate("/")}
               >
-                <span className="text-xl">{selectedCountry.flag}</span>
-                <span className="text-sm font-semibold text-gray-800 hidden lg:inline">
-                  {selectedCountry.name}
-                </span>
-                <ChevronDown
-                  size={16}
-                  className={`
-                    transition-transform duration-200 text-gray-600
-                    ${countryOpen ? "rotate-180 text-[#9B3DFF]" : ""}
-                  `}
+                <img
+                  src={
+                    country?.site_web_logo
+                      ? `${STORAGE_URL}${country?.site_web_logo}`
+                      : "/image/swch_logo.png"
+                  }
+                  alt="Logo"
+                  className="w-20 h-14 sm:w-24 sm:h-16 md:w-28 md:h-18 object-contain"
                 />
-              </button>
+              </div>
+            </div>
 
-              {countryOpen && (
-                <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-[#F2EEFF] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-3 border-b border-gray-100">
-                    <div className="flex items-center gap-2 px-2">
-                      <Globe className="w-4 h-4 text-gray-500" />
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Select Country
-                      </span>
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6">
+              {navLinks.map((item) => {
+                if (item.id === "services") {
+                  return (
+                    <div
+                      key={item.id}
+                      className="relative"
+                      ref={servicesDropdownRef}
+                      onMouseEnter={handleServicesMouseEnter}
+                      onMouseLeave={handleServicesMouseLeave}
+                    >
+                      <div
+                        className={`font-semibold hover:text-[#D00EFF] transition-colors px-2 py-1 flex items-center gap-1 cursor-pointer ${
+                          servicesHover || location.pathname === item.path ? "text-[#D00EFF]" : "text-[#333333]"
+                        }`}
+                        onClick={handleServicesClick}
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            servicesHover ? "rotate-180" : ""
+                          }`}
+                        />
+                      </div>
+
+                      {servicesHover && (
+                        <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-[#F2EEFF] rounded-lg shadow-lg z-50">
+                          <div className="py-2">
+                            {item.dropdown.map((dropdownItem) => (
+                              <RouterLink
+                                key={dropdownItem.id}
+                                to={dropdownItem.path}
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#F2EEFF] hover:text-[#9B3DFF] transition-colors"
+                                onClick={() => {
+                                  setServicesHover(false);
+                                  setMobileMenuOpen(false);
+                                }}
+                              >
+                                {dropdownItem.label}
+                              </RouterLink>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                const isActive = location.pathname === item.path;
+                return (
+                  <RouterLink
+                    key={item.id}
+                    to={item.path}
+                    className={`font-semibold hover:text-[#D00EFF] transition-colors px-2 py-1 ${
+                      isActive ? "text-[#D00EFF]" : "text-[#333333]"
+                    }`}
+                    onClick={() => handleNavClick(item.path)}
+                  >
+                    {item.label}
+                  </RouterLink>
+                );
+              })}
+
+              {/* Country Selector - Desktop */}
+              <div className="relative" ref={desktopCountryRef}>
+                <button
+                  onClick={() => setCountryOpen(!countryOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-white/80"
+                >
+                  <span className="text-lg sm:text-xl">{selectedCountry.flag}</span>
+                  <span className="text-sm font-semibold text-gray-800 hidden xl:inline">
+                    {selectedCountry.name}
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${
+                      countryOpen ? "rotate-180 text-[#9B3DFF]" : ""
+                    }`}
+                  />
+                </button>
+
+                {countryOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-[#F2EEFF] overflow-hidden z-50">
+                    <div className="p-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2 px-2">
+                        <Globe className="w-4 h-4 text-gray-500" />
+                        <span className="text-xs font-semibold text-gray-500 uppercase">
+                          Select Country
+                        </span>
+                      </div>
+                    </div>
+                    <div className="py-1">
+                      {countries.map((countryItem) => (
+                        <button
+                          key={countryItem.code}
+                          onClick={() => handleCountrySelect(countryItem)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 text-left ${
+                            selectedCountry.code === countryItem.code
+                              ? "bg-[#F8F5FF] text-[#9B3DFF]"
+                              : "hover:bg-[#F2EEFF] text-gray-800"
+                          }`}
+                        >
+                          <span className="text-xl">{countryItem.flag}</span>
+                          <span className="font-medium flex-1">
+                            {countryItem.name}
+                          </span>
+                          {selectedCountry.code === countryItem.code && (
+                            <div className="w-2 h-2 rounded-full bg-[#9B3DFF]"></div>
+                          )}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <div className="py-1">
-                    {countries.map((country) => (
+                )}
+              </div>
+
+              <button className="bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-4 py-2 rounded-lg font-bold text-sm lg:text-base transition-all duration-300 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-1 whitespace-nowrap">
+                Explore SponicHR Now
+              </button>
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden flex items-center gap-3">
+              {/* Mobile Country Selector */}
+              <div className="relative" ref={mobileCountryRef}>
+                <button
+                  onClick={() => setCountryOpen(!countryOpen)}
+                  className="flex items-center gap-1 p-2 rounded-lg bg-white/50 backdrop-blur-sm"
+                >
+                  <span className="text-base sm:text-lg">{selectedCountry.flag}</span>
+                  <ChevronDown size={14} className={`transition-transform ${countryOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {countryOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
+                    {countries.map((countryItem) => (
                       <button
-                        key={country.code}
-                        onClick={() => handleCountrySelect(country)}
-                        className={`
-                          w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 text-left
-                          ${
-                            selectedCountry.code === country.code
-                              ? "bg-[#F8F5FF] text-[#9B3DFF]"
-                              : "hover:bg-[#F2EEFF] text-gray-800 hover:text-[#9B3DFF]"
-                          }
-                        `}
+                        key={countryItem.code}
+                        onClick={() => handleCountrySelect(countryItem)}
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition"
                       >
-                        <span className="text-xl">{country.flag}</span>
-                        <span className="font-medium flex-1">
-                          {country.name}
-                        </span>
-                        {selectedCountry.code === country.code && (
-                          <div className="w-2 h-2 rounded-full bg-[#9B3DFF]"></div>
-                        )}
+                        <span className="text-lg">{countryItem.flag}</span>
+                        <span className="text-sm font-medium">{countryItem.name}</span>
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            <button
-              className="
-    bg-gradient-to-r from-[#E60023] to-[#B8001B]
-    text-white
-    px-4 py-2
-    rounded-lg
-    font-bold
-    text-lg
-    transition-all duration-300
-    hover:shadow-xl hover:shadow-red-200
-    hover:-translate-y-1
-    focus:outline-none
-  "
-            >
-              Explore SponicHR Now
-            </button>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
-            {/* Mobile Country Selector */}
-            <div className="relative" ref={mobileCountryRef}>
               <button
-                onClick={() => setCountryOpen(!countryOpen)}
-                className="flex items-center gap-1 p-2 rounded-lg bg-white/50 backdrop-blur-sm"
+                onClick={toggleMenu}
+                className="text-[#333333] focus:outline-none cursor-pointer hover:text-[#9B3DFF] transition-colors"
+                aria-label="Toggle menu"
               >
-                <span className="text-lg">{selectedCountry.flag}</span>
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform ${
-                    countryOpen ? "rotate-180" : ""
-                  }`}
-                />
+                {mobileMenuOpen ? <X className="w-6 h-6 sm:w-7 sm:h-7" /> : <Menu className="w-6 h-6 sm:w-7 sm:h-7" />}
               </button>
-
-              {countryOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
-                  {countries.map((country) => (
-                    <button
-                      key={country.code}
-                      onClick={() => handleCountrySelect(country)}
-                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition"
-                    >
-                      <span className="text-lg">{country.flag}</span>
-                      <span className="text-sm font-medium">
-                        {country.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
-
-            <button
-              onClick={toggleMenu}
-              className="text-[#333333] focus:outline-none cursor-pointer hover:text-[#9B3DFF] transition-colors"
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-8 h-8" />
-            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="py-2">
+              {navLinks.map((item) => {
+                if (item.id === "services") {
+                  const isServicesOpen = mobileDropdowns[item.id];
+                  return (
+                    <div key={item.id} className="border-b border-gray-100">
+                      <button
+                        onClick={() => toggleMobileDropdown(item.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 text-left font-medium text-gray-700"
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            isServicesOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {isServicesOpen && (
+                        <div className="bg-gray-50">
+                          <RouterLink
+                            to="/services"
+                            className="block px-8 py-2 text-sm text-gray-600 hover:text-[#9B3DFF] hover:bg-gray-100 transition-colors"
+                            onClick={() => handleNavClick("/services")}
+                          >
+                            View All Services
+                          </RouterLink>
+                          {item.dropdown.map((subItem) => (
+                            <RouterLink
+                              key={subItem.id}
+                              to={subItem.path}
+                              className="block px-8 py-2 text-sm text-gray-600 hover:text-[#9B3DFF] hover:bg-gray-100 transition-colors"
+                              onClick={() => handleNavClick(subItem.path)}
+                            >
+                              {subItem.label}
+                            </RouterLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return renderMobileMenuItem(item);
+              })}
+
+              {/* Mobile CTA Button */}
+              <div className="p-4">
+                <button className="w-full bg-gradient-to-r from-[#E60023] to-[#B8001B] text-white px-4 py-3 rounded-lg font-bold text-sm transition-all duration-300 hover:shadow-lg">
+                  Explore SponicHR Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Announcement Bar */}
-      <div className="announcement-bar shadow-md">
-        <div className="container mx-auto px-8 h-full flex justify-between items-center ">
-          <div className="announcement-note">NOTE:</div>
-
-          <div className="announcement-marquee">
-            <div className="announcement-track">
-              {noteData?.note}&nbsp;
-              <a
-                href="https://skilledworkerscloud.co.uk/hrms-v2/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="announcement-link"
-              >
-                SWC HRMS Software
-              </a>
+      <div className="announcement-bar shadow-md bg-gradient-to-r from-yellow-50 to-orange-50 border-t border-b border-yellow-200">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div className="announcement-note text-xs sm:text-sm font-bold text-red-600 whitespace-nowrap">
+              NOTE:
+            </div>
+            <div className="announcement-marquee flex-1 text-center">
+              <div className="announcement-track text-xs sm:text-sm text-gray-700">
+                {noteData?.note}&nbsp;
+                <a
+                  href="https://skilledworkerscloud.co.uk/hrms-v2/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="announcement-link text-red-600 font-semibold hover:underline"
+                >
+                  SWC HRMS Software
+                </a>
+              </div>
             </div>
           </div>
         </div>
